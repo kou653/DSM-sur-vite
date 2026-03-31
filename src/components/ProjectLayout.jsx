@@ -19,7 +19,7 @@ const adminMenu = [
 function ProjectLayout() {
   const { role, selectedProjectId } = useAuth();
   const visibleMenu =
-    ["admin", "administrateur"].includes(role) ? [...projectMenu, ...adminMenu] : projectMenu;
+    role === "administrateur" ? [...projectMenu, ...adminMenu] : projectMenu;
 
   return (
     <div className="project-layout">

@@ -5,7 +5,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { getMe, login as loginRequest } from "../api/auth";
+import { getMe, login as loginRequest, logout as logoutRequest } from "../api/auth";
 import { AuthContext } from "./auth-context.js";
 
 function getStoredProjectId() {
@@ -19,14 +19,17 @@ function getStoredProjectId() {
   return Number.isNaN(parsedValue) ? null : parsedValue;
 }
 
+function getStoredToken() {
+  return localStorage.getItem("token");
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [selectedProjectId, setSelectedProjectIdState] = useState(() =>
     getStoredProjectId()
   );
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => Boolean(getStoredToken()));
 
-  // Updated role mapping for Laravel backend (simple string)
   const role = user?.role ?? null;
   const accessibleProjectIds = useMemo(
     () => user?.projects?.map((project) => project.id) ?? [],
@@ -49,6 +52,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const clearAuth = useCallback(() => {
+    localStorage.removeItem("token");
+
     startTransition(() => {
       setUser(null);
       setSelectedProjectIdState(null);
@@ -56,6 +61,11 @@ export function AuthProvider({ children }) {
   }, []);
 
   const fetchMe = useCallback(async () => {
+    if (!getStoredToken()) {
+      clearAuth();
+      return null;
+    }
+
     setLoading(true);
 
     try {
@@ -65,7 +75,7 @@ export function AuthProvider({ children }) {
       startTransition(() => {
         setUser(nextUser);
         setSelectedProjectIdState((currentProjectId) => {
-          const allowedProjectIds = nextUser?.projects?.map((p) => p.id) ?? [];
+          const allowedProjectIds = nextUser?.projects?.map((project) => project.id) ?? [];
 
           if (currentProjectId && allowedProjectIds.includes(currentProjectId)) {
             return currentProjectId;
@@ -77,10 +87,10 @@ export function AuthProvider({ children }) {
 
       return data;
     } catch (error) {
-      // If 401, axios interceptor handles redirect
       if (error.response?.status === 401) {
-          clearAuth();
+        clearAuth();
       }
+
       throw error;
     } finally {
       setLoading(false);
@@ -92,10 +102,11 @@ export function AuthProvider({ children }) {
 
     try {
       const { data } = await loginRequest(credentials);
-      // Sanctum session-based login might not return a token if using cookies
-      // or might return access_token if using API tokens.
-      // The backend I saw earlier returns access_token.
-      
+
+      if (data.access_token) {
+        localStorage.setItem("token", data.access_token);
+      }
+
       const nextUser = data.user ?? null;
       const firstProjectId = nextUser?.projects?.[0]?.id ?? null;
 
@@ -112,8 +123,24 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const logout = useCallback(async () => {
+    try {
+      if (getStoredToken()) {
+        await logoutRequest();
+      }
+    } catch {
+      // Clear local auth state even if the server token is already invalid.
+    } finally {
+      clearAuth();
+    }
+  }, [clearAuth]);
+
   useEffect(() => {
-    // Attempt to fetch current user on mount to check if session is active
+    if (!getStoredToken()) {
+      setLoading(false);
+      return;
+    }
+
     fetchMe().catch(() => {});
   }, [fetchMe]);
 
@@ -131,6 +158,7 @@ export function AuthProvider({ children }) {
       clearAuth,
       fetchMe,
       login,
+      logout,
     }),
     [
       user,
@@ -142,6 +170,7 @@ export function AuthProvider({ children }) {
       clearAuth,
       fetchMe,
       login,
+      logout,
     ]
   );
 

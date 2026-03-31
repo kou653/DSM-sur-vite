@@ -41,7 +41,7 @@ function App() {
                 element={<MenuPlaceholderPage title="Statistiques" />}
               />
 
-              <Route element={<RoleGuard allowedRoles={["admin", "administrateur"]} />}>
+              <Route element={<RoleGuard allowedRoles={["administrateur"]} />}>
                 <Route path="monitoring" element={<MonitoringPage />} />
                 <Route path="cooperatives" element={<CooperativesPage />} />
                 <Route path="utilisateurs" element={<UsersPage />} />

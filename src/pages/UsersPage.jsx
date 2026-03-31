@@ -3,6 +3,7 @@ import JsonCrudSection from "../components/JsonCrudSection.jsx";
 import { useAuth } from "../contexts/auth-context.js";
 import {
   createUser,
+  deleteUser,
   getUsers,
   updateUser,
 } from "../api/users.js";
@@ -15,6 +16,7 @@ function normalizeUsers(payload) {
     name: user.nom_complet || `Utilisateur ${user.id}`,
     email: user.email || "Email non renseigne",
     role: user.role || null,
+    projects: user.projects || [],
     raw: user,
   }));
 }
@@ -57,6 +59,7 @@ function UsersPage() {
             <h3>{user.name}</h3>
             <p>{user.email}</p>
             <p>Role : {user.role || "Aucun role"}</p>
+            <p>Projets : {user.projects.length}</p>
           </article>
         ))}
       </div>
@@ -69,15 +72,16 @@ function UsersPage() {
         onRefresh={fetchUsers}
         onCreate={createUser}
         onUpdate={updateUser}
-        onDelete={null}
+        onDelete={deleteUser}
         createTemplate={{
           nom_complet: "",
           email: "",
           password: "",
-          role: "agriculteur",
+          role: "agent terrain",
+          code_acces: "",
           projects: [],
         }}
-        canManage={["admin", "administrateur"].includes(currentUserRole)}
+        canManage={currentUserRole === "administrateur"}
         getRecordLabel={(record) => `${record.name} (${record.email})`}
       />
     </section>

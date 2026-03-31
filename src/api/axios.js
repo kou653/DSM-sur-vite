@@ -1,22 +1,36 @@
-import axios from 'axios';
+import axios from "axios";
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 const api = axios.create({
   baseURL: apiBaseUrl,
-  withCredentials: true, // Requis pour les cookies de session Sanctum
-  headers: {
-    'X-Requested-With': 'XMLHttpRequest',
-  }
 });
 
-// Intercepteur pour gérer les erreurs 401 (Session expirée)
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  config.headers.Accept = "application/json";
+  config.headers["X-Requested-With"] = "XMLHttpRequest";
+
+  return config;
+});
+
 api.interceptors.response.use(
-  response => response,
-  error => {
+  (response) => response,
+  (error) => {
     if (error.response?.status === 401) {
-      window.location.href = '/login';
+      localStorage.removeItem("token");
+      window.location.href = "/login";
     }
+
+    if (error.response?.status === 403) {
+      window.location.href = "/access-denied";
+    }
+
     return Promise.reject(error);
   }
 );

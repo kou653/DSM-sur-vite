@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import JsonCrudSection from "../components/JsonCrudSection.jsx";
-import { getEspeces } from "../api/referentiels.js";
+import { useAuth } from "../contexts/auth-context.js";
+import {
+  createEspece,
+  deleteEspece,
+  getEspeces,
+  updateEspece,
+} from "../api/referentiels.js";
 
 function normalizeEspeces(payload) {
   const rawEspeces = Array.isArray(payload)
@@ -9,13 +15,14 @@ function normalizeEspeces(payload) {
 
   return rawEspeces.map((espece) => ({
     id: Number(espece.id),
-    name: espece.common_name || `Espece ${espece.id}`,
-    scientificName: espece.scientific_name || null,
+    name: espece.nom_commun || `Espece ${espece.id}`,
+    scientificName: espece.nom_scientifique || null,
     raw: espece,
   }));
 }
 
 function EspecesPage() {
+  const { role } = useAuth();
   const [especes, setEspeces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -65,10 +72,14 @@ function EspecesPage() {
         loading={loading}
         errorMessage={errorMessage}
         onRefresh={fetchEspeces}
-        onCreate={null}
-        onUpdate={null}
-        onDelete={null}
-        canManage={false}
+        onCreate={createEspece}
+        onUpdate={updateEspece}
+        onDelete={deleteEspece}
+        createTemplate={{
+          nom_commun: "",
+          nom_scientifique: "",
+        }}
+        canManage={role === "administrateur"}
         getRecordLabel={(record) => record.name}
       />
     </section>

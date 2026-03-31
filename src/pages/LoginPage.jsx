@@ -1,3 +1,4 @@
+import { Eye, EyeOff, TreePine } from "lucide-react";
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context.js";
@@ -10,6 +11,7 @@ function LoginPage() {
     password: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -40,16 +42,21 @@ function LoginPage() {
   }
 
   return (
-    <section className="auth-page">
-      <div className="auth-card">
-        <p className="eyebrow">Connexion</p>
-        <h2>Acceder a la plateforme</h2>
+    <section className="auth-page auth-page-login">
+      <div className="auth-card auth-card-login">
+        <div className="auth-brand">
+          <div className="auth-brand-icon" aria-hidden="true">
+            <TreePine size={30} strokeWidth={2.2} />
+          </div>
+          <h1>DSM</h1>
+          <p>Plateforme de suivi-evaluation des projets de reboisement</p>
+        </div>
 
         {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <label>
-            <span>Email</span>
+            <span>Adresse email</span>
             <input
               type="email"
               name="email"
@@ -63,18 +70,36 @@ function LoginPage() {
 
           <label>
             <span>Mot de passe</span>
-            <input
-              type="password"
-              name="password"
-              placeholder="Votre mot de passe"
-              value={formData.password}
-              onChange={handleChange}
-              autoComplete="current-password"
-              required
-            />
+            <div className="password-field">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Votre mot de passe"
+                value={formData.password}
+                onChange={handleChange}
+                autoComplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((currentValue) => !currentValue)}
+                aria-label={
+                  showPassword
+                    ? "Masquer le mot de passe"
+                    : "Afficher le mot de passe"
+                }
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </label>
 
-          <button type="submit" disabled={loading}>
+          <button
+            type="submit"
+            className="auth-submit"
+            disabled={loading}
+          >
             {loading ? "Connexion..." : "Se connecter"}
           </button>
         </form>

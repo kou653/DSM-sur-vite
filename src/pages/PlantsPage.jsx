@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/auth-context.js";
 import { getProjetParcelles } from "../api/parcelles.js";
 import {
   createPlant,
-  getPlants,
+  getParcellePlants,
   updatePlantStatus,
 } from "../api/plants.js";
 
@@ -19,18 +19,18 @@ function normalizeParcelleOptions(payload) {
   }));
 }
 
-function normalizePlants(payload) {
+function normalizePlants(payload, selectedParcelleName) {
   const rawPlants = Array.isArray(payload)
     ? payload
     : payload?.plants || payload?.data || [];
 
   return rawPlants.map((plant) => ({
     id: Number(plant.id),
-    code: plant.code || `PL${plant.id}`,
-    name: plant.nom || `Plant ${plant.id}`,
+    code: `PL${plant.id}`,
+    name: `Plant ${plant.id}`,
     status: plant.status || null,
-    parcelleName: plant.parcelle?.nom || null,
-    especeName: plant.espece?.common_name || null,
+    parcelleName: plant.parcelle?.nom || selectedParcelleName || null,
+    especeName: plant.espece?.nom_commun || null,
     raw: plant,
   }));
 }
@@ -49,6 +49,7 @@ function PlantsPage() {
     async function fetchParcelles() {
       if (!selectedProjectId) {
         setParcelles([]);
+        setSelectedParcelleId("");
         return;
       }
 
@@ -59,10 +60,19 @@ function PlantsPage() {
           return;
         }
 
-        setParcelles(normalizeParcelleOptions(data));
+        const nextParcelles = normalizeParcelleOptions(data);
+        setParcelles(nextParcelles);
+        setSelectedParcelleId((currentValue) => {
+          if (currentValue && nextParcelles.some((parcelle) => String(parcelle.id) === currentValue)) {
+            return currentValue;
+          }
+
+          return nextParcelles[0] ? String(nextParcelles[0].id) : "";
+        });
       } catch {
         if (isMounted) {
           setParcelles([]);
+          setSelectedParcelleId("");
         }
       }
     }
@@ -76,7 +86,7 @@ function PlantsPage() {
 
   useEffect(() => {
     async function fetchPlants() {
-      if (!selectedProjectId) {
+      if (!selectedParcelleId) {
         setPlants([]);
         setLoading(false);
         return;
@@ -85,15 +95,12 @@ function PlantsPage() {
       setLoading(true);
       setErrorMessage("");
 
-      const params = { project_id: selectedProjectId };
-
-      if (selectedParcelleId) {
-        params.parcelle_id = Number(selectedParcelleId);
-      }
-
       try {
-        const { data } = await getPlants(params);
-        setPlants(normalizePlants(data));
+        const { data } = await getParcellePlants(selectedParcelleId);
+        const selectedParcelle = parcelles.find(
+          (parcelle) => String(parcelle.id) === selectedParcelleId
+        );
+        setPlants(normalizePlants(data, selectedParcelle?.name ?? null));
       } catch (error) {
         setErrorMessage(
           error.response?.data?.message || "Impossible de charger les plants."
@@ -104,12 +111,40 @@ function PlantsPage() {
     }
 
     fetchPlants();
-  }, [selectedProjectId, selectedParcelleId]);
+  }, [parcelles, selectedParcelleId]);
+
+  const refreshPlants = () => {
+    if (!selectedParcelleId) {
+      setPlants([]);
+      setLoading(false);
+      return Promise.resolve();
+    }
+
+    setLoading(true);
+    setErrorMessage("");
+
+    return getParcellePlants(selectedParcelleId)
+      .then(({ data }) => {
+        const selectedParcelle = parcelles.find(
+          (parcelle) => String(parcelle.id) === selectedParcelleId
+        );
+        setPlants(normalizePlants(data, selectedParcelle?.name ?? null));
+      })
+      .catch((error) => {
+        setErrorMessage(
+          error.response?.data?.message || "Impossible de charger les plants."
+        );
+        throw error;
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   return (
     <section className="panel panel-wide">
       <p className="eyebrow">Plants</p>
-      <h2>Liste filtree par projet et parcelle</h2>
+      <h2>Liste des plants par parcelle</h2>
 
       <div className="filters-bar">
         <label className="filter-field">
@@ -123,7 +158,7 @@ function PlantsPage() {
             value={selectedParcelleId}
             onChange={(event) => setSelectedParcelleId(event.target.value)}
           >
-            <option value="">Toutes les parcelles</option>
+            <option value="">Selectionner une parcelle</option>
             {parcelles.map((parcelle) => (
               <option key={parcelle.id} value={parcelle.id}>
                 {parcelle.name}
@@ -132,11 +167,6 @@ function PlantsPage() {
           </select>
         </label>
       </div>
-
-      <p>
-        Filtres envoyes : `project_id={selectedProjectId ?? ""}`
-        {selectedParcelleId ? `, parcelle_id=${selectedParcelleId}` : ""}
-      </p>
 
       {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
       {loading ? <p className="muted-text">Chargement des plants...</p> : null}
@@ -154,7 +184,7 @@ function PlantsPage() {
       </div>
 
       {!loading && !errorMessage && plants.length === 0 ? (
-        <p className="muted-text">Aucun plant retourne avec ces filtres.</p>
+        <p className="muted-text">Aucun plant retourne pour cette parcelle.</p>
       ) : null}
 
       <JsonCrudSection
@@ -162,47 +192,19 @@ function PlantsPage() {
         records={plants}
         loading={loading}
         errorMessage={errorMessage}
-        onRefresh={() => {
-          if (!selectedProjectId) {
-            setPlants([]);
-            setLoading(false);
-            return Promise.resolve();
-          }
-
-          setLoading(true);
-          setErrorMessage("");
-
-          const params = { project_id: selectedProjectId };
-
-          if (selectedParcelleId) {
-            params.parcelle_id = Number(selectedParcelleId);
-          }
-
-          return getPlants(params)
-            .then(({ data }) => {
-              setPlants(normalizePlants(data));
-            })
-            .catch((error) => {
-              setErrorMessage(
-                error.response?.data?.message || "Impossible de charger les plants."
-              );
-              throw error;
-            })
-            .finally(() => {
-              setLoading(false);
-            });
-        }}
+        onRefresh={refreshPlants}
         onCreate={createPlant}
         onUpdate={(id, payload) => updatePlantStatus(id, payload.status)}
         onDelete={null}
         createTemplate={{
-          nom: "",
-          code: "",
-          parcelle_id: selectedParcelleId ? Number(selectedParcelleId) : "",
           espece_id: "",
-          etat_sanitaire_id: "",
+          parcelle_id: selectedParcelleId ? Number(selectedParcelleId) : "",
+          date_plantation: "",
+          status: "vivant",
+          lat: "",
+          lng: "",
         }}
-        canManage={["admin", "administrateur"].includes(role)}
+        canManage={["administrateur", "agent terrain"].includes(role)}
         getRecordLabel={(record) => record.name}
       />
     </section>

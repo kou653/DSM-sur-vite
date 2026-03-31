@@ -3,10 +3,14 @@ import { useAuth } from "../../contexts/auth-context.js";
 
 function ProtectedRoute() {
   const location = useLocation();
-  const { isAuthenticated, loading, user } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-  if (loading && isAuthenticated && !user) {
-    return <section className="panel"><p>Chargement de la session...</p></section>;
+  if (loading) {
+    return (
+      <section className="panel">
+        <p>Chargement de la session...</p>
+      </section>
+    );
   }
 
   if (!isAuthenticated) {

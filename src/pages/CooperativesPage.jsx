@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import JsonCrudSection from "../components/JsonCrudSection.jsx";
-import { getCooperatives } from "../api/referentiels.js";
+import { useAuth } from "../contexts/auth-context.js";
+import {
+  createCooperative,
+  deleteCooperative,
+  getCooperatives,
+  updateCooperative,
+} from "../api/referentiels.js";
 
 function normalizeCooperatives(payload) {
   const rawCooperatives = Array.isArray(payload)
@@ -9,13 +15,15 @@ function normalizeCooperatives(payload) {
 
   return rawCooperatives.map((cooperative) => ({
     id: Number(cooperative.id),
-    name: cooperative.name || `Cooperative ${cooperative.id}`,
-    locality: cooperative.city || null,
+    name: cooperative.nom || `Cooperative ${cooperative.id}`,
+    locality: cooperative.ville || null,
+    village: cooperative.village || null,
     raw: cooperative,
   }));
 }
 
 function CooperativesPage() {
+  const { role } = useAuth();
   const [cooperatives, setCooperatives] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -52,8 +60,13 @@ function CooperativesPage() {
             <h3>{cooperative.name}</h3>
             <p>
               {cooperative.locality
-                ? `Localite : ${cooperative.locality}`
-                : "Localite non renseignee"}
+                ? `Ville : ${cooperative.locality}`
+                : "Ville non renseignee"}
+            </p>
+            <p>
+              {cooperative.village
+                ? `Village : ${cooperative.village}`
+                : "Village non renseigne"}
             </p>
           </article>
         ))}
@@ -65,10 +78,18 @@ function CooperativesPage() {
         loading={loading}
         errorMessage={errorMessage}
         onRefresh={fetchCooperatives}
-        onCreate={null}
-        onUpdate={null}
-        onDelete={null}
-        canManage={false}
+        onCreate={createCooperative}
+        onUpdate={updateCooperative}
+        onDelete={deleteCooperative}
+        createTemplate={{
+          nom: "",
+          entreprise: "",
+          contact: "",
+          email: "",
+          ville: "",
+          village: "",
+        }}
+        canManage={role === "administrateur"}
         getRecordLabel={(record) => record.name}
       />
     </section>

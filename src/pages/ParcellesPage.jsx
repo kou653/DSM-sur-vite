@@ -15,10 +15,11 @@ function normalizeParcelles(payload) {
 
   return rawParcelles.map((parcelle) => ({
     id: Number(parcelle.id),
-    code: parcelle.code || `PAR${parcelle.id}`,
+    code: `PAR${parcelle.id}`,
     name: parcelle.nom || `Parcelle ${parcelle.id}`,
     area: parcelle.superficie || null,
-    status: parcelle.status || null,
+    city: parcelle.ville || null,
+    cooperativeName: parcelle.cooperative?.nom || null,
     raw: parcelle,
   }));
 }
@@ -58,8 +59,7 @@ function ParcellesPage() {
   return (
     <section className="panel panel-wide">
       <p className="eyebrow">Parcelles</p>
-      <h2>Liste filtree par projet</h2>
-      <p>Filtre envoye : `project_id={selectedProjectId ?? ""}`</p>
+      <h2>Liste du projet actif</h2>
 
       {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
       {loading ? <p className="muted-text">Chargement des parcelles...</p> : null}
@@ -69,8 +69,15 @@ function ParcellesPage() {
           <article key={parcelle.id} className="list-card">
             <p className="eyebrow">{parcelle.code}</p>
             <h3>{parcelle.name}</h3>
-            <p>{parcelle.area ? `Superficie : ${parcelle.area}` : "Superficie non renseignee"}</p>
-            <p>{parcelle.status ? `Statut : ${parcelle.status}` : "Statut non renseigne"}</p>
+            <p>{parcelle.city ? `Ville : ${parcelle.city}` : "Ville non renseignee"}</p>
+            <p>
+              {parcelle.cooperativeName
+                ? `Cooperative : ${parcelle.cooperativeName}`
+                : "Cooperative non renseignee"}
+            </p>
+            <p>
+              {parcelle.area ? `Superficie : ${parcelle.area}` : "Superficie non renseignee"}
+            </p>
           </article>
         ))}
       </div>
@@ -90,11 +97,14 @@ function ParcellesPage() {
         onDelete={deleteParcelle}
         createTemplate={{
           nom: "",
-          code: "",
-          superficie: "",
+          ville: "",
           cooperative_id: "",
+          superficie: "",
+          lat: "",
+          lng: "",
+          objectif: "",
         }}
-        canManage={["admin", "administrateur"].includes(role)}
+        canManage={["administrateur", "agent terrain"].includes(role)}
         getRecordLabel={(record) => `${record.code} - ${record.name}`}
       />
     </section>

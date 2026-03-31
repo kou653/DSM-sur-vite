@@ -7,8 +7,7 @@ function ProjectAccessGuard() {
   const { accessibleProjectIds, role, setSelectedProjectId } = useAuth();
   const numericProjectId = Number(projectId);
   const hasAccess =
-    ["admin", "administrateur"].includes(role) ||
-    accessibleProjectIds.includes(numericProjectId);
+    role === "administrateur" || accessibleProjectIds.includes(numericProjectId);
 
   useEffect(() => {
     if (!Number.isNaN(numericProjectId) && hasAccess) {
