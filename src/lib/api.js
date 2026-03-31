@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const baseURL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+
 const api = axios.create({
-    baseURL: "http://localhost:8000/api",
+    baseURL,
 });
 
 api.interceptors.request.use((config) => {
@@ -22,6 +24,11 @@ api.interceptors.response.use(
             localStorage.removeItem("token");
             window.location.href = "/login";
         }
+
+        if (error.response?.status === 403) {
+            window.location.href = "/access-denied";
+        }
+
         return Promise.reject(error);
     }
 );
