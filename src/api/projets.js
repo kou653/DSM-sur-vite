@@ -19,7 +19,3 @@ export const updateProjet = (projetId, payload) => {
 export const deleteProjet = (projetId) => {
   return api.delete(`/projets/${projetId}`);
 };
-
-export const getProjetDashboard = (projetId) => {
-  return api.get(`/projets/${projetId}/dashboard`);
-};

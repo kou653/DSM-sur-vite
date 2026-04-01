@@ -1,18 +1,10 @@
-import {
-  ChevronLeft,
-  ChevronRight,
-  Leaf,
-  MapPinned,
-  Plus,
-  Sprout,
-  TreePine,
-  Trees,
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Leaf, MapPinned, Plus, Sprout, Trees } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import heroImage from "../assets/hero.png";
 import JsonCrudSection from "../components/JsonCrudSection.jsx";
+import HeroCard from "../components/HeroCard.jsx";
 import { useAuth } from "../contexts/auth-context.js";
+import { getProjectMonitoring } from "../api/monitoring.js";
 import {
   createProjet,
   deleteProjet,
@@ -32,6 +24,7 @@ function normalizeProjects(payload) {
     description: project.description || null,
     status: project.status || null,
     region: project.region || null,
+    parcellesCount: Number(project.parcelles_count || 0),
     raw: project,
   }));
 }
@@ -39,41 +32,85 @@ function normalizeProjects(payload) {
 function ProjectListPage() {
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
+  const [metrics, setMetrics] = useState({
+    totalPlants: 0,
+    averageSurvivalRate: 0,
+  });
   const [errorMessage, setErrorMessage] = useState("");
   const { role, accessibleProjectIds, selectedProjectId, setSelectedProjectId } =
     useAuth();
 
-  async function fetchProjects() {
+  const fetchProjects = useCallback(async () => {
     setLoadingProjects(true);
     setErrorMessage("");
 
     try {
       const { data } = await getProjets();
-      setProjects(normalizeProjects(data));
+      const normalizedProjects = normalizeProjects(data);
+
+      setProjects(normalizedProjects);
+
+      const monitorableProjects = normalizedProjects.filter(
+        (project) =>
+          role === "administrateur" || accessibleProjectIds.includes(project.id)
+      );
+
+      if (monitorableProjects.length === 0) {
+        setMetrics({
+          totalPlants: 0,
+          averageSurvivalRate: 0,
+        });
+        return;
+      }
+
+      const monitoringResponses = await Promise.all(
+        monitorableProjects.map((project) =>
+          getProjectMonitoring(project.id).catch(() => null)
+        )
+      );
+
+      const validStats = monitoringResponses
+        .map((response) => response?.data?.stats_globales)
+        .filter(Boolean);
+
+      const totalPlants = validStats.reduce(
+        (sum, stat) => sum + Number(stat.total_plants || 0),
+        0
+      );
+      const averageSurvivalRate =
+        validStats.length > 0
+          ? validStats.reduce(
+              (sum, stat) => sum + Number(stat.taux_survie || 0),
+              0
+            ) / validStats.length
+          : 0;
+
+      setMetrics({
+        totalPlants,
+        averageSurvivalRate,
+      });
     } catch (error) {
       const nextMessage =
         error.response?.data?.message ||
         "Impossible de charger la liste des projets.";
 
       setErrorMessage(nextMessage);
+      throw error;
     } finally {
       setLoadingProjects(false);
     }
-  }
+  }, [accessibleProjectIds, role]);
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    fetchProjects().catch(() => {});
+  }, [fetchProjects]);
 
   const projectStats = useMemo(() => {
-    const totalProjects = projects.length;
     const activeProjects = projects.filter((project) => project.status === "actif").length;
-    const coveredRegions = new Set(
-      projects.map((project) => project.region).filter(Boolean)
-    ).size;
-    const accessibleCount = projects.filter(
-      (project) => role === "administrateur" || accessibleProjectIds.includes(project.id)
-    ).length;
+    const totalParcelles = projects.reduce(
+      (sum, project) => sum + project.parcellesCount,
+      0
+    );
 
     return [
       {
@@ -83,21 +120,21 @@ function ProjectListPage() {
       },
       {
         label: "Total parcelles",
-        value: totalProjects,
+        value: totalParcelles,
         icon: Sprout,
       },
       {
         label: "Total plants",
-        value: coveredRegions,
+        value: metrics.totalPlants,
         icon: MapPinned,
       },
       {
         label: "Taux de survie moyen",
-        value: totalProjects > 0 ? `${Math.max(72, accessibleCount * 12.5).toFixed(1)}%` : "0%",
+        value: `${metrics.averageSurvivalRate.toFixed(1)}%`,
         icon: Leaf,
       },
     ];
-  }, [accessibleProjectIds, projects, role]);
+  }, [metrics.averageSurvivalRate, metrics.totalPlants, projects]);
 
   return (
     <section className="dashboard-overview">
@@ -117,31 +154,7 @@ function ProjectListPage() {
 
       {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
 
-      <article className="dashboard-hero-card">
-        <img src={heroImage} alt="Jeune pousse tenue dans les mains" />
-        <div className="dashboard-hero-overlay" />
-        <button
-          type="button"
-          className="dashboard-hero-arrow dashboard-hero-arrow-left"
-          aria-label="Image precedente"
-        >
-          <ChevronLeft size={16} strokeWidth={2.4} />
-        </button>
-        <button
-          type="button"
-          className="dashboard-hero-arrow dashboard-hero-arrow-right"
-          aria-label="Image suivante"
-        >
-          <ChevronRight size={16} strokeWidth={2.4} />
-        </button>
-        <div className="dashboard-hero-content">
-          <span>Restauration des ecosystemes locaux</span>
-        </div>
-        <div className="dashboard-hero-dots" aria-hidden="true">
-          <span className="dashboard-hero-dot dashboard-hero-dot-active" />
-          <span className="dashboard-hero-dot" />
-        </div>
-      </article>
+      <HeroCard />
 
       <div className="dashboard-stat-grid">
         {projectStats.map((stat) => {
@@ -182,7 +195,7 @@ function ProjectListPage() {
               <article key={project.id} className="dashboard-project-card">
                 <div className="dashboard-project-card-top">
                   <div className="dashboard-project-badge">
-                    <TreePine size={14} strokeWidth={2.1} />
+                    <Trees size={13} strokeWidth={2.1} />
                   </div>
                   <div className="dashboard-project-heading">
                     <h3>{project.name}</h3>
@@ -199,16 +212,16 @@ function ProjectListPage() {
 
                 <div className="dashboard-project-metrics">
                   <div>
-                    <strong>{Math.max(12, project.id * 7)}</strong>
+                    <strong>{project.parcellesCount}</strong>
                     <span>Parcelles</span>
                   </div>
                   <div>
-                    <strong>{Math.max(1500, project.id * 4100)}</strong>
-                    <span>Plants</span>
+                    <strong>{project.code}</strong>
+                    <span>Code projet</span>
                   </div>
                   <div>
-                    <strong>{project.status === "actif" ? "92.3%" : "78.9%"}</strong>
-                    <span>Suivi</span>
+                    <strong>{project.status || "-"}</strong>
+                    <span>Statut</span>
                   </div>
                 </div>
 

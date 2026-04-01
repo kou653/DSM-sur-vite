@@ -7,12 +7,15 @@ import {
   TreePine,
   UserCircle2,
   Users,
+  X,
 } from "lucide-react";
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context.js";
 
 function DashboardLayout() {
   const { role, selectedProjectId, user, logout } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const adminBasePath = selectedProjectId
     ? `/dashboard/projet/${selectedProjectId}`
@@ -31,22 +34,22 @@ function DashboardLayout() {
     },
     ...(role === "administrateur"
       ? [
-          {
-            title: "Administration",
-            items: [
-              {
-                to: `${adminBasePath}/cooperatives`,
-                label: "Cooperatives",
-                icon: Building2,
-              },
-              {
-                to: `${adminBasePath}/utilisateurs`,
-                label: "Utilisateurs",
-                icon: Users,
-              },
-            ],
-          },
-        ]
+        {
+          title: "Administration",
+          items: [
+            {
+              to: `${adminBasePath}/cooperatives`,
+              label: "Cooperatives",
+              icon: Building2,
+            },
+            {
+              to: `${adminBasePath}/utilisateurs`,
+              label: "Utilisateurs",
+              icon: Users,
+            },
+          ],
+        },
+      ]
       : []),
     {
       title: "Compte",
@@ -61,13 +64,30 @@ function DashboardLayout() {
   ];
 
   return (
-    <div className="dashboard-shell">
+    <div
+      className={
+        isSidebarOpen
+          ? "dashboard-shell"
+          : "dashboard-shell dashboard-shell-sidebar-closed"
+      }
+    >
       <aside className="dashboard-sidebar">
-        <div className="dashboard-brand">
-          <div className="dashboard-brand-mark" aria-hidden="true">
-            <TreePine size={16} strokeWidth={2.4} />
+        <div className="dashboard-sidebar-header">
+          <div className="dashboard-brand">
+            <div className="dashboard-brand-mark" aria-hidden="true">
+              <TreePine size={16} strokeWidth={2.4} />
+            </div>
+            <span>DSM</span>
           </div>
-          <span>DSM</span>
+
+          <button
+            type="button"
+            className="dashboard-sidebar-close"
+            aria-label="Fermer le menu"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <X size={16} />
+          </button>
         </div>
 
         <div className="dashboard-sidebar-sections">
@@ -112,7 +132,13 @@ function DashboardLayout() {
 
       <div className="dashboard-body">
         <header className="dashboard-topbar">
-          <button type="button" className="dashboard-menu-button" aria-label="Menu">
+          <button
+            type="button"
+            className="dashboard-menu-button"
+            aria-label={isSidebarOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={isSidebarOpen}
+            onClick={() => setIsSidebarOpen((current) => !current)}
+          >
             <Menu size={16} />
           </button>
 
