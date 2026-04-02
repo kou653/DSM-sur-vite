@@ -7,6 +7,7 @@ import AccessDeniedPage from "./pages/AccessDeniedPage.jsx";
 import CooperativesPage from "./pages/CooperativesPage.jsx";
 import ProjectLayout from "./components/ProjectLayout.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
+import EvolutionPage from "./pages/EvolutionPage.jsx";
 import EspecesPage from "./pages/EspecesPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import MenuPlaceholderPage from "./pages/MenuPlaceholderPage.jsx";
@@ -28,6 +29,10 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<ProjectListPage />} />
 
+          <Route element={<RoleGuard allowedRoles={["administrateur"]} />}>
+            <Route path="/dashboard/utilisateurs" element={<UsersPage />} />
+          </Route>
+
           <Route path="/dashboard/projet/:projectId" element={<ProjectAccessGuard />}>
             <Route element={<ProjectLayout />}>
               <Route index element={<Navigate to="accueil" replace />} />
@@ -40,11 +45,11 @@ function App() {
                 path="statistiques"
                 element={<MenuPlaceholderPage title="Statistiques" />}
               />
+              <Route path="cooperatives" element={<CooperativesPage />} />
+              <Route path="evolution" element={<EvolutionPage />} />
 
               <Route element={<RoleGuard allowedRoles={["administrateur"]} />}>
                 <Route path="monitoring" element={<MonitoringPage />} />
-                <Route path="cooperatives" element={<CooperativesPage />} />
-                <Route path="utilisateurs" element={<UsersPage />} />
               </Route>
             </Route>
           </Route>

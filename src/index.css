@@ -978,6 +978,54 @@ textarea {
   color: var(--muted);
 }
 
+.evolution-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.evolution-success {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px solid #b9d8c0;
+  border-radius: 14px;
+  background: #eef9f0;
+  color: #24623b;
+}
+
+.evolution-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.evolution-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-alt);
+}
+
+.evolution-image {
+  display: block;
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  background: #edf4ef;
+}
+
+.evolution-card-body {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.evolution-card-body p,
+.evolution-card-body span {
+  margin: 0;
+}
+
 @media (max-width: 960px) {
   .app-shell {
     padding: 16px;

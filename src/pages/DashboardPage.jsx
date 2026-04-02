@@ -70,7 +70,7 @@ function DashboardPage() {
 
   return (
     <section className="panel panel-wide">
-      <p className="eyebrow">Tableau de bord</p>
+      <p className="eyebrow">Vue d'ensemble</p>
       <h2>{projectName}</h2>
       <p>{projet?.description || "Pas de description disponible."}</p>
 

@@ -1,25 +1,93 @@
 import {
+  BarChart3,
   Building2,
+  Camera,
   ChevronDown,
   LayoutDashboard,
   LogOut,
+  Map,
   Menu,
+  ScanSearch,
+  Sprout,
   TreePine,
   UserCircle2,
   Users,
   X,
 } from "lucide-react";
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context.js";
 
 function DashboardLayout() {
   const { role, selectedProjectId, user, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const location = useLocation();
 
-  const adminBasePath = selectedProjectId
+  const isProjectRoute = /^\/dashboard\/projet\/\d+(\/|$)/.test(location.pathname);
+  const projectBasePath = selectedProjectId
     ? `/dashboard/projet/${selectedProjectId}`
-    : "/dashboard";
+    : null;
+
+  const projectItems =
+    isProjectRoute && projectBasePath
+      ? [
+        {
+          to: `${projectBasePath}/accueil`,
+          label: "Vue d'ensemble",
+          icon: LayoutDashboard,
+        },
+        {
+          to: `${projectBasePath}/parcelles`,
+          label: "Parcelles",
+          icon: Sprout,
+        },
+        {
+          to: `${projectBasePath}/plants`,
+          label: "Plants",
+          icon: ScanSearch,
+        },
+        {
+          to: `${projectBasePath}/especes`,
+          label: "Especes",
+          icon: TreePine,
+        },
+        {
+          to: `${projectBasePath}/carte`,
+          label: "Carte",
+          icon: Map,
+        },
+        {
+          to: `${projectBasePath}/statistiques`,
+          label: "Statistiques",
+          icon: BarChart3,
+        },
+
+        ...(role === "administrateur"
+          ? [
+            {
+              to: `${projectBasePath}/monitoring`,
+              label: "Monitoring",
+              icon: ScanSearch,
+            },
+          ]
+          : []),
+        ...(role !== "commanditaire"
+          ? [
+            {
+              to: `${projectBasePath}/evolution`,
+              label: "Evolution",
+              icon: Camera,
+            },
+          ]
+          : []),
+        {
+          to: `${projectBasePath}/cooperatives`,
+          label: "Cooperatives",
+          icon: Building2,
+        },
+
+      ]
+      : [];
 
   const navigationSections = [
     {
@@ -29,21 +97,25 @@ function DashboardLayout() {
           to: "/dashboard",
           label: "Tableau de bord",
           icon: LayoutDashboard,
+          end: true,
         },
       ],
     },
+    ...(projectItems.length > 0
+      ? [
+        {
+          title: `Projet ${selectedProjectId}`,
+          items: projectItems,
+        },
+      ]
+      : []),
     ...(role === "administrateur"
       ? [
         {
           title: "Administration",
           items: [
             {
-              to: `${adminBasePath}/cooperatives`,
-              label: "Cooperatives",
-              icon: Building2,
-            },
-            {
-              to: `${adminBasePath}/utilisateurs`,
+              to: "/dashboard/utilisateurs",
               label: "Utilisateurs",
               icon: Users,
             },
@@ -102,7 +174,7 @@ function DashboardLayout() {
                     <NavLink
                       key={item.label}
                       to={item.to}
-                      end={item.to === "/dashboard"}
+                      end={item.end}
                       className={({ isActive }) =>
                         isActive
                           ? "dashboard-sidebar-link dashboard-sidebar-link-active"

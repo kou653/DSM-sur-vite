@@ -140,7 +140,7 @@ function ProjectListPage() {
     <section className="dashboard-overview">
       <div className="dashboard-overview-header">
         <div className="dashboard-overview-title">
-          <h1>Tableau de bord</h1>
+          <h1>Vue d'ensemble</h1>
           <p>Vue d&apos;ensemble de tous les projets</p>
         </div>
 
