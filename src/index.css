@@ -1030,7 +1030,7 @@ textarea {
   display: grid;
   gap: 14px;
   min-height: 100%;
-  padding: 10px 10px 24px;
+  padding: 4px 10px 24px;
   border: 1px solid #d8eadb;
   border-radius: 18px;
   overflow: hidden;
@@ -1045,9 +1045,13 @@ textarea {
 .users-form-header,
 .users-table-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+
+.users-toolbar {
+  margin-top: 20px;
 }
 
 .users-toolbar h1,
@@ -1058,7 +1062,7 @@ textarea {
 
 .users-hero {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
 }
 
@@ -1086,10 +1090,11 @@ textarea {
 
 .users-toolbar-actions {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  margin-left: auto;
 }
 
 .users-search {
@@ -1099,11 +1104,16 @@ textarea {
   min-width: 0;
   width: min(100%, 320px);
   padding: 10px 14px;
+  margin-top: 2px;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: #fff;
   color: var(--muted);
   box-shadow: 0 8px 24px rgba(40, 92, 56, 0.08);
+}
+
+.dashboard-add-button {
+  margin-top: 2px;
 }
 
 .users-search input {
