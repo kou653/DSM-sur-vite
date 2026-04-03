@@ -22,6 +22,7 @@ function normalizeProjects(payload) {
     code: `PRJ${project.id}`,
     name: project.nom || `Projet ${project.id}`,
     description: project.description || null,
+    objectif: project.objectif ?? null,
     status: project.status || null,
     region: project.region || null,
     parcellesCount: Number(project.parcelles_count || 0),
@@ -80,9 +81,9 @@ function ProjectListPage() {
       const averageSurvivalRate =
         validStats.length > 0
           ? validStats.reduce(
-              (sum, stat) => sum + Number(stat.taux_survie || 0),
-              0
-            ) / validStats.length
+            (sum, stat) => sum + Number(stat.taux_survie || 0),
+            0
+          ) / validStats.length
           : 0;
 
       setMetrics({
@@ -102,7 +103,7 @@ function ProjectListPage() {
   }, [accessibleProjectIds, role]);
 
   useEffect(() => {
-    fetchProjects().catch(() => {});
+    fetchProjects().catch(() => { });
   }, [fetchProjects]);
 
   const projectStats = useMemo(() => {
@@ -263,6 +264,7 @@ function ProjectListPage() {
           date_debut: "",
           date_fin: "",
           region: "",
+          objectif: "",
           status: "actif",
         }}
         canManage={role === "administrateur"}

@@ -18,6 +18,7 @@ function normalizeParcelles(payload) {
     code: `PAR${parcelle.id}`,
     name: parcelle.nom || `Parcelle ${parcelle.id}`,
     area: parcelle.superficie || null,
+    objectif: parcelle.objectif ?? null,
     city: parcelle.ville || null,
     cooperativeName: parcelle.cooperative?.nom || null,
     raw: parcelle,

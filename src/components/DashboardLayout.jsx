@@ -42,11 +42,6 @@ function DashboardLayout() {
           icon: Sprout,
         },
         {
-          to: `${projectBasePath}/plants`,
-          label: "Plants",
-          icon: ScanSearch,
-        },
-        {
           to: `${projectBasePath}/especes`,
           label: "Especes",
           icon: TreePine,
@@ -55,11 +50,6 @@ function DashboardLayout() {
           to: `${projectBasePath}/carte`,
           label: "Carte",
           icon: Map,
-        },
-        {
-          to: `${projectBasePath}/statistiques`,
-          label: "Statistiques",
-          icon: BarChart3,
         },
 
         ...(role === "administrateur"

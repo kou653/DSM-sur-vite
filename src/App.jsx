@@ -14,7 +14,6 @@ import MenuPlaceholderPage from "./pages/MenuPlaceholderPage.jsx";
 import MonitoringPage from "./pages/MonitoringPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import ParcellesPage from "./pages/ParcellesPage.jsx";
-import PlantsPage from "./pages/PlantsPage.jsx";
 import ProjectListPage from "./pages/ProjectListPage.jsx";
 import UsersPage from "./pages/UsersPage.jsx";
 
@@ -38,13 +37,8 @@ function App() {
               <Route index element={<Navigate to="accueil" replace />} />
               <Route path="accueil" element={<DashboardPage />} />
               <Route path="parcelles" element={<ParcellesPage />} />
-              <Route path="plants" element={<PlantsPage />} />
               <Route path="especes" element={<EspecesPage />} />
               <Route path="carte" element={<MenuPlaceholderPage title="Carte" />} />
-              <Route
-                path="statistiques"
-                element={<MenuPlaceholderPage title="Statistiques" />}
-              />
               <Route path="cooperatives" element={<CooperativesPage />} />
               <Route path="evolution" element={<EvolutionPage />} />
 
