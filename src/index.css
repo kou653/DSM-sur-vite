@@ -1303,6 +1303,34 @@ textarea {
   box-shadow: none;
 }
 
+.cooperatives-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cooperatives-summary-card {
+  padding: 16px 18px;
+  border: 1px solid #d8e7da;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 26px rgba(52, 88, 62, 0.1);
+}
+
+.cooperatives-summary-card p,
+.cooperatives-summary-card h2 {
+  margin: 0;
+}
+
+.cooperatives-summary-card p {
+  color: var(--muted);
+}
+
+.cooperatives-summary-card h2 {
+  margin-top: 4px;
+  color: #04130a;
+  font-size: 1.6rem;
+}
+
 @media (max-width: 960px) {
   .app-shell {
     padding: 16px;
