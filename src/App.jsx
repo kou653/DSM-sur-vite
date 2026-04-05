@@ -14,6 +14,7 @@ import MenuPlaceholderPage from "./pages/MenuPlaceholderPage.jsx";
 import MonitoringPage from "./pages/MonitoringPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import ParcellesPage from "./pages/ParcellesPage.jsx";
+import ParcelleDetailsPage from "./pages/ParcelleDetailsPage.jsx";
 import ProjectListPage from "./pages/ProjectListPage.jsx";
 import UsersPage from "./pages/UsersPage.jsx";
 
@@ -36,7 +37,10 @@ function App() {
             <Route element={<ProjectLayout />}>
               <Route index element={<Navigate to="accueil" replace />} />
               <Route path="accueil" element={<DashboardPage />} />
-              <Route path="parcelles" element={<ParcellesPage />} />
+              <Route path="parcelles">
+                <Route index element={<ParcellesPage />} />
+                <Route path=":parcelleId" element={<ParcelleDetailsPage />} />
+              </Route>
               <Route path="especes" element={<EspecesPage />} />
               <Route path="carte" element={<MenuPlaceholderPage title="Carte" />} />
               <Route path="cooperatives" element={<CooperativesPage />} />
