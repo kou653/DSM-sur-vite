@@ -1028,7 +1028,7 @@ textarea {
 
 .users-page {
   display: grid;
-  gap: 14px;
+  gap: 6px;
   min-height: 100%;
   padding: 4px 10px 24px;
   border: 1px solid #d8eadb;
