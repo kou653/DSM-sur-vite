@@ -1,298 +1,119 @@
-import { useEffect, useState } from "react";
-import {
-  createParcelleEvolution,
-  deleteEvolutionImage,
-  getParcelleEvolution,
-} from "../api/evolution.js";
+import { Activity, ArrowRight, Camera, Images, MapPinned } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getProjetParcelles } from "../api/parcelles.js";
 import { useAuth } from "../contexts/auth-context.js";
 
-function normalizeParcelles(payload) {
-  const rawParcelles = Array.isArray(payload)
-    ? payload
-    : payload?.parcelles || payload?.data || [];
-
-  return rawParcelles.map((parcelle) => ({
-    id: Number(parcelle.id),
-    name: parcelle.nom || `Parcelle ${parcelle.id}`,
-  }));
-}
-
-function normalizeEvolution(payload) {
-  const rawEvolution = Array.isArray(payload)
-    ? payload
-    : payload?.evolution || payload?.data || [];
-
-  return rawEvolution.map((item) => ({
-    id: Number(item.id),
-    url: item.url || "",
-    description: item.description || "",
-    date: item.date || null,
-  }));
-}
-
 function EvolutionPage() {
-  const { role, selectedProjectId } = useAuth();
+  const { selectedProjectId } = useAuth();
   const [parcelles, setParcelles] = useState([]);
-  const [selectedParcelleId, setSelectedParcelleId] = useState("");
-  const [images, setImages] = useState([]);
-  const [description, setDescription] = useState("");
-  const [photoFile, setPhotoFile] = useState(null);
-  const [loadingParcelles, setLoadingParcelles] = useState(true);
-  const [loadingImages, setLoadingImages] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function fetchParcelles() {
-      if (!selectedProjectId) {
-        setParcelles([]);
-        setSelectedParcelleId("");
-        setLoadingParcelles(false);
-        return;
-      }
-
-      setLoadingParcelles(true);
-
-      try {
-        const { data } = await getProjetParcelles(selectedProjectId);
-        const nextParcelles = normalizeParcelles(data);
-
-        if (!isMounted) return;
-
-        setParcelles(nextParcelles);
-        setSelectedParcelleId((currentValue) => {
-          if (
-            currentValue &&
-            nextParcelles.some((parcelle) => String(parcelle.id) === currentValue)
-          ) {
-            return currentValue;
-          }
-
-          return nextParcelles[0] ? String(nextParcelles[0].id) : "";
-        });
-      } catch (error) {
-        if (isMounted) {
-          setErrorMessage(
-            error.response?.data?.message ||
-              "Impossible de charger les parcelles du projet."
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setLoadingParcelles(false);
-        }
-      }
-    }
-
-    fetchParcelles();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedProjectId]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function fetchEvolution() {
-      if (!selectedParcelleId) {
-        setImages([]);
-        return;
-      }
-
-      setLoadingImages(true);
-      setErrorMessage("");
-
-      try {
-        const { data } = await getParcelleEvolution(selectedParcelleId);
-        if (isMounted) {
-          setImages(normalizeEvolution(data));
-        }
-      } catch (error) {
-        if (isMounted) {
-          setErrorMessage(
-            error.response?.data?.message ||
-              "Impossible de charger les photos d'evolution."
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setLoadingImages(false);
-        }
-      }
-    }
-
-    fetchEvolution();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedParcelleId]);
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    if (!selectedParcelleId || !photoFile || !description.trim()) {
-      setErrorMessage("Selectionnez une parcelle, une photo et une description.");
+  const fetchParcelles = useCallback(async () => {
+    if (!selectedProjectId) {
+      setParcelles([]);
+      setLoading(false);
       return;
     }
 
-    setSubmitting(true);
+    setLoading(true);
     setErrorMessage("");
-    setSuccessMessage("");
-
-    const formData = new FormData();
-    formData.append("photo", photoFile);
-    formData.append("description", description.trim());
 
     try {
-      await createParcelleEvolution(selectedParcelleId, formData);
-      const { data } = await getParcelleEvolution(selectedParcelleId);
-
-      setImages(normalizeEvolution(data));
-      setDescription("");
-      setPhotoFile(null);
-      setSuccessMessage("Photo d'evolution ajoutee avec succes.");
-
-      const fileInput = document.getElementById("evolution-photo-input");
-      if (fileInput) {
-        fileInput.value = "";
-      }
+      const response = await getProjetParcelles(selectedProjectId);
+      const rawParcelles = Array.isArray(response.data) ? response.data : response.data?.parcelles || response.data?.data || [];
+      setParcelles(rawParcelles);
     } catch (error) {
-      setErrorMessage(
-        error.response?.data?.message || "Impossible d'ajouter la photo d'evolution."
-      );
+      setErrorMessage("Impossible de charger les parcelles du projet.");
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
-  }
+  }, [selectedProjectId]);
 
-  async function handleDelete(imageId) {
-    setErrorMessage("");
-    setSuccessMessage("");
-
-    try {
-      await deleteEvolutionImage(imageId);
-      setImages((currentImages) =>
-        currentImages.filter((image) => image.id !== imageId)
-      );
-      setSuccessMessage("Photo d'evolution supprimee avec succes.");
-    } catch (error) {
-      setErrorMessage(
-        error.response?.data?.message ||
-          "Impossible de supprimer la photo d'evolution."
-      );
-    }
-  }
-
-  const canUpload = role !== "commanditaire";
-  const canDelete = role === "administrateur";
+  useEffect(() => {
+    fetchParcelles();
+  }, [fetchParcelles]);
 
   return (
-    <section className="panel panel-wide">
-      <p className="eyebrow">Evolution</p>
-      <h2>Suivi photo des parcelles</h2>
-
-      <div className="filters-bar">
-        <label className="filter-field">
-          <span>Parcelle</span>
-          <select
-            value={selectedParcelleId}
-            onChange={(event) => setSelectedParcelleId(event.target.value)}
-            disabled={loadingParcelles || parcelles.length === 0}
-          >
-            {parcelles.length === 0 ? (
-              <option value="">Aucune parcelle disponible</option>
-            ) : null}
-            {parcelles.map((parcelle) => (
-              <option key={parcelle.id} value={parcelle.id}>
-                {parcelle.name}
-              </option>
-            ))}
-          </select>
-        </label>
+    <section className="users-page">
+      <div className="users-toolbar">
+        <div className="users-hero" style={{ margin: 0 }}>
+          <div className="users-hero-icon" aria-hidden="true">
+            <Camera size={22} strokeWidth={2.1} />
+          </div>
+          <div>
+            <h1>Suivi Visuel par Parcelle</h1>
+            <p>Sélectionnez une parcelle pour voir son évolution historique.</p>
+          </div>
+        </div>
       </div>
 
       {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
-      {successMessage ? <p className="evolution-success">{successMessage}</p> : null}
 
-      {canUpload ? (
-        <form className="evolution-form" onSubmit={handleSubmit}>
-          <label className="filter-field">
-            <span>Description</span>
-            <textarea
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder="Exemple: croissance observee, reprise vegetative, etat sanitaire..."
-              rows={4}
-            />
-          </label>
-
-          <label className="filter-field">
-            <span>Photo</span>
-            <input
-              id="evolution-photo-input"
-              type="file"
-              accept="image/*"
-              onChange={(event) => setPhotoFile(event.target.files?.[0] || null)}
-            />
-          </label>
-
-          <button
-            type="submit"
-            className="primary-action"
-            disabled={submitting || !selectedParcelleId}
-          >
-            {submitting ? "Ajout en cours..." : "Ajouter une photo"}
-          </button>
-        </form>
-      ) : (
-        <p className="muted-text">
-          Votre profil peut consulter les photos, mais pas en ajouter.
-        </p>
-      )}
-
-      {loadingImages ? (
-        <p className="muted-text">Chargement des photos d'evolution...</p>
+      {loading ? (
+        <p className="muted-text" style={{ marginTop: "2rem" }}>Chargement des parcelles...</p>
       ) : null}
 
-      {!loadingImages && images.length === 0 ? (
-        <p className="muted-text">
-          Aucune photo d'evolution n'est encore disponible pour cette parcelle.
-        </p>
+      {!loading && parcelles.length === 0 && !errorMessage ? (
+        <div style={{ textAlign: "center", padding: "4rem 2rem", background: "var(--surface)", borderRadius: "var(--radius-lg)", border: "1px dashed var(--border)" }}>
+          <Images size={48} style={{ color: "var(--border)", marginBottom: "1rem" }} />
+          <h3 style={{ margin: "0 0 0.5rem 0" }}>Aucune parcelle</h3>
+          <p className="muted-text" style={{ margin: 0 }}>Créez d'abord une parcelle dans l'onglet correspondant.</p>
+        </div>
       ) : null}
 
-      {images.length > 0 ? (
-        <div className="evolution-grid">
-          {images.map((image) => (
-            <article key={image.id} className="evolution-card">
-              <img
-                src={image.url}
-                alt={image.description || "Photo d'evolution"}
-                className="evolution-image"
-              />
-              <div className="evolution-card-body">
-                <p>{image.description}</p>
-                <span>
-                  {image.date
-                    ? new Date(image.date).toLocaleDateString("fr-FR")
-                    : "Date non disponible"}
-                </span>
-                {canDelete ? (
-                  <button
-                    type="button"
-                    className="danger-action"
-                    onClick={() => handleDelete(image.id)}
-                  >
-                    Supprimer
-                  </button>
-                ) : null}
-              </div>
-            </article>
+      {!loading && parcelles.length > 0 ? (
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gap: "1.5rem",
+          marginTop: "2rem"
+        }}>
+          {parcelles.map((parcelle) => (
+            <Link
+              key={parcelle.id}
+              to={String(parcelle.id)}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius-md)",
+                textDecoration: "none",
+                color: "inherit",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                overflow: "hidden"
+              }}
+              className="hover-card-effect"
+            >
+               <div style={{ padding: "1.5rem", flexGrow: 1 }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                     <h3 style={{ margin: 0, fontSize: "1.2rem", color: "var(--text)" }}>{parcelle.nom || `Parcelle #${parcelle.id}`}</h3>
+                     <span style={{ color: "var(--primary)", background: "var(--surface-hover)", padding: "0.25rem 0.5rem", borderRadius: "10px", fontSize: "0.85rem", fontWeight: "600" }}>
+                       {Number(parcelle.superficie || 0)} ha
+                     </span>
+                  </div>
+                  <p style={{ margin: 0, color: "var(--muted-text)", display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.9rem" }}>
+                    <MapPinned size={14} /> {parcelle.ville || "-"}
+                  </p>
+               </div>
+               
+               <div style={{ 
+                 background: "var(--surface-hover)", 
+                 padding: "1rem 1.5rem", 
+                 borderTop: "1px solid var(--border-soft)",
+                 display: "flex",
+                 alignItems: "center",
+                 justifyContent: "space-between",
+                 color: "var(--primary)",
+                 fontWeight: "500",
+                 fontSize: "0.95rem"
+               }}>
+                 <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><Activity size={16} /> Voir les photos</span>
+                 <ArrowRight size={16} />
+               </div>
+            </Link>
           ))}
         </div>
       ) : null}

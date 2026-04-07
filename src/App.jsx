@@ -7,8 +7,9 @@ import AccessDeniedPage from "./pages/AccessDeniedPage.jsx";
 import CooperativesPage from "./pages/CooperativesPage.jsx";
 import ProjectLayout from "./components/ProjectLayout.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
-import EvolutionPage from "./pages/EvolutionPage.jsx";
 import EspecesPage from "./pages/EspecesPage.jsx";
+import EvolutionPage from "./pages/EvolutionPage.jsx";
+import EvolutionDetailsPage from "./pages/EvolutionDetailsPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import MenuPlaceholderPage from "./pages/MenuPlaceholderPage.jsx";
 import MonitoringPage from "./pages/MonitoringPage.jsx";
@@ -44,7 +45,10 @@ function App() {
               <Route path="especes" element={<EspecesPage />} />
               <Route path="carte" element={<MenuPlaceholderPage title="Carte" />} />
               <Route path="cooperatives" element={<CooperativesPage />} />
-              <Route path="evolution" element={<EvolutionPage />} />
+              <Route path="evolution">
+                <Route index element={<EvolutionPage />} />
+                <Route path=":parcelleId" element={<EvolutionDetailsPage />} />
+              </Route>
 
               <Route element={<RoleGuard allowedRoles={["administrateur"]} />}>
                 <Route path="monitoring" element={<MonitoringPage />} />
