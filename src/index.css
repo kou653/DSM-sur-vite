@@ -1421,3 +1421,6 @@ textarea {
     padding: 32px 18px 22px;
   }
 }
+
+:root { --radius-sm: 8px; --radius-md: 16px; --radius-lg: 24px; }
+.dashboard-stat-card { border-radius: 16px !important; }
