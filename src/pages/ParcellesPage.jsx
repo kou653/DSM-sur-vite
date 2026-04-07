@@ -222,7 +222,7 @@ function ParcellesPage() {
       {actionError ? <p className="form-error">{actionError}</p> : null}
       {successMessage ? <p className="evolution-success">{successMessage}</p> : null}
 
-      <div className="dashboard-stat-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: "3rem", gap: "1.5rem" }}>
+      <div className="dashboard-stat-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: "1rem", gap: "1.5rem" }}>
         <article style={{ 
           background: "#ffffff", 
           display: "flex", 
@@ -355,7 +355,7 @@ function ParcellesPage() {
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           gap: "1.5rem",
-          marginTop: "2rem"
+          marginTop: "0.5rem"
         }}>
           {filteredParcelles.map((parcelle) => (
             <div key={parcelle.id} style={{ position: "relative" }}>
