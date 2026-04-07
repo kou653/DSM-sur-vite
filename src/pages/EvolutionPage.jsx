@@ -78,11 +78,9 @@ function EvolutionPage() {
                 display: "flex",
                 flexDirection: "column",
                 background: "#ffffff",
-                border: "1px solid var(--border)",
                 borderRadius: "var(--radius-md)",
                 textDecoration: "none",
                 color: "inherit",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
                 overflow: "hidden",
                 textAlign: "center"
               }}

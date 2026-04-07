@@ -222,7 +222,7 @@ function ParcellesPage() {
       {actionError ? <p className="form-error">{actionError}</p> : null}
       {successMessage ? <p className="evolution-success">{successMessage}</p> : null}
 
-      <div className="dashboard-stat-grid" style={{ marginBottom: "2rem" }}>
+      <div className="dashboard-stat-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: "3rem" }}>
         <article className="dashboard-stat-card">
           <div className="dashboard-stat-icon">
             <MapPinned size={16} strokeWidth={2.1} />
@@ -335,9 +335,9 @@ function ParcellesPage() {
       {!loading && filteredParcelles.length > 0 ? (
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+          gridTemplateColumns: "repeat(3, 1fr)",
           gap: "1.5rem",
-          marginTop: "1.5rem"
+          marginTop: "2rem"
         }}>
           {filteredParcelles.map((parcelle) => (
             <div key={parcelle.id} style={{ position: "relative" }}>
@@ -348,14 +348,12 @@ function ParcellesPage() {
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  background: "var(--surface)",
-                  border: "1px solid var(--border)",
+                  background: "#ffffff",
                   borderRadius: "var(--radius-md)",
-                  padding: "2.5rem 1rem",
+                  padding: "3rem 1.5rem",
                   textAlign: "center",
                   textDecoration: "none",
                   color: "var(--text)",
-                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
                   cursor: "pointer",
                   height: "100%",
                 }}

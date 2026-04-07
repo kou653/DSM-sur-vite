@@ -1428,6 +1428,14 @@ textarea {
   --radius-lg: 24px;
 }
 
-.dashboard-stat-card {
-  border-radius: 16px !important;
+.hover-card-effect {
+  border: 1px solid transparent !important;
+  transition: all 0.25s ease !important;
+}
+
+.hover-card-effect:hover {
+  background-color: rgba(20, 150, 85, 0.05) !important;
+  border: 1px solid #149655 !important;
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(20, 150, 85, 0.1);
 }
