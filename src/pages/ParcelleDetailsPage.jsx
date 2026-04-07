@@ -18,7 +18,7 @@ function ParcelleDetailsPage() {
   // Plants
   const [plants, setPlants] = useState([]);
   const [loadingPlants, setLoadingPlants] = useState(true);
-  
+
   // Reference data
   const [especes, setEspeces] = useState([]);
 
@@ -30,11 +30,11 @@ function ParcelleDetailsPage() {
   const [isPlantFormOpen, setIsPlantFormOpen] = useState(false);
   const [plantSubmitting, setPlantSubmitting] = useState(false);
   const [plantFormError, setPlantFormError] = useState("");
-  
+
   // Plant Autocomplete
   const [especeSearch, setEspeceSearch] = useState("");
   const [showEspeceDropdown, setShowEspeceDropdown] = useState(false);
-  
+
   const [plantFormState, setPlantFormState] = useState({
     espece_id: "",
     date_plantation: new Date().toISOString().slice(0, 10),
@@ -67,14 +67,14 @@ function ParcelleDetailsPage() {
         ? plantsRes.data
         : plantsRes.data?.plants || plantsRes.data?.data || [];
       setPlants(rawPlants);
-      
+
       // Inherit coordinates if not manually filled yet in form
       setPlantFormState(prev => ({
         ...prev,
         lat: prev.lat || parcelleData.lat || "",
         lng: prev.lng || parcelleData.lng || ""
       }));
-      
+
     } catch (error) {
       setErrorMessage("Impossible de charger les sous-données de la parcelle.");
     } finally {
@@ -162,10 +162,10 @@ function ParcelleDetailsPage() {
     <section className="users-page" style={{ paddingBottom: "4rem" }}>
       {/* Breadcrumb / Top Return */}
       <div style={{ marginBottom: "1.5rem" }}>
-         <Link to={`/dashboard/projet/${selectedProjectId}/parcelles`} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", textDecoration: "none", color: "var(--muted-text)", fontWeight: "500", fontSize: "0.95rem" }}>
-           <ArrowLeft size={16} />
-           Retour aux parcelles
-         </Link>
+        <Link to={`/dashboard/projet/${selectedProjectId}/parcelles`} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", textDecoration: "none", color: "var(--muted-text)", fontWeight: "500", fontSize: "0.95rem" }}>
+          <ArrowLeft size={16} />
+          Retour aux parcelles
+        </Link>
       </div>
 
       <div className="users-toolbar">
@@ -173,9 +173,9 @@ function ParcelleDetailsPage() {
           <div>
             <h1>{parcelle.nom || `Parcelle #${parcelle.id}`}</h1>
             <p style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-               <span>Détails et évolution de la zone</span>
-               <ChevronRight size={14} />
-               <strong style={{ color: "var(--primary)" }}>{parcelle.projet?.nom || "Projet Actif"}</strong>
+              <span>Détails et évolution de la zone</span>
+              <ChevronRight size={14} />
+              <strong style={{ color: "var(--primary)" }}>{parcelle.projet?.nom || "Projet Actif"}</strong>
             </p>
           </div>
         </div>
@@ -186,96 +186,96 @@ function ParcelleDetailsPage() {
         {/* Objectif Block */}
         <article style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "1.5rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-             <p className="eyebrow" style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}><Target size={16} /> Objectif de la parcelle</p>
+            <p className="eyebrow" style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}><Target size={16} /> Objectif de la parcelle</p>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem" }}>
-             {isEditingObjective ? (
-               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <input
-                    type="number"
-                    min="0"
-                    value={tempObjectifAtteint}
-                    onChange={(e) => setTempObjectifAtteint(e.target.value)}
-                    style={{ width: "100px", padding: "0.5rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--primary)" }}
-                    autoFocus
-                  />
-                  <span style={{ fontSize: "1.5rem", fontWeight: "600", color: "var(--muted-text)" }}>/ {objectifCible}</span>
-                  <button onClick={handleSaveObjective} className="primary-action" style={{ padding: "0.5rem" }} title="Enregistrer"><Check size={16} /></button>
-                  <button onClick={() => setIsEditingObjective(false)} className="secondary-action" style={{ padding: "0.5rem" }} title="Annuler"><X size={16} /></button>
-               </div>
-             ) : (
-               <>
-                 <h2 style={{ fontSize: "2.5rem", margin: 0, color: "var(--text)" }}>{objectifAtteint}</h2>
-                 <span style={{ fontSize: "1.5rem", fontWeight: "600", color: "var(--muted-text)" }}>/ {objectifCible}</span>
-                 {canManage && (
-                   <button onClick={() => setIsEditingObjective(true)} className="secondary-action users-icon-button" style={{ marginLeft: "1rem" }} title="Mettre à jour l'objectif atteint">
-                     <Pencil size={15} />
-                   </button>
-                 )}
-               </>
-             )}
+            {isEditingObjective ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <input
+                  type="number"
+                  min="0"
+                  value={tempObjectifAtteint}
+                  onChange={(e) => setTempObjectifAtteint(e.target.value)}
+                  style={{ width: "100px", padding: "0.5rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--primary)" }}
+                  autoFocus
+                />
+                <span style={{ fontSize: "1.5rem", fontWeight: "600", color: "var(--muted-text)" }}>/ {objectifCible}</span>
+                <button onClick={handleSaveObjective} className="primary-action" style={{ padding: "0.5rem" }} title="Enregistrer"><Check size={16} /></button>
+                <button onClick={() => setIsEditingObjective(false)} className="secondary-action" style={{ padding: "0.5rem" }} title="Annuler"><X size={16} /></button>
+              </div>
+            ) : (
+              <>
+                <h2 style={{ fontSize: "2.5rem", margin: 0, color: "var(--text)" }}>{objectifAtteint}</h2>
+                <span style={{ fontSize: "1.5rem", fontWeight: "600", color: "var(--muted-text)" }}>/ {objectifCible}</span>
+                {canManage && (
+                  <button onClick={() => setIsEditingObjective(true)} className="secondary-action users-icon-button" style={{ marginLeft: "1rem" }} title="Mettre à jour l'objectif atteint">
+                    <Pencil size={15} />
+                  </button>
+                )}
+              </>
+            )}
           </div>
         </article>
 
         {/* Evolution Block */}
         <article style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "1.5rem", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-           <p className="eyebrow" style={{ margin: "0 0 1rem 0", display: "flex", alignItems: "center", gap: "0.5rem" }}><Activity size={16} /> Évolution de l'objectif</p>
-           
-           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-              <span style={{ fontWeight: "600", fontSize: "1.1rem" }}>{progressPercentage.toFixed(1)}% Réalisé</span>
-              <span style={{ color: "var(--muted-text)", fontSize: "0.9rem" }}>{objectifCible - objectifAtteint > 0 ? `${objectifCible - objectifAtteint} restants` : "Cible atteinte !"}</span>
-           </div>
-           
-           <div style={{ width: "100%", height: "12px", background: "var(--surface-hover)", borderRadius: "6px", overflow: "hidden", position: "relative" }}>
-              <div 
-                style={{ 
-                  position: "absolute", left: 0, top: 0, bottom: 0, 
-                  width: `${progressPercentage}%`, 
-                  background: progressPercentage >= 100 ? "#10b981" : "var(--primary)",
-                  borderRadius: "6px",
-                  transition: "width 0.5s ease"
-                }} 
-              />
-           </div>
+          <p className="eyebrow" style={{ margin: "0 0 1rem 0", display: "flex", alignItems: "center", gap: "0.5rem" }}><Activity size={16} /> Évolution de l'objectif</p>
+
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+            <span style={{ fontWeight: "600", fontSize: "1.1rem" }}>{progressPercentage.toFixed(1)}% Réalisé</span>
+            <span style={{ color: "var(--muted-text)", fontSize: "0.9rem" }}>{objectifCible - objectifAtteint > 0 ? `${objectifCible - objectifAtteint} restants` : "Cible atteinte !"}</span>
+          </div>
+
+          <div style={{ width: "100%", height: "12px", background: "var(--surface-hover)", borderRadius: "6px", overflow: "hidden", position: "relative" }}>
+            <div
+              style={{
+                position: "absolute", left: 0, top: 0, bottom: 0,
+                width: `${progressPercentage}%`,
+                background: progressPercentage >= 100 ? "#10b981" : "var(--primary)",
+                borderRadius: "6px",
+                transition: "width 0.5s ease"
+              }}
+            />
+          </div>
         </article>
       </div>
 
       {/* Row 2: 4 Info Blocks */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.5rem", marginBottom: "2.5rem" }}>
-         <article className="dashboard-stat-card">
-           <div className="dashboard-stat-icon"><MapPinned size={16} strokeWidth={2.1} /></div>
-           <div>
-             <p>Ville</p>
-             <h3 style={{ fontSize: "1.1rem" }}>{parcelle.ville || "-"}</h3>
-           </div>
-         </article>
-         <article className="dashboard-stat-card">
-           <div className="dashboard-stat-icon"><ZoomIn size={16} strokeWidth={2.1} /></div>
-           <div>
-             <p>Superficie</p>
-             <h3 style={{ fontSize: "1.1rem" }}>{parcelle.superficie || "0"} ha</h3>
-           </div>
-         </article>
-         <article className="dashboard-stat-card">
-           <div className="dashboard-stat-icon"><Building2 size={16} strokeWidth={2.1} /></div>
-           <div>
-             <p>Coopérative</p>
-             <h3 style={{ fontSize: "1.1rem" }}>{parcelle.cooperative?.nom || "-"}</h3>
-           </div>
-         </article>
-         <article className="dashboard-stat-card">
-           <div className="dashboard-stat-icon"><Crosshair size={16} strokeWidth={2.1} /></div>
-           <div>
-             <p>Plants enregistrés</p>
-             <h3 style={{ fontSize: "1.1rem" }}>{plants.length}</h3>
-           </div>
-         </article>
+        <article className="dashboard-stat-card">
+          <div className="dashboard-stat-icon"><MapPinned size={16} strokeWidth={2.1} /></div>
+          <div>
+            <p>Ville</p>
+            <h3 style={{ fontSize: "1.1rem" }}>{parcelle.ville || "-"}</h3>
+          </div>
+        </article>
+        <article className="dashboard-stat-card">
+          <div className="dashboard-stat-icon"><ZoomIn size={16} strokeWidth={2.1} /></div>
+          <div>
+            <p>Superficie</p>
+            <h3 style={{ fontSize: "1.1rem" }}>{parcelle.superficie || "0"} ha</h3>
+          </div>
+        </article>
+        <article className="dashboard-stat-card">
+          <div className="dashboard-stat-icon"><Building2 size={16} strokeWidth={2.1} /></div>
+          <div>
+            <p>Coopérative</p>
+            <h3 style={{ fontSize: "1.1rem" }}>{parcelle.cooperative?.nom || "-"}</h3>
+          </div>
+        </article>
+        <article className="dashboard-stat-card">
+          <div className="dashboard-stat-icon"><Crosshair size={16} strokeWidth={2.1} /></div>
+          <div>
+            <p>Plants enregistrés</p>
+            <h3 style={{ fontSize: "1.1rem" }}>{plants.length}</h3>
+          </div>
+        </article>
       </div>
 
       {/* Plants Table Section */}
       <section className="users-table-panel">
         <div className="users-table-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2>Liste des plants de la parcelle</h2>
+          <h3>Liste des plants de la parcelle</h3>
           {canManage && (
             <button type="button" className="dashboard-add-button" onClick={() => setIsPlantFormOpen(!isPlantFormOpen)}>
               {isPlantFormOpen ? <X size={14} strokeWidth={2.4} /> : <Plus size={14} strokeWidth={2.4} />}
@@ -289,7 +289,7 @@ function ParcelleDetailsPage() {
           <div style={{ padding: "1.5rem", background: "var(--surface-hover)", borderBottom: "1px solid var(--border)" }}>
             <h3 style={{ marginTop: 0, marginBottom: "1rem", fontSize: "1.1rem" }}>Enregistrer un nouveau plant</h3>
             {plantFormError && <p className="form-error" style={{ marginBottom: "1rem" }}>{plantFormError}</p>}
-            
+
             <form onSubmit={handleCreatePlant} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", alignItems: "start" }}>
               <div className="filter-field" style={{ position: "relative" }}>
                 <span>Espèce (Autocomplétion)</span>
@@ -315,15 +315,15 @@ function ParcelleDetailsPage() {
                     }}
                   >
                     {especes
-                      .filter(e => 
-                        e.nom_commun?.toLowerCase().includes(especeSearch.toLowerCase()) || 
+                      .filter(e =>
+                        e.nom_commun?.toLowerCase().includes(especeSearch.toLowerCase()) ||
                         e.nom_scientifique?.toLowerCase().includes(especeSearch.toLowerCase())
                       )
                       .map(e => (
                         <li
                           key={e.id}
                           style={{ padding: "0.75rem", cursor: "pointer", borderBottom: "1px solid var(--border-soft)" }}
-                          onMouseDown={(evt) => evt.preventDefault()} 
+                          onMouseDown={(evt) => evt.preventDefault()}
                           onClick={() => {
                             setPlantFormState(cur => ({ ...cur, espece_id: e.id }));
                             setEspeceSearch(`${e.nom_commun} (${e.nom_scientifique})`);
@@ -372,46 +372,46 @@ function ParcelleDetailsPage() {
 
         {/* Plants Data Table */}
         {!loadingPlants && plants.length === 0 ? (
-           <p className="muted-text" style={{ padding: "1.5rem" }}>Aucun plant enregistré pour cette parcelle.</p>
+          <p className="muted-text" style={{ padding: "1.5rem" }}>Aucun plant enregistré pour cette parcelle.</p>
         ) : null}
 
         {loadingPlants ? (
-           <p className="muted-text" style={{ padding: "1.5rem" }}>Chargement des plants...</p>
+          <p className="muted-text" style={{ padding: "1.5rem" }}>Chargement des plants...</p>
         ) : null}
 
         {!loadingPlants && plants.length > 0 && (
           <div className="users-table-wrapper">
-             <table className="users-table">
-               <thead>
-                 <tr>
-                   <th>Espèce</th>
-                   <th>Nom scientifique</th>
-                   <th>GPS</th>
-                   <th>Date de plantation</th>
-                   <th>État</th>
-                 </tr>
-               </thead>
-               <tbody>
-                 {plants.map(plant => (
-                   <tr key={plant.id}>
-                     <td><strong>{plant.espece?.nom_commun || "Inconnu"}</strong></td>
-                     <td><em style={{ color: "var(--muted-text)" }}>{plant.espece?.nom_scientifique || "-"}</em></td>
-                     <td><span style={{ fontSize: "0.85rem", background: "var(--surface-hover)", padding: "0.2rem 0.5rem", borderRadius: "10px" }}>{plant.lat}, {plant.lng}</span></td>
-                     <td>{plant.date_plantation ? new Date(plant.date_plantation).toLocaleDateString() : "-"}</td>
-                     <td>
-                        <span style={{ 
-                          display: "inline-flex", alignItems: "center", gap: "0.25rem", padding: "0.25rem 0.5rem", borderRadius: "20px", fontSize: "0.85rem", fontWeight: "500",
-                          background: plant.status === "vivant" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
-                          color: plant.status === "vivant" ? "#10b981" : "#ef4444"
-                        }}>
-                          {plant.status === "vivant" ? <CheckCircle2 size={12} /> : <X size={12} />}
-                          {plant.status === "vivant" ? "Vivant" : "Mort"}
-                        </span>
-                     </td>
-                   </tr>
-                 ))}
-               </tbody>
-             </table>
+            <table className="users-table">
+              <thead>
+                <tr>
+                  <th>Espèce</th>
+                  <th>Nom scientifique</th>
+                  <th>GPS</th>
+                  <th>Date de plantation</th>
+                  <th>État</th>
+                </tr>
+              </thead>
+              <tbody>
+                {plants.map(plant => (
+                  <tr key={plant.id}>
+                    <td><strong>{plant.espece?.nom_commun || "Inconnu"}</strong></td>
+                    <td><em style={{ color: "var(--muted-text)" }}>{plant.espece?.nom_scientifique || "-"}</em></td>
+                    <td><span style={{ fontSize: "0.85rem", background: "var(--surface-hover)", padding: "0.2rem 0.5rem", borderRadius: "10px" }}>{plant.lat}, {plant.lng}</span></td>
+                    <td>{plant.date_plantation ? new Date(plant.date_plantation).toLocaleDateString() : "-"}</td>
+                    <td>
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", gap: "0.25rem", padding: "0.25rem 0.5rem", borderRadius: "20px", fontSize: "0.85rem", fontWeight: "500",
+                        background: plant.status === "vivant" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
+                        color: plant.status === "vivant" ? "#10b981" : "#ef4444"
+                      }}>
+                        {plant.status === "vivant" ? <CheckCircle2 size={12} /> : <X size={12} />}
+                        {plant.status === "vivant" ? "Vivant" : "Mort"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

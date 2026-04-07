@@ -7,7 +7,7 @@ import {
   getProjetParcelles,
   updateParcelle,
 } from "../api/parcelles.js";
-import { getEspeces, getProjetCooperatives } from "../api/referentiels.js";
+import { getProjetCooperatives } from "../api/referentiels.js";
 
 function normalizeParcelles(payload) {
   const rawParcelles = Array.isArray(payload)
@@ -42,7 +42,6 @@ function buildInitialFormState(parcelle = null) {
     lat: parcelle?.raw?.lat || "",
     lng: parcelle?.raw?.lng || "",
     objectif: parcelle?.raw?.objectif || "",
-    espece_id: parcelle?.raw?.espece_id || "",
   };
 }
 
@@ -50,22 +49,18 @@ function ParcellesPage() {
   const { role, selectedProjectId } = useAuth();
   const [parcelles, setParcelles] = useState([]);
   const [cooperatives, setCooperatives] = useState([]);
-  const [especes, setEspeces] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  
+
   const [actionError, setActionError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingParcelle, setEditingParcelle] = useState(null);
   const [formState, setFormState] = useState(buildInitialFormState());
-
-  const [especeSearch, setEspeceSearch] = useState("");
-  const [showEspeceDropdown, setShowEspeceDropdown] = useState(false);
 
   const fetchParcelles = useCallback(async () => {
     if (!selectedProjectId) {
@@ -78,15 +73,13 @@ function ParcellesPage() {
     setErrorMessage("");
 
     try {
-      const [parcellesRes, coopRes, espRes] = await Promise.all([
+      const [parcellesRes, coopRes] = await Promise.all([
         getProjetParcelles(selectedProjectId),
-        getProjetCooperatives(selectedProjectId),
-        getEspeces()
+        getProjetCooperatives(selectedProjectId)
       ]);
 
       setParcelles(normalizeParcelles(parcellesRes.data));
       setCooperatives(normalizeOptions(coopRes.data, 'cooperatives'));
-      setEspeces(normalizeOptions(espRes.data, 'especes'));
     } catch (error) {
       setErrorMessage(
         error.response?.data?.message || "Impossible de charger les sous-donnees du projet."
@@ -132,7 +125,6 @@ function ParcellesPage() {
   function openCreateForm() {
     setEditingParcelle(null);
     setFormState(buildInitialFormState());
-    setEspeceSearch("");
     setActionError("");
     setSuccessMessage("");
     setIsFormOpen(true);
@@ -141,13 +133,6 @@ function ParcellesPage() {
   function openEditForm(parcelle) {
     setEditingParcelle(parcelle);
     setFormState(buildInitialFormState(parcelle));
-    
-    if (parcelle.raw?.espece) {
-      setEspeceSearch(`${parcelle.raw.espece.nom_commun} (${parcelle.raw.espece.nom_scientifique})`);
-    } else {
-      setEspeceSearch("");
-    }
-    
     setActionError("");
     setSuccessMessage("");
     setIsFormOpen(true);
@@ -247,7 +232,7 @@ function ParcellesPage() {
             <h3>{parcelles.length}</h3>
           </div>
         </article>
-        
+
         <article className="dashboard-stat-card">
           <div className="dashboard-stat-icon">
             <MapPinned size={16} strokeWidth={2.1} />
@@ -297,56 +282,8 @@ function ParcellesPage() {
               </label>
             </div>
 
-            <div className="filter-field" style={{ position: "relative" }}>
-              <span>Espèce principale (Autocomplétion)</span>
-              <input
-                type="text"
-                placeholder="Commencez à taper le nom de l'espèce..."
-                value={especeSearch}
-                onChange={(e) => {
-                  setEspeceSearch(e.target.value);
-                  setShowEspeceDropdown(true);
-                  if (formState.espece_id) {
-                    setFormState(cur => ({ ...cur, espece_id: "" })); 
-                  }
-                }}
-                onFocus={() => setShowEspeceDropdown(true)}
-              />
-              {showEspeceDropdown && especeSearch && !formState.espece_id && (
-                <ul
-                  style={{
-                    position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10,
-                    background: "var(--surface)", border: "1px solid var(--border)",
-                    borderRadius: "0 0 6px 6px", maxHeight: "180px", overflowY: "auto",
-                    listStyle: "none", padding: 0, margin: 0, boxShadow: "var(--shadow-md)"
-                  }}
-                >
-                  {especes
-                    .filter(e => 
-                      e.nom_commun?.toLowerCase().includes(especeSearch.toLowerCase()) || 
-                      e.nom_scientifique?.toLowerCase().includes(especeSearch.toLowerCase())
-                    )
-                    .map(e => (
-                      <li
-                        key={e.id}
-                        style={{ padding: "0.75rem", cursor: "pointer", borderBottom: "1px solid var(--border-soft)", display: "flex", justifyContent: "space-between" }}
-                        onMouseDown={(evt) => evt.preventDefault()} 
-                        onClick={() => {
-                          setFormState(cur => ({ ...cur, espece_id: e.id }));
-                          setEspeceSearch(`${e.nom_commun} (${e.nom_scientifique})`);
-                          setShowEspeceDropdown(false);
-                        }}
-                      >
-                        <strong>{e.nom_commun}</strong>
-                        <span style={{ color: "var(--muted-text)", fontSize: "0.85em" }}>{e.nom_scientifique}</span>
-                      </li>
-                    ))}
-                </ul>
-              )}
-            </div>
-
             <label className="filter-field">
-              <span>Coopérative partenaire</span>
+              <span>Coopérative</span>
               <select name="cooperative_id" value={formState.cooperative_id} onChange={handleInputChange} required>
                 <option value="" disabled>Sélectionner une coopérative</option>
                 {cooperatives.map(coop => (
@@ -404,56 +341,56 @@ function ParcellesPage() {
         }}>
           {filteredParcelles.map((parcelle) => (
             <div key={parcelle.id} style={{ position: "relative" }}>
-               <Link
-                 to={`/dashboard/projet/${selectedProjectId}/parcelles/${parcelle.id}`}
-                 style={{
-                   display: "flex",
-                   flexDirection: "column",
-                   alignItems: "center",
-                   justifyContent: "center",
-                   background: "var(--surface)",
-                   border: "1px solid var(--border)",
-                   borderRadius: "var(--radius-md)",
-                   padding: "2.5rem 1rem",
-                   textAlign: "center",
-                   textDecoration: "none",
-                   color: "var(--text)",
-                   transition: "transform 0.15s ease, box-shadow 0.15s ease",
-                   cursor: "pointer",
-                   height: "100%",
-                 }}
-                 className="hover-card-effect"
-               >
-                 <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.15rem" }}>{parcelle.name}</h3>
-                 <p style={{ margin: 0, color: "var(--primary)", fontWeight: "500" }}>{parcelle.area} ha</p>
-               </Link>
+              <Link
+                to={String(parcelle.id)}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "2.5rem 1rem",
+                  textAlign: "center",
+                  textDecoration: "none",
+                  color: "var(--text)",
+                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                  cursor: "pointer",
+                  height: "100%",
+                }}
+                className="hover-card-effect"
+              >
+                <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.15rem" }}>{parcelle.name}</h3>
+                <p style={{ margin: 0, color: "var(--primary)", fontWeight: "500" }}>{parcelle.area} ha</p>
+              </Link>
 
-               {canManage && (
-                 <button
-                   onClick={(e) => {
-                     e.preventDefault();
-                     openEditForm(parcelle);
-                   }}
-                   title="Modifier la parcelle"
-                   style={{
-                     position: "absolute",
-                     top: "0.5rem",
-                     right: "0.5rem",
-                     background: "var(--surface-hover)",
-                     border: "none",
-                     borderRadius: "50%",
-                     width: "32px",
-                     height: "32px",
-                     display: "flex",
-                     alignItems: "center",
-                     justifyContent: "center",
-                     cursor: "pointer",
-                     color: "var(--muted-text)"
-                   }}
-                 >
-                   <Pencil size={14} />
-                 </button>
-               )}
+              {canManage && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openEditForm(parcelle);
+                  }}
+                  title="Modifier la parcelle"
+                  style={{
+                    position: "absolute",
+                    top: "0.5rem",
+                    right: "0.5rem",
+                    background: "var(--surface-hover)",
+                    border: "none",
+                    borderRadius: "50%",
+                    width: "32px",
+                    height: "32px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    color: "var(--muted-text)"
+                  }}
+                >
+                  <Pencil size={14} />
+                </button>
+              )}
             </div>
           ))}
         </div>
