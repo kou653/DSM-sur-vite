@@ -66,7 +66,7 @@ function EvolutionPage() {
       {!loading && parcelles.length > 0 ? (
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gridTemplateColumns: "repeat(3, 1fr)",
           gap: "1.5rem",
           marginTop: "2rem"
         }}>
@@ -77,26 +77,24 @@ function EvolutionPage() {
               style={{
                 display: "flex",
                 flexDirection: "column",
-                background: "var(--surface)",
+                background: "#ffffff",
                 border: "1px solid var(--border)",
                 borderRadius: "var(--radius-md)",
                 textDecoration: "none",
                 color: "inherit",
                 transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                overflow: "hidden"
+                overflow: "hidden",
+                textAlign: "center"
               }}
               className="hover-card-effect"
             >
-               <div style={{ padding: "1.5rem", flexGrow: 1 }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                     <h3 style={{ margin: 0, fontSize: "1.2rem", color: "var(--text)" }}>{parcelle.nom || `Parcelle #${parcelle.id}`}</h3>
-                     <span style={{ color: "var(--primary)", background: "var(--surface-hover)", padding: "0.25rem 0.5rem", borderRadius: "10px", fontSize: "0.85rem", fontWeight: "600" }}>
-                       {Number(parcelle.superficie || 0)} ha
-                     </span>
-                  </div>
-                  <p style={{ margin: 0, color: "var(--muted-text)", display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.9rem" }}>
-                    <MapPinned size={14} /> {parcelle.ville || "-"}
-                  </p>
+               <div style={{ padding: "2rem 1.5rem", flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
+                  <h3 style={{ margin: 0, fontSize: "1.3rem", color: "var(--text)", fontWeight: "700" }}>
+                    {parcelle.nom || `Parcelle #${parcelle.id}`}
+                  </h3>
+                  <span style={{ color: "var(--primary)", fontSize: "1rem", fontWeight: "600" }}>
+                    {Number(parcelle.superficie || 0)} ha
+                  </span>
                </div>
                
                <div style={{ 
@@ -105,13 +103,12 @@ function EvolutionPage() {
                  borderTop: "1px solid var(--border-soft)",
                  display: "flex",
                  alignItems: "center",
-                 justifyContent: "space-between",
+                 justifyContent: "center",
                  color: "var(--primary)",
-                 fontWeight: "500",
+                 fontWeight: "600",
                  fontSize: "0.95rem"
                }}>
-                 <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><Activity size={16} /> Voir les photos</span>
-                 <ArrowRight size={16} />
+                 <span>Voir les photos</span>
                </div>
             </Link>
           ))}
