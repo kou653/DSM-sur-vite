@@ -181,7 +181,7 @@ function DashboardPage() {
             </article>
 
             {/* Parcelles (Clickable) */}
-            <Link to={`/dashboard/projet/${selectedProjectId}/parcelles`} className="dashboard-stat-card" style={{ textDecoration: "none", color: "inherit", transition: "transform 0.15s ease", cursor: "pointer" }} onMouseOver={e => e.currentTarget.style.transform = "translateY(-3px)"} onMouseOut={e => e.currentTarget.style.transform = "none"}>
+            <Link to={`/dashboard/projet/${selectedProjectId}/parcelles`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
               <div className="dashboard-stat-icon" style={{ background: "rgba(59,130,246,0.1)", color: "#3b82f6" }}><MapPinned size={18} /></div>
               <div>
                 <p>Parcelles</p>
@@ -190,7 +190,7 @@ function DashboardPage() {
             </Link>
 
             {/* Coopératives (Clickable) */}
-            <Link to={`/dashboard/projet/${selectedProjectId}/cooperatives`} className="dashboard-stat-card" style={{ textDecoration: "none", color: "inherit", transition: "transform 0.15s ease", cursor: "pointer" }} onMouseOver={e => e.currentTarget.style.transform = "translateY(-3px)"} onMouseOut={e => e.currentTarget.style.transform = "none"}>
+            <Link to={`/dashboard/projet/${selectedProjectId}/cooperatives`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
               <div className="dashboard-stat-icon" style={{ background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}><Building2 size={18} /></div>
               <div>
                 <p>Coopératives</p>
@@ -223,7 +223,7 @@ function DashboardPage() {
             </article>
 
             {/* Taux survie */}
-            <Link to={`/dashboard/projet/${selectedProjectId}/monitoring`} className="dashboard-stat-card" style={{ textDecoration: "none", color: "inherit", transition: "transform 0.15s ease" }} onMouseOver={e => e.currentTarget.style.transform = "translateY(-3px)"} onMouseOut={e => e.currentTarget.style.transform = "none"}>
+            <Link to={`/dashboard/projet/${selectedProjectId}/monitoring`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit" }}>
               <div className="dashboard-stat-icon" style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b" }}><TrendingUp size={18} /></div>
               <div>
                 <p>Taux de survie</p>

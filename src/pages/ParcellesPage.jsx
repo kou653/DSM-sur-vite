@@ -233,8 +233,7 @@ function ParcellesPage() {
           textAlign: "center",
           borderRadius: "var(--radius-md)",
           boxShadow: "var(--shadow-sm)"
-        }} 
-        className="hover-card-effect">
+        }}>
           <p style={{ margin: "0 0 0.5rem 0", color: "var(--muted-text)", fontWeight: "600", fontSize: "1.05rem" }}>Total parcelles</p>
           <h3 style={{ margin: 0, fontSize: "1.6rem", fontWeight: "700", color: "var(--text)" }}>{parcelles.length}</h3>
         </article>
@@ -249,8 +248,7 @@ function ParcellesPage() {
           textAlign: "center",
           borderRadius: "var(--radius-md)",
           boxShadow: "var(--shadow-sm)"
-        }} 
-        className="hover-card-effect">
+        }}>
           <p style={{ margin: "0 0 0.5rem 0", color: "var(--muted-text)", fontWeight: "600", fontSize: "1.05rem" }}>Superficie totale</p>
           <h3 style={{ margin: 0, fontSize: "1.6rem", fontWeight: "700", color: "var(--text)" }}>{totalArea.toFixed(2)} ha</h3>
         </article>
@@ -265,8 +263,7 @@ function ParcellesPage() {
           textAlign: "center",
           borderRadius: "var(--radius-md)",
           boxShadow: "var(--shadow-sm)"
-        }} 
-        className="hover-card-effect">
+        }}>
           <p style={{ margin: "0 0 0.5rem 0", color: "var(--muted-text)", fontWeight: "600", fontSize: "1.05rem" }}>Coopératives</p>
           <h3 style={{ margin: 0, fontSize: "1.6rem", fontWeight: "700", color: "var(--text)" }}>{uniqueCooperativesCount}</h3>
         </article>
