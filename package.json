@@ -13,10 +13,12 @@
     "axios": "^1.14.0",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.7.0",
     "react": "^19.2.4",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.4",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.13.2",
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.5.0"

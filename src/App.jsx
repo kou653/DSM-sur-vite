@@ -11,8 +11,8 @@ import EspecesPage from "./pages/EspecesPage.jsx";
 import EvolutionPage from "./pages/EvolutionPage.jsx";
 import EvolutionDetailsPage from "./pages/EvolutionDetailsPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
-import MenuPlaceholderPage from "./pages/MenuPlaceholderPage.jsx";
 import MonitoringPage from "./pages/MonitoringPage.jsx";
+import MapPage from "./pages/MapPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import ParcellesPage from "./pages/ParcellesPage.jsx";
 import ParcelleDetailsPage from "./pages/ParcelleDetailsPage.jsx";
@@ -43,7 +43,7 @@ function App() {
                 <Route path=":parcelleId" element={<ParcelleDetailsPage />} />
               </Route>
               <Route path="especes" element={<EspecesPage />} />
-              <Route path="carte" element={<MenuPlaceholderPage title="Carte" />} />
+              <Route path="carte" element={<MapPage />} />
               <Route path="cooperatives" element={<CooperativesPage />} />
               <Route path="evolution">
                 <Route index element={<EvolutionPage />} />
