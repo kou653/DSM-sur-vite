@@ -1615,7 +1615,7 @@ textarea {
 .monitoring-filter-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(220px, 280px));
-  gap: 28px;
+  gap: 16px;
   margin-top: 18px;
 }
 
@@ -1671,5 +1671,11 @@ textarea {
 
   .monitoring-chart-shell {
     height: 300px;
+  }
+}
+
+@media (min-width: 961px) {
+  .monitoring-filter-grid {
+    gap: 400px;
   }
 }
