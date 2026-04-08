@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { Link, useParams } from "react-router-dom";
+import {
+  MapContainer,
+  Marker,
+  Polyline,
+  Popup,
+  TileLayer,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
+import { AlertCircle, LocateFixed, Map as MapIcon, Maximize2, Route } from "lucide-react";
 import { getProjetParcelles } from "../api/parcelles";
-import { Map as MapIcon, Sprout, Building2, Maximize2, AlertCircle } from "lucide-react";
 
-// Fix for default Leaflet icons in React
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
@@ -13,16 +19,23 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
-// Custom DivIcon for a premium look
-const createCustomIcon = () => {
-  return new L.DivIcon({
+const createCustomIcon = () =>
+  new L.DivIcon({
     html: `<div class="custom-marker"><div class="marker-pin"></div></div>`,
     className: "custom-div-icon",
     iconSize: [30, 42],
     iconAnchor: [15, 42],
     popupAnchor: [0, -40],
   });
-};
+
+const createUserIcon = () =>
+  new L.DivIcon({
+    html: `<div class="custom-marker custom-marker-user"><div class="marker-pin marker-pin-user"></div></div>`,
+    className: "custom-div-icon",
+    iconSize: [30, 42],
+    iconAnchor: [15, 42],
+    popupAnchor: [0, -40],
+  });
 
 function parseCoordinate(value) {
   if (typeof value === "number") {
@@ -51,11 +64,13 @@ function offsetCoordinate(lat, lng, index, total) {
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
+
   useEffect(() => {
     if (center && center[0] !== 0) {
       map.setView(center, zoom);
     }
   }, [center, zoom, map]);
+
   return null;
 }
 
@@ -65,7 +80,13 @@ function MapPage() {
   const [nonGeolocated, setNonGeolocated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [mapCenter, setMapCenter] = useState([5.30966, -4.01266]); // Default center (Abidjan region)
+  const [locationError, setLocationError] = useState("");
+  const [isLocating, setIsLocating] = useState(false);
+  const [isRouting, setIsRouting] = useState(false);
+  const [userPosition, setUserPosition] = useState(null);
+  const [selectedRouteTargetId, setSelectedRouteTargetId] = useState(null);
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const [mapCenter, setMapCenter] = useState([5.30966, -4.01266]);
   const [zoom, setZoom] = useState(10);
 
   const displayedParcelles = useMemo(() => {
@@ -111,29 +132,37 @@ function MapPage() {
         setLoading(true);
         const response = await getProjetParcelles(projectId);
         const allParcelles = response.data.parcelles || [];
-        
-        // Filter parcels with actual coordinates
-        const withCoords = allParcelles.filter(p => 
-          p.lat && p.lng && 
-          parseCoordinate(p.lat) !== 0 && 
-          parseCoordinate(p.lng) !== 0
-        );
-        
+
+        const withCoords = allParcelles.filter((parcelle) => {
+          const lat = parseCoordinate(parcelle.lat);
+          const lng = parseCoordinate(parcelle.lng);
+
+          return (
+            !Number.isNaN(lat) &&
+            !Number.isNaN(lng) &&
+            lat !== 0 &&
+            lng !== 0
+          );
+        });
+
         setParcelles(withCoords);
-        setNonGeolocated(allParcelles.filter(p => !withCoords.find(wc => wc.id === p.id)));
+        setNonGeolocated(
+          allParcelles.filter(
+            (parcelle) => !withCoords.some((withCoord) => withCoord.id === parcelle.id)
+          )
+        );
 
         if (withCoords.length > 0) {
-          // Calculate center based on geolocated parcels only
-          const lats = withCoords.map((p) => parseCoordinate(p.lat));
-          const lngs = withCoords.map((p) => parseCoordinate(p.lng));
-          const avgLat = lats.reduce((a, b) => a + b, 0) / lats.length;
-          const avgLng = lngs.reduce((a, b) => a + b, 0) / lngs.length;
+          const lats = withCoords.map((parcelle) => parseCoordinate(parcelle.lat));
+          const lngs = withCoords.map((parcelle) => parseCoordinate(parcelle.lng));
+          const avgLat = lats.reduce((sum, value) => sum + value, 0) / lats.length;
+          const avgLng = lngs.reduce((sum, value) => sum + value, 0) / lngs.length;
           setMapCenter([avgLat, avgLng]);
           setZoom(13);
         }
-      } catch (err) {
-        console.error("Error fetching map data:", err);
-        setError("Impossible de charger les données cartographiques.");
+      } catch (fetchError) {
+        console.error("Error fetching map data:", fetchError);
+        setError("Impossible de charger les donnees cartographiques.");
       } finally {
         setLoading(false);
       }
@@ -141,6 +170,90 @@ function MapPage() {
 
     fetchParcelles();
   }, [projectId]);
+
+  async function getCurrentPosition() {
+    if (!navigator.geolocation) {
+      throw new Error("La geolocalisation n'est pas prise en charge par ce navigateur.");
+    }
+
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve([position.coords.latitude, position.coords.longitude]),
+        () => reject(new Error("Impossible de recuperer votre position actuelle.")),
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000,
+        }
+      );
+    });
+  }
+
+  async function locateUser() {
+    setIsLocating(true);
+    setLocationError("");
+
+    try {
+      const nextPosition = await getCurrentPosition();
+      setUserPosition(nextPosition);
+      setMapCenter(nextPosition);
+      setZoom(15);
+    } catch (locateError) {
+      setLocationError(locateError.message);
+    } finally {
+      setIsLocating(false);
+    }
+  }
+
+  async function buildRoute(parcelle) {
+    setIsRouting(true);
+    setLocationError("");
+
+    try {
+      const origin = userPosition ?? (await getCurrentPosition());
+      const destination = [parseCoordinate(parcelle.lat), parseCoordinate(parcelle.lng)];
+
+      if (destination.some((value) => Number.isNaN(value))) {
+        throw new Error("Les coordonnees de cette parcelle sont invalides.");
+      }
+
+      if (!userPosition) {
+        setUserPosition(origin);
+      }
+
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${origin[1]},${origin[0]};${destination[1]},${destination[0]}?overview=full&geometries=geojson`
+      );
+
+      if (!response.ok) {
+        throw new Error("Impossible de calculer l'itineraire pour le moment.");
+      }
+
+      const data = await response.json();
+      const coordinates =
+        data.routes?.[0]?.geometry?.coordinates?.map(([lng, lat]) => [lat, lng]) ?? [];
+
+      if (coordinates.length === 0) {
+        throw new Error("Aucun itineraire routier n'a ete trouve.");
+      }
+
+      setSelectedRouteTargetId(parcelle.id);
+      setRouteCoordinates(coordinates);
+      setMapCenter(destination);
+      setZoom(14);
+    } catch (routeError) {
+      setLocationError(routeError.message);
+      setSelectedRouteTargetId(null);
+      setRouteCoordinates([]);
+    } finally {
+      setIsRouting(false);
+    }
+  }
+
+  function clearRoute() {
+    setSelectedRouteTargetId(null);
+    setRouteCoordinates([]);
+  }
 
   if (loading) {
     return (
@@ -168,42 +281,93 @@ function MapPage() {
     <div className="map-page-container">
       <div className="dashboard-overview-header">
         <div>
-          <h1>Géolocalisation des Parcelles</h1>
+          <h1>Geolocalisation des Parcelles</h1>
           <p>
-            {parcelles.length} parcelle(s) géolocalisée(s)
-            {nonGeolocated.length > 0 && ` • ${nonGeolocated.length} en attente de coordonnées`}
+            {parcelles.length} parcelle(s) geolocalisee(s)
+            {nonGeolocated.length > 0 ? ` • ${nonGeolocated.length} en attente de coordonnees` : ""}
           </p>
+        </div>
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="dashboard-add-button"
+            onClick={locateUser}
+            disabled={isLocating}
+          >
+            <LocateFixed size={14} />
+            {isLocating ? "Localisation..." : "Ma position"}
+          </button>
+          {routeCoordinates.length > 0 ? (
+            <button type="button" className="secondary-action" onClick={clearRoute}>
+              Effacer l'itineraire
+            </button>
+          ) : null}
         </div>
       </div>
 
-      {nonGeolocated.length > 0 && (
-        <div className="panel panel-inline" style={{ background: 'var(--accent-soft)', borderColor: 'var(--accent)', marginBottom: '1rem', width: '100%', maxWidth: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--accent-strong)' }}>
+      {locationError ? <p className="form-error">{locationError}</p> : null}
+
+      {nonGeolocated.length > 0 ? (
+        <div
+          className="panel panel-inline"
+          style={{
+            background: "var(--accent-soft)",
+            borderColor: "var(--accent)",
+            marginBottom: "1rem",
+            width: "100%",
+            maxWidth: "none",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              color: "var(--accent-strong)",
+            }}
+          >
             <AlertCircle size={20} />
             <div>
-              <p style={{ margin: 0, fontWeight: '700' }}>Attention : Certaines parcelles n'ont pas encore de coordonnées GPS.</p>
-              <p style={{ margin: '4px 0 0', fontSize: '0.9rem' }}>
-                Les parcelles suivantes ne sont pas affichées sur la carte : 
-                <strong> {nonGeolocated.map(p => p.nom).join(', ')}</strong>.
-                Rendez-vous dans l'onglet <Link to={`/dashboard/projet/${projectId}/parcelles`} style={{ textDecoration: 'underline', color: 'inherit' }}>Parcelles</Link> pour les mettre à jour.
+              <p style={{ margin: 0, fontWeight: "700" }}>
+                Certaines parcelles n'ont pas encore de coordonnees GPS.
+              </p>
+              <p style={{ margin: "4px 0 0", fontSize: "0.9rem" }}>
+                Non affichees sur la carte :
+                <strong> {nonGeolocated.map((parcelle) => parcelle.nom).join(", ")}</strong>.
+                Mettre a jour dans{" "}
+                <Link
+                  to={`/dashboard/projet/${projectId}/parcelles`}
+                  style={{ textDecoration: "underline", color: "inherit" }}
+                >
+                  Parcelles
+                </Link>
+                .
               </p>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       <div className="map-card">
-        <MapContainer
-          center={mapCenter}
-          zoom={zoom}
-          scrollWheelZoom={true}
-          className="leaflet-container"
-        >
+        <MapContainer center={mapCenter} zoom={zoom} scrollWheelZoom className="leaflet-container">
           <ChangeView center={mapCenter} zoom={zoom} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          {userPosition ? (
+            <Marker position={userPosition} icon={createUserIcon()}>
+              <Popup>
+                <strong>Votre position actuelle</strong>
+              </Popup>
+            </Marker>
+          ) : null}
+          {routeCoordinates.length > 0 ? (
+            <Polyline
+              positions={routeCoordinates}
+              pathOptions={{ color: "#1d4ed8", weight: 5, opacity: 0.85 }}
+            />
+          ) : null}
           {displayedParcelles.map((parcelle) => (
             <Marker
               key={parcelle.id}
@@ -220,7 +384,7 @@ function MapPage() {
                     <span>{parcelle.ville}</span>
                   </div>
                   <div className="map-popup-row">
-                    <span>Coopérative</span>
+                    <span>Cooperative</span>
                     <span>{parcelle.cooperative?.nom || "N/A"}</span>
                   </div>
                   <div className="map-popup-row">
@@ -233,16 +397,45 @@ function MapPage() {
                   </div>
                   <div className="map-popup-row">
                     <span>Progression</span>
-                    <span>{parcelle.plants_count || 0} / {parcelle.objectif || 0}</span>
+                    <span>
+                      {parcelle.plants_count || 0} / {parcelle.objectif || 0}
+                    </span>
                   </div>
                 </div>
                 <Link
                   to={`/dashboard/projet/${projectId}/parcelles/${parcelle.id}`}
                   className="map-popup-link"
                 >
-                  <Maximize2 size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
-                  Voir la fiche détaillée
+                  <Maximize2
+                    size={14}
+                    style={{ display: "inline", marginRight: "4px", verticalAlign: "middle" }}
+                  />
+                  Voir la fiche detaillee
                 </Link>
+                <button
+                  type="button"
+                  className="map-popup-link"
+                  style={{
+                    width: "100%",
+                    border: 0,
+                    borderTop: "1px solid #eee",
+                    background:
+                      selectedRouteTargetId === parcelle.id ? "#eef4ff" : "transparent",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => buildRoute(parcelle)}
+                  disabled={isRouting}
+                >
+                  <Route
+                    size={14}
+                    style={{ display: "inline", marginRight: "4px", verticalAlign: "middle" }}
+                  />
+                  {selectedRouteTargetId === parcelle.id && routeCoordinates.length > 0
+                    ? "Itineraire affiche"
+                    : isRouting
+                      ? "Calcul..."
+                      : "Itineraire jusqu'ici"}
+                </button>
               </Popup>
             </Marker>
           ))}
