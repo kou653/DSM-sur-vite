@@ -1441,6 +1441,7 @@ textarea {
   transform: translateY(-5px);
   box-shadow: 0 12px 24px rgba(20, 150, 85, 0.1);
 }
+
 /* Map Styles */
 .map-page-container {
   display: flex;
@@ -1468,6 +1469,7 @@ textarea {
 }
 
 @media (max-width: 960px) {
+
   .map-card,
   .leaflet-container {
     height: 420px;
@@ -1496,7 +1498,7 @@ textarea {
   top: 50%;
   margin: -15px 0 0 -15px;
   border: 2px solid #fff;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .marker-pin-user {
@@ -1519,7 +1521,7 @@ textarea {
   border-radius: 12px;
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .leaflet-popup-content {
@@ -1612,8 +1614,8 @@ textarea {
 
 .monitoring-filter-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(2, minmax(220px, 280px));
+  gap: 28px;
   margin-top: 18px;
 }
 
@@ -1661,6 +1663,7 @@ textarea {
 }
 
 @media (max-width: 960px) {
+
   .monitoring-filter-grid,
   .monitoring-stats-grid {
     grid-template-columns: 1fr;
