@@ -1,7 +1,7 @@
-import { Activity, ArrowLeft, Building2, Check, CheckCircle2, ChevronRight, Crosshair, MapPinned, Pencil, Plus, Target, X, ZoomIn } from "lucide-react";
+import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronRight, Crosshair, MapPinned, Plus, Target, X, ZoomIn } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getParcelle, updateParcelle } from "../api/parcelles.js";
+import { getParcelle } from "../api/parcelles.js";
 import { createPlant, getParcellePlants, updatePlantStatus } from "../api/plants.js";
 import { getEspeces } from "../api/referentiels.js";
 import { useAuth } from "../contexts/auth-context.js";
@@ -21,10 +21,6 @@ function ParcelleDetailsPage() {
 
   // Reference data
   const [especes, setEspeces] = useState([]);
-
-  // Edit Objectif
-  const [isEditingObjective, setIsEditingObjective] = useState(false);
-  const [tempObjectifAtteint, setTempObjectifAtteint] = useState("");
 
   // Plants Form
   const [isPlantFormOpen, setIsPlantFormOpen] = useState(false);
@@ -56,7 +52,6 @@ function ParcelleDetailsPage() {
 
       const parcelleData = parcelleRes.data.parcelle || parcelleRes.data;
       setParcelle(parcelleData);
-      setTempObjectifAtteint(parcelleData.objectif_atteint || 0);
 
       const rawEspeces = Array.isArray(especesRes.data)
         ? especesRes.data
@@ -99,16 +94,6 @@ function ParcelleDetailsPage() {
     }
   };
 
-  async function handleSaveObjective() {
-    try {
-      await updateParcelle(parcelleId, { objectif_atteint: Number(tempObjectifAtteint) });
-      setIsEditingObjective(false);
-      setParcelle(prev => ({ ...prev, objectif_atteint: Number(tempObjectifAtteint) }));
-    } catch (e) {
-      alert("Erreur lors de la mise à jour de l'objectif.");
-    }
-  }
-
   function handlePlantInputChange(e) {
     const { name, value } = e.target;
     setPlantFormState(cur => ({ ...cur, [name]: value }));
@@ -128,6 +113,7 @@ function ParcelleDetailsPage() {
         lat: Number(plantFormState.lat),
         lng: Number(plantFormState.lng)
       });
+      await fetchData();
       await refreshPlants();
       setIsPlantFormOpen(false);
       setPlantFormState({
@@ -189,31 +175,8 @@ function ParcelleDetailsPage() {
             <p className="eyebrow" style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}><Target size={16} /> Objectif de la parcelle</p>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem" }}>
-            {isEditingObjective ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <input
-                  type="number"
-                  min="0"
-                  value={tempObjectifAtteint}
-                  onChange={(e) => setTempObjectifAtteint(e.target.value)}
-                  style={{ width: "100px", padding: "0.5rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--primary)" }}
-                  autoFocus
-                />
-                <span style={{ fontSize: "1.5rem", fontWeight: "600", color: "var(--muted-text)" }}>/ {objectifCible}</span>
-                <button onClick={handleSaveObjective} className="primary-action" style={{ padding: "0.5rem" }} title="Enregistrer"><Check size={16} /></button>
-                <button onClick={() => setIsEditingObjective(false)} className="secondary-action" style={{ padding: "0.5rem" }} title="Annuler"><X size={16} /></button>
-              </div>
-            ) : (
-              <>
-                <h2 style={{ fontSize: "2.5rem", margin: 0, color: "var(--text)" }}>{objectifAtteint}</h2>
-                <span style={{ fontSize: "1.5rem", fontWeight: "600", color: "var(--muted-text)" }}>/ {objectifCible}</span>
-                {canManage && (
-                  <button onClick={() => setIsEditingObjective(true)} className="secondary-action users-icon-button" style={{ marginLeft: "1rem" }} title="Mettre à jour l'objectif atteint">
-                    <Pencil size={15} />
-                  </button>
-                )}
-              </>
-            )}
+            <h2 style={{ fontSize: "2.5rem", margin: 0, color: "var(--text)" }}>{objectifAtteint}</h2>
+            <span style={{ fontSize: "1.5rem", fontWeight: "600", color: "var(--muted-text)" }}>/ {objectifCible}</span>
           </div>
         </article>
 
