@@ -37,6 +37,12 @@ const createUserIcon = () =>
     popupAnchor: [0, -40],
   });
 
+const COTE_DIVOIRE_CENTER = [7.54, -5.55];
+const COTE_DIVOIRE_BOUNDS = [
+  [4.2, -8.7],
+  [10.8, -2.3],
+];
+
 function parseCoordinate(value) {
   if (typeof value === "number") {
     return Number.isFinite(value) ? value : NaN;
@@ -86,8 +92,8 @@ function MapPage() {
   const [userPosition, setUserPosition] = useState(null);
   const [routeTarget, setRouteTarget] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
-  const [mapCenter, setMapCenter] = useState([5.30966, -4.01266]);
-  const [zoom, setZoom] = useState(10);
+  const [mapCenter, setMapCenter] = useState(COTE_DIVOIRE_CENTER);
+  const [zoom, setZoom] = useState(7);
   const watchIdRef = useRef(null);
   const routeDebounceRef = useRef(null);
 
@@ -419,7 +425,16 @@ function MapPage() {
       ) : null}
 
       <div className="map-card">
-        <MapContainer center={mapCenter} zoom={zoom} scrollWheelZoom className="leaflet-container">
+        <MapContainer
+          center={mapCenter}
+          zoom={zoom}
+          scrollWheelZoom
+          className="leaflet-container"
+          maxBounds={COTE_DIVOIRE_BOUNDS}
+          maxBoundsViscosity={1}
+          minZoom={7}
+          maxZoom={18}
+        >
           <ChangeView center={mapCenter} zoom={zoom} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
