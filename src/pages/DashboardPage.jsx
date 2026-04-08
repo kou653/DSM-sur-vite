@@ -240,7 +240,7 @@ function DashboardPage() {
           Évolution des objectifs par parcelle
         </h2>
         
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "1.5rem", marginBottom: "1.5rem" }}>
+        <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", marginBottom: "1.5rem" }}>
           <div style={{ height: "350px", width: "100%" }}>
             <Bar data={barChartData} options={barChartOptions} />
           </div>
@@ -249,7 +249,7 @@ function DashboardPage() {
         {/* Petits blocs textuels (Parcelle: Cible vs Actuel) */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "1rem" }}>
           {parcelles.map(p => (
-            <div key={p.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", padding: "1rem", borderLeft: "4px solid var(--primary)" }}>
+            <div key={p.id} style={{ background: "#ffffff", borderRadius: "var(--radius-md)", padding: "1rem", borderLeft: "4px solid var(--primary)" }}>
               <h4 style={{ margin: "0 0 0.5rem 0", color: "var(--text)" }}>{p.nom}</h4>
               <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: "0.95rem" }}>
                  <strong title="Actuellement mis en terre" style={{ color: "var(--primary)" }}>{p.plants_count || 0}</strong>
@@ -264,7 +264,7 @@ function DashboardPage() {
       {/* 4. Section Circulaire & Liste des superficies */}
       <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "3rem" }}>
          {/* Pie Chart */}
-         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "1.5rem" }}>
+         <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem" }}>
            <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.1rem" }}>Etat global écologique des plants</h3>
            <div style={{ height: "250px", width: "100%", display: "flex", justifyContent: "center" }}>
              <Pie data={pieChartData} options={pieChartOptions} />
@@ -272,7 +272,7 @@ function DashboardPage() {
          </div>
 
          {/* Liste Parcelles + Superficies */}
-         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "1.5rem", overflowY: "auto", maxHeight: "330px" }}>
+         <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", overflowY: "auto", maxHeight: "330px" }}>
            <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.1rem" }}>Répartition topographique</h3>
            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
              {parcelles.map(p => (
@@ -305,7 +305,7 @@ function DashboardPage() {
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
            {cooperatives.map(coop => (
-             <article key={coop.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "1.5rem" }}>
+             <article key={coop.id} style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem" }}>
                 <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.2rem", color: "var(--text)" }}>{coop.nom}</h3>
                 <p style={{ margin: "0 0 1rem 0", color: "var(--primary)", fontWeight: "500" }}>{coop.entreprise || "-"}</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.95rem" }}>
