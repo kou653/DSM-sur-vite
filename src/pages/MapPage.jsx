@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   MapContainer,
@@ -84,10 +84,12 @@ function MapPage() {
   const [isLocating, setIsLocating] = useState(false);
   const [isRouting, setIsRouting] = useState(false);
   const [userPosition, setUserPosition] = useState(null);
-  const [selectedRouteTargetId, setSelectedRouteTargetId] = useState(null);
+  const [routeTarget, setRouteTarget] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [mapCenter, setMapCenter] = useState([5.30966, -4.01266]);
   const [zoom, setZoom] = useState(10);
+  const watchIdRef = useRef(null);
+  const routeDebounceRef = useRef(null);
 
   const displayedParcelles = useMemo(() => {
     const groups = new Map();
@@ -171,6 +173,19 @@ function MapPage() {
     fetchParcelles();
   }, [projectId]);
 
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+
+      if (routeDebounceRef.current) {
+        clearTimeout(routeDebounceRef.current);
+      }
+    };
+  }, []);
+
   async function getCurrentPosition() {
     if (!navigator.geolocation) {
       throw new Error("La geolocalisation n'est pas prise en charge par ce navigateur.");
@@ -189,6 +204,46 @@ function MapPage() {
     });
   }
 
+  function startWatchingUserPosition() {
+    if (!navigator.geolocation || watchIdRef.current !== null) {
+      return;
+    }
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (position) => {
+        setUserPosition([position.coords.latitude, position.coords.longitude]);
+      },
+      () => {
+        setLocationError("Le suivi de position en temps reel a echoue.");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 5000,
+      }
+    );
+  }
+
+  async function fetchRoute(origin, destination) {
+    const response = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/${origin[1]},${origin[0]};${destination[1]},${destination[0]}?overview=full&geometries=geojson`
+    );
+
+    if (!response.ok) {
+      throw new Error("Impossible de calculer l'itineraire pour le moment.");
+    }
+
+    const data = await response.json();
+    const coordinates =
+      data.routes?.[0]?.geometry?.coordinates?.map(([lng, lat]) => [lat, lng]) ?? [];
+
+    if (coordinates.length === 0) {
+      throw new Error("Aucun itineraire routier n'a ete trouve.");
+    }
+
+    setRouteCoordinates(coordinates);
+  }
+
   async function locateUser() {
     setIsLocating(true);
     setLocationError("");
@@ -198,6 +253,7 @@ function MapPage() {
       setUserPosition(nextPosition);
       setMapCenter(nextPosition);
       setZoom(15);
+      startWatchingUserPosition();
     } catch (locateError) {
       setLocationError(locateError.message);
     } finally {
@@ -206,11 +262,9 @@ function MapPage() {
   }
 
   async function buildRoute(parcelle) {
-    setIsRouting(true);
     setLocationError("");
 
     try {
-      const origin = userPosition ?? (await getCurrentPosition());
       const destination = [parseCoordinate(parcelle.lat), parseCoordinate(parcelle.lng)];
 
       if (destination.some((value) => Number.isNaN(value))) {
@@ -218,42 +272,58 @@ function MapPage() {
       }
 
       if (!userPosition) {
+        const origin = await getCurrentPosition();
         setUserPosition(origin);
+        setMapCenter(origin);
       }
 
-      const response = await fetch(
-        `https://router.project-osrm.org/route/v1/driving/${origin[1]},${origin[0]};${destination[1]},${destination[0]}?overview=full&geometries=geojson`
-      );
-
-      if (!response.ok) {
-        throw new Error("Impossible de calculer l'itineraire pour le moment.");
-      }
-
-      const data = await response.json();
-      const coordinates =
-        data.routes?.[0]?.geometry?.coordinates?.map(([lng, lat]) => [lat, lng]) ?? [];
-
-      if (coordinates.length === 0) {
-        throw new Error("Aucun itineraire routier n'a ete trouve.");
-      }
-
-      setSelectedRouteTargetId(parcelle.id);
-      setRouteCoordinates(coordinates);
+      setRouteTarget({
+        id: parcelle.id,
+        lat: destination[0],
+        lng: destination[1],
+      });
       setMapCenter(destination);
       setZoom(14);
+      startWatchingUserPosition();
     } catch (routeError) {
       setLocationError(routeError.message);
-      setSelectedRouteTargetId(null);
+      setRouteTarget(null);
       setRouteCoordinates([]);
-    } finally {
-      setIsRouting(false);
     }
   }
 
   function clearRoute() {
-    setSelectedRouteTargetId(null);
+    setRouteTarget(null);
     setRouteCoordinates([]);
   }
+
+  useEffect(() => {
+    if (!routeTarget || !userPosition) {
+      return;
+    }
+
+    if (routeDebounceRef.current) {
+      clearTimeout(routeDebounceRef.current);
+    }
+
+    routeDebounceRef.current = setTimeout(async () => {
+      setIsRouting(true);
+
+      try {
+        await fetchRoute(userPosition, [routeTarget.lat, routeTarget.lng]);
+      } catch (routeError) {
+        setLocationError(routeError.message);
+      } finally {
+        setIsRouting(false);
+      }
+    }, 800);
+
+    return () => {
+      if (routeDebounceRef.current) {
+        clearTimeout(routeDebounceRef.current);
+      }
+    };
+  }, [routeTarget, userPosition]);
 
   if (loading) {
     return (
@@ -420,7 +490,7 @@ function MapPage() {
                     border: 0,
                     borderTop: "1px solid #eee",
                     background:
-                      selectedRouteTargetId === parcelle.id ? "#eef4ff" : "transparent",
+                      routeTarget?.id === parcelle.id ? "#eef4ff" : "transparent",
                     cursor: "pointer",
                   }}
                   onClick={() => buildRoute(parcelle)}
@@ -430,7 +500,7 @@ function MapPage() {
                     size={14}
                     style={{ display: "inline", marginRight: "4px", verticalAlign: "middle" }}
                   />
-                  {selectedRouteTargetId === parcelle.id && routeCoordinates.length > 0
+                  {routeTarget?.id === parcelle.id && routeCoordinates.length > 0
                     ? "Itineraire affiche"
                     : isRouting
                       ? "Calcul..."
