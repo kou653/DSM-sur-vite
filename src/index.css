@@ -64,7 +64,7 @@ textarea {
 
 .dashboard-shell {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 260px minmax(0, 1fr);
   min-height: 100vh;
   background: #f8fbf8;
   transition: grid-template-columns 0.22s ease;
@@ -1361,7 +1361,7 @@ textarea {
     left: 0;
     bottom: 0;
     z-index: 20;
-    width: 240px;
+    width: 260px;
     gap: 14px;
     border-right: 1px solid #dde8df;
     border-bottom: 0;
