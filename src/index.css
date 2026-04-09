@@ -1333,6 +1333,16 @@ textarea {
   font-size: 1.6rem;
 }
 
+.project-create-panel {
+  margin-top: 10px;
+}
+
+.project-create-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
 @media (max-width: 960px) {
   .app-shell {
     padding: 16px;
@@ -1403,6 +1413,10 @@ textarea {
   }
 
   .users-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-create-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1695,6 +1709,6 @@ textarea {
 
 @media (min-width: 961px) {
   .monitoring-filter-grid {
-    gap: 400px;
+    gap: 200px;
   }
 }

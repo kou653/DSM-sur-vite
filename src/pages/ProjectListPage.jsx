@@ -1,16 +1,10 @@
-import { Leaf, MapPinned, Plus, Sprout, Trees } from "lucide-react";
+import { Leaf, MapPinned, Plus, Sprout, Trees, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import JsonCrudSection from "../components/JsonCrudSection.jsx";
 import HeroCard from "../components/HeroCard.jsx";
 import { useAuth } from "../contexts/auth-context.js";
 import { getProjectMonitoring } from "../api/monitoring.js";
-import {
-  createProjet,
-  deleteProjet,
-  getProjets,
-  updateProjet,
-} from "../api/projets.js";
+import { createProjet, getProjets } from "../api/projets.js";
 
 function normalizeProjects(payload) {
   const rawProjects = Array.isArray(payload)
@@ -30,6 +24,18 @@ function normalizeProjects(payload) {
   }));
 }
 
+function buildInitialFormState() {
+  return {
+    nom: "",
+    description: "",
+    date_debut: "",
+    date_fin: "",
+    region: "",
+    objectif: "",
+    status: "actif",
+  };
+}
+
 function ProjectListPage() {
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
@@ -38,6 +44,11 @@ function ProjectListPage() {
     averageSurvivalRate: 0,
   });
   const [errorMessage, setErrorMessage] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formState, setFormState] = useState(buildInitialFormState());
   const { role, accessibleProjectIds, selectedProjectId, setSelectedProjectId } =
     useAuth();
 
@@ -137,6 +148,60 @@ function ProjectListPage() {
     ];
   }, [metrics.averageSurvivalRate, metrics.totalPlants, projects]);
 
+  function openCreateForm() {
+    setActionError("");
+    setSuccessMessage("");
+    setFormState(buildInitialFormState());
+    setIsCreateFormOpen(true);
+  }
+
+  function closeCreateForm() {
+    setActionError("");
+    setFormState(buildInitialFormState());
+    setIsCreateFormOpen(false);
+  }
+
+  function handleInputChange(event) {
+    const { name, value } = event.target;
+    setFormState((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
+
+  async function handleCreateProject(event) {
+    event.preventDefault();
+    setSubmitting(true);
+    setActionError("");
+    setSuccessMessage("");
+
+    const payload = {
+      nom: formState.nom.trim(),
+      description: formState.description.trim(),
+      date_debut: formState.date_debut,
+      date_fin: formState.date_fin,
+      region: formState.region.trim(),
+      status: formState.status,
+    };
+
+    if (formState.objectif !== "") {
+      payload.objectif = Number(formState.objectif);
+    }
+
+    try {
+      await createProjet(payload);
+      await fetchProjects();
+      closeCreateForm();
+      setSuccessMessage("Projet cree avec succes.");
+    } catch (error) {
+      setActionError(
+        error.response?.data?.message || "Impossible de creer ce projet."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <section className="dashboard-overview">
       <div className="dashboard-overview-header">
@@ -146,7 +211,11 @@ function ProjectListPage() {
         </div>
 
         {role === "administrateur" ? (
-          <button type="button" className="dashboard-add-button">
+          <button
+            type="button"
+            className="dashboard-add-button"
+            onClick={openCreateForm}
+          >
             <Plus size={14} strokeWidth={2.4} />
             Ajouter un projet
           </button>
@@ -154,6 +223,129 @@ function ProjectListPage() {
       </div>
 
       {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
+      {actionError ? <p className="form-error">{actionError}</p> : null}
+      {successMessage ? <p className="evolution-success">{successMessage}</p> : null}
+
+      {isCreateFormOpen ? (
+        <section className="users-form-panel project-create-panel">
+          <div className="users-form-header">
+            <div>
+              <p className="eyebrow">Creation</p>
+              <h2>Creer un nouveau projet</h2>
+            </div>
+
+            <button
+              type="button"
+              className="secondary-action"
+              onClick={closeCreateForm}
+            >
+              <X size={16} strokeWidth={2} />
+              Fermer
+            </button>
+          </div>
+
+          <form className="users-form" onSubmit={handleCreateProject}>
+            <div className="project-create-grid">
+              <label className="filter-field">
+                <span>Nom du projet</span>
+                <input
+                  type="text"
+                  name="nom"
+                  value={formState.nom}
+                  onChange={handleInputChange}
+                  required
+                />
+              </label>
+
+              <label className="filter-field">
+                <span>Region</span>
+                <input
+                  type="text"
+                  name="region"
+                  value={formState.region}
+                  onChange={handleInputChange}
+                  required
+                />
+              </label>
+            </div>
+
+            <label className="filter-field">
+              <span>Description</span>
+              <textarea
+                name="description"
+                value={formState.description}
+                onChange={handleInputChange}
+                rows={4}
+                required
+              />
+            </label>
+
+            <div className="project-create-grid">
+              <label className="filter-field">
+                <span>Date de debut</span>
+                <input
+                  type="date"
+                  name="date_debut"
+                  value={formState.date_debut}
+                  onChange={handleInputChange}
+                  required
+                />
+              </label>
+
+              <label className="filter-field">
+                <span>Date de fin</span>
+                <input
+                  type="date"
+                  name="date_fin"
+                  value={formState.date_fin}
+                  onChange={handleInputChange}
+                  required
+                />
+              </label>
+            </div>
+
+            <div className="project-create-grid">
+              <label className="filter-field">
+                <span>Objectif global</span>
+                <input
+                  type="number"
+                  min="1"
+                  name="objectif"
+                  value={formState.objectif}
+                  onChange={handleInputChange}
+                  placeholder="Optionnel"
+                />
+              </label>
+
+              <label className="filter-field">
+                <span>Statut</span>
+                <select
+                  name="status"
+                  value={formState.status}
+                  onChange={handleInputChange}
+                >
+                  <option value="actif">Actif</option>
+                  <option value="en_pause">En pause</option>
+                  <option value="termine">Termine</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="crud-actions">
+              <button type="submit" className="primary-action" disabled={submitting}>
+                {submitting ? "Creation..." : "Creer le projet"}
+              </button>
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={closeCreateForm}
+              >
+                Annuler
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
 
       <HeroCard />
 
@@ -248,28 +440,6 @@ function ProjectListPage() {
           </section>
         ) : null}
       </section>
-
-      <JsonCrudSection
-        title="Projets"
-        records={projects}
-        loading={loadingProjects}
-        errorMessage={errorMessage}
-        onRefresh={fetchProjects}
-        onCreate={createProjet}
-        onUpdate={updateProjet}
-        onDelete={deleteProjet}
-        createTemplate={{
-          nom: "",
-          description: "",
-          date_debut: "",
-          date_fin: "",
-          region: "",
-          objectif: "",
-          status: "actif",
-        }}
-        canManage={role === "administrateur"}
-        getRecordLabel={(record) => record.name}
-      />
     </section>
   );
 }
