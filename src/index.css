@@ -553,6 +553,7 @@ textarea {
 .dashboard-overview {
   display: grid;
   gap: 10px;
+  margin: 14px;
 }
 
 .dashboard-overview-header {
