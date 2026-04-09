@@ -196,6 +196,15 @@ function DashboardLayout() {
         </div>
       </aside>
 
+      {isSidebarOpen ? (
+        <button
+          type="button"
+          className="dashboard-sidebar-backdrop"
+          aria-label="Fermer le menu"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      ) : null}
+
       <div className="dashboard-body">
         <header className="dashboard-topbar">
           <button
