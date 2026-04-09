@@ -704,6 +704,10 @@ textarea {
   background: #ffffff;
 }
 
+.project-card-clickable {
+  cursor: pointer;
+}
+
 .dashboard-project-card-top {
   display: grid;
   grid-template-columns: 1fr auto;

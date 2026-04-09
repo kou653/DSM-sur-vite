@@ -1,6 +1,6 @@
 import { Leaf, MapPinned, Plus, Sprout, Trash2, Trees, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import HeroCard from "../components/HeroCard.jsx";
 import { useAuth } from "../contexts/auth-context.js";
 import { getProjectMonitoring } from "../api/monitoring.js";
@@ -39,6 +39,7 @@ function buildInitialFormState() {
 }
 
 function ProjectListPage() {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [metrics, setMetrics] = useState({
@@ -434,10 +435,20 @@ function ProjectListPage() {
           {projects.map((project) => {
             const canOpen =
               role === "administrateur" || accessibleProjectIds.includes(project.id);
-            const isSelected = selectedProjectId === project.id;
 
             return (
-              <article key={project.id} className="dashboard-project-card">
+              <article
+                key={project.id}
+                className={canOpen ? "dashboard-project-card hover-card-effect project-card-clickable" : "dashboard-project-card"}
+                onClick={() => {
+                  if (!canOpen) {
+                    return;
+                  }
+
+                  setSelectedProjectId(project.id);
+                  navigate(`/dashboard/projet/${project.id}`);
+                }}
+              >
                 <div className="dashboard-project-card-top">
                   <div className="dashboard-project-heading">
                     <h3>{project.name}</h3>
@@ -447,7 +458,10 @@ function ProjectListPage() {
                     <button
                       type="button"
                       className="project-card-delete-button"
-                      onClick={() => handleDeleteProject(project)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDeleteProject(project);
+                      }}
                       disabled={submitting}
                       title="Supprimer le projet"
                     >
@@ -478,18 +492,9 @@ function ProjectListPage() {
                     <span>Taux de survie</span>
                   </div>
                 </div>
-
-                {canOpen ? (
-                  <Link
-                    className="dashboard-project-link"
-                    to={`/dashboard/projet/${project.id}`}
-                    onClick={() => setSelectedProjectId(project.id)}
-                  >
-                    {isSelected ? "Ouvrir le projet actif" : "Ouvrir le projet"}
-                  </Link>
-                ) : (
+                {!canOpen ? (
                   <span className="project-disabled-link">Acces non autorise</span>
-                )}
+                ) : null}
               </article>
             );
           })}
