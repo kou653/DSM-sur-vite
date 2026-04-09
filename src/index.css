@@ -1424,6 +1424,25 @@ textarea {
   }
 }
 
+@media (min-width: 961px) {
+  .users-stats-grid {
+    margin-top: -225px;
+  }
+
+  .users-stat-card {
+    height: 100px;
+    min-height: auto;
+    padding-top: 10px;
+    padding-bottom: 8px;
+  }
+
+  .users-stats-grid+.users-table-panel,
+  .users-stats-grid+.users-form-panel,
+  .users-form-panel+.users-table-panel {
+    margin-top: -350px;
+  }
+}
+
 :root {
   --radius-sm: 8px;
   --radius-md: 16px;
