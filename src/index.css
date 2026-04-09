@@ -1030,8 +1030,8 @@ textarea {
 
 .users-page {
   display: grid;
+  align-content: start;
   gap: 6px;
-  min-height: 100%;
   padding: 4px 10px 24px;
   border: 1px solid #d8eadb;
   border-radius: 18px;
@@ -1426,11 +1426,11 @@ textarea {
 
 @media (min-width: 961px) {
   .users-stats-grid {
-    margin-top: -225px;
+    margin-top: 4px;
   }
 
   .users-stat-card {
-    height: 100px;
+    height: 96px;
     min-height: auto;
     padding-top: 10px;
     padding-bottom: 8px;
@@ -1439,7 +1439,7 @@ textarea {
   .users-stats-grid+.users-table-panel,
   .users-stats-grid+.users-form-panel,
   .users-form-panel+.users-table-panel {
-    margin-top: -350px;
+    margin-top: 6px;
   }
 }
 
