@@ -1699,6 +1699,18 @@ textarea {
   margin-top: 18px;
 }
 
+.monitoring-filter-grid select {
+  background: #e9f8ef;
+  color: #000000;
+  border: 1px solid #149655;
+}
+
+.monitoring-filter-grid select:focus {
+  outline: none;
+  border-color: #149655;
+  box-shadow: 0 0 0 3px rgba(20, 150, 85, 0.18);
+}
+
 .monitoring-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
