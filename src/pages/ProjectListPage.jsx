@@ -1,10 +1,10 @@
-import { Leaf, MapPinned, Plus, Sprout, Trees, X } from "lucide-react";
+import { Leaf, MapPinned, Plus, Sprout, Trash2, Trees, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import HeroCard from "../components/HeroCard.jsx";
 import { useAuth } from "../contexts/auth-context.js";
 import { getProjectMonitoring } from "../api/monitoring.js";
-import { createProjet, getProjets } from "../api/projets.js";
+import { createProjet, deleteProjet, getProjets } from "../api/projets.js";
 
 function normalizeProjects(payload) {
   const rawProjects = Array.isArray(payload)
@@ -20,6 +20,8 @@ function normalizeProjects(payload) {
     status: project.status || null,
     region: project.region || null,
     parcellesCount: Number(project.parcelles_count || 0),
+    totalPlants: 0,
+    survivalRate: null,
     raw: project,
   }));
 }
@@ -60,14 +62,13 @@ function ProjectListPage() {
       const { data } = await getProjets();
       const normalizedProjects = normalizeProjects(data);
 
-      setProjects(normalizedProjects);
-
       const monitorableProjects = normalizedProjects.filter(
         (project) =>
           role === "administrateur" || accessibleProjectIds.includes(project.id)
       );
 
       if (monitorableProjects.length === 0) {
+        setProjects(normalizedProjects);
         setMetrics({
           totalPlants: 0,
           averageSurvivalRate: 0,
@@ -79,6 +80,31 @@ function ProjectListPage() {
         monitorableProjects.map((project) =>
           getProjectMonitoring(project.id).catch(() => null)
         )
+      );
+
+      const survivalRateByProjectId = new Map(
+        monitorableProjects.map((project, index) => [
+          project.id,
+          Number(
+            monitoringResponses[index]?.data?.stats_globales?.taux_survie ?? 0
+          ),
+        ])
+      );
+      const totalPlantsByProjectId = new Map(
+        monitorableProjects.map((project, index) => [
+          project.id,
+          Number(
+            monitoringResponses[index]?.data?.stats_globales?.total_plants ?? 0
+          ),
+        ])
+      );
+
+      setProjects(
+        normalizedProjects.map((project) => ({
+          ...project,
+          totalPlants: totalPlantsByProjectId.get(project.id) ?? 0,
+          survivalRate: survivalRateByProjectId.get(project.id) ?? null,
+        }))
       );
 
       const validStats = monitoringResponses
@@ -196,6 +222,32 @@ function ProjectListPage() {
     } catch (error) {
       setActionError(
         error.response?.data?.message || "Impossible de creer ce projet."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleDeleteProject(project) {
+    const confirmed = window.confirm(
+      `Voulez-vous vraiment supprimer le projet ${project.name} ?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setSubmitting(true);
+    setActionError("");
+    setSuccessMessage("");
+
+    try {
+      await deleteProjet(project.id);
+      await fetchProjects();
+      setSuccessMessage("Projet supprime avec succes.");
+    } catch (error) {
+      setActionError(
+        error.response?.data?.message || "Impossible de supprimer ce projet."
       );
     } finally {
       setSubmitting(false);
@@ -387,16 +439,21 @@ function ProjectListPage() {
             return (
               <article key={project.id} className="dashboard-project-card">
                 <div className="dashboard-project-card-top">
-                  <div className="dashboard-project-badge">
-                    <Trees size={13} strokeWidth={2.1} />
-                  </div>
                   <div className="dashboard-project-heading">
                     <h3>{project.name}</h3>
                     <p>{project.region || "Region non renseignee"}</p>
                   </div>
-                  <span className="dashboard-status-pill">
-                    {project.status || "En attente"}
-                  </span>
+                  {role === "administrateur" ? (
+                    <button
+                      type="button"
+                      className="project-card-delete-button"
+                      onClick={() => handleDeleteProject(project)}
+                      disabled={submitting}
+                      title="Supprimer le projet"
+                    >
+                      <Trash2 size={14} strokeWidth={2} />
+                    </button>
+                  ) : null}
                 </div>
 
                 <p className="dashboard-project-description">
@@ -409,12 +466,16 @@ function ProjectListPage() {
                     <span>Parcelles</span>
                   </div>
                   <div>
-                    <strong>{project.code}</strong>
-                    <span>Code projet</span>
+                    <strong>{project.totalPlants}</strong>
+                    <span>Plants</span>
                   </div>
                   <div>
-                    <strong>{project.status || "-"}</strong>
-                    <span>Statut</span>
+                    <strong>
+                      {project.survivalRate !== null
+                        ? `${project.survivalRate.toFixed(1)}%`
+                        : "-"}
+                    </strong>
+                    <span>Taux de survie</span>
                   </div>
                 </div>
 
