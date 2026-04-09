@@ -1759,3 +1759,184 @@ textarea {
     gap: 200px;
   }
 }
+
+/* Unified palette: green + white, black text */
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-alt: #f6fff9;
+  --border: #b9e7cb;
+  --text: #000000;
+  --muted: #000000;
+  --accent: #149655;
+  --accent-soft: #e9f8ef;
+  --accent-strong: #0f7a45;
+  --shadow: 0 16px 40px rgba(20, 150, 85, 0.12);
+}
+
+body,
+.dashboard-shell,
+.users-page,
+.map-card,
+.monitoring-card,
+.users-stat-card,
+.users-form-panel,
+.users-table-panel,
+.cooperatives-summary-card,
+.dashboard-project-card,
+.dashboard-stat-card,
+.project-card,
+.crud-section,
+.metric-card,
+.list-card,
+.insight-card,
+.auth-card,
+.auth-card-login {
+  background: #ffffff;
+  color: #000000;
+}
+
+.users-page,
+.dashboard-overview-header,
+.dashboard-stat-card,
+.dashboard-project-card,
+.users-stat-card,
+.users-form-panel,
+.users-table-panel,
+.cooperatives-summary-card,
+.monitoring-card,
+.monitoring-stat-card,
+.map-card,
+.crud-section,
+.metric-card,
+.list-card,
+.insight-card,
+.project-card,
+.auth-card,
+.auth-card-login {
+  border-color: #b9e7cb;
+  box-shadow: 0 10px 26px rgba(20, 150, 85, 0.1);
+}
+
+.dashboard-topbar,
+.dashboard-sidebar,
+.users-search,
+.filter-field input,
+.filter-field select,
+.filter-field textarea,
+.crud-editor textarea,
+.auth-form input,
+.dashboard-menu-button,
+.dashboard-logout,
+.dashboard-sidebar-close {
+  background: #ffffff;
+  color: #000000;
+  border-color: #b9e7cb;
+}
+
+.dashboard-brand,
+.dashboard-sidebar-title,
+.dashboard-sidebar-link,
+.dashboard-user-name,
+.dashboard-user-role,
+.dashboard-topbar-user,
+.dashboard-overview-header h1,
+.dashboard-overview-header p,
+.users-hero h1,
+.users-hero p,
+.monitoring-header h1,
+.monitoring-header p,
+.monitoring-card-heading h2,
+.monitoring-card-heading p,
+.dashboard-project-heading h3,
+.dashboard-project-heading p,
+.dashboard-project-description,
+.dashboard-project-metrics strong,
+.dashboard-project-metrics span,
+.dashboard-stat-card p,
+.dashboard-stat-card h3,
+.users-stat-card p,
+.users-stat-card h2,
+.users-table th,
+.users-table td,
+.muted-text,
+.panel p,
+.project-card p,
+.page-intro p,
+.list-card h3,
+.metric-card h3,
+.map-popup-body,
+.map-popup-row span:first-child {
+  color: #000000;
+}
+
+.dashboard-brand-mark,
+.dashboard-stat-icon,
+.dashboard-project-badge,
+.users-stat-icon,
+.users-avatar,
+.dashboard-topbar-avatar,
+.dashboard-sidebar-link-active,
+.dashboard-status-pill,
+.users-role-pill,
+.users-role-pill-admin,
+.users-role-pill-agent,
+.users-role-pill-sponsor,
+.map-popup-header,
+.project-disabled-link {
+  background: #e9f8ef;
+  color: #149655;
+}
+
+.dashboard-sidebar-link-active {
+  box-shadow: inset 0 0 0 1px #149655;
+}
+
+.dashboard-add-button,
+.auth-submit,
+.primary-action {
+  background: #149655;
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(20, 150, 85, 0.18);
+}
+
+.secondary-action,
+.danger-action,
+.project-card-delete-button {
+  background: #ffffff;
+  color: #149655;
+  border-color: #149655;
+}
+
+.danger-action:hover,
+.project-card-delete-button:hover:not(:disabled),
+.secondary-action:hover,
+.dashboard-sidebar-link:hover,
+.dashboard-sidebar-close:hover,
+.dashboard-project-link,
+.map-popup-link:hover,
+.hover-card-effect:hover {
+  background: #e9f8ef !important;
+  color: #149655;
+}
+
+.form-error,
+.evolution-success {
+  background: #e9f8ef;
+  color: #000000;
+  border-color: #149655;
+}
+
+.dashboard-sidebar-backdrop {
+  background: rgba(20, 150, 85, 0.12);
+}
+
+.marker-pin,
+.marker-pin-user {
+  background: #149655;
+  box-shadow: 0 4px 12px rgba(20, 150, 85, 0.2);
+}
+
+.marker-pin::after {
+  background: #ffffff;
+}
