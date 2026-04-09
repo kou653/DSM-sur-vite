@@ -42,11 +42,6 @@ function DashboardLayout() {
           icon: Sprout,
         },
         {
-          to: `${projectBasePath}/especes`,
-          label: "Especes",
-          icon: TreePine,
-        },
-        {
           to: `${projectBasePath}/carte`,
           label: "Carte",
           icon: Map,
@@ -109,6 +104,15 @@ function DashboardLayout() {
               label: "Utilisateurs",
               icon: Users,
             },
+            ...(isProjectRoute && projectBasePath
+              ? [
+                {
+                  to: `${projectBasePath}/especes`,
+                  label: "Especes",
+                  icon: TreePine,
+                },
+              ]
+              : []),
           ],
         },
       ]

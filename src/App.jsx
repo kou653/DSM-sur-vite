@@ -42,7 +42,6 @@ function App() {
                 <Route index element={<ParcellesPage />} />
                 <Route path=":parcelleId" element={<ParcelleDetailsPage />} />
               </Route>
-              <Route path="especes" element={<EspecesPage />} />
               <Route path="carte" element={<MapPage />} />
               <Route path="cooperatives" element={<CooperativesPage />} />
               <Route path="evolution">
@@ -51,6 +50,7 @@ function App() {
               </Route>
 
               <Route element={<RoleGuard allowedRoles={["administrateur"]} />}>
+                <Route path="especes" element={<EspecesPage />} />
                 <Route path="monitoring" element={<MonitoringPage />} />
               </Route>
             </Route>
