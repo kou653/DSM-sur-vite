@@ -240,24 +240,24 @@ function DashboardPage() {
           Évolution des objectifs par parcelle
         </h2>
         
-        <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", marginBottom: "1.5rem", border: "1px solid #b9e7cb" }}>
+        <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", border: "1px solid #b9e7cb" }}>
           <div style={{ height: "350px", width: "100%" }}>
             <Bar data={barChartData} options={barChartOptions} />
           </div>
-        </div>
 
-        {/* Petits blocs textuels (Parcelle: Cible vs Actuel) */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "1rem" }}>
-          {parcelles.map(p => (
-            <div key={p.id} style={{ background: "#ffffff", borderRadius: "var(--radius-md)", padding: "1rem", border: "1px solid #b9e7cb", borderLeft: "4px solid var(--primary)" }}>
-              <h4 style={{ margin: "0 0 0.5rem 0", color: "var(--text)" }}>{p.nom}</h4>
-              <p style={{ margin: 0, display: "flex", justifyContent: "space-between", fontSize: "0.95rem" }}>
-                 <strong title="Actuellement mis en terre" style={{ color: "var(--primary)" }}>{p.plants_count || 0}</strong>
-                 <span style={{ color: "var(--border-strong)" }}>/</span>
-                 <strong title="Cible (objectif)" style={{ color: "var(--muted-text)" }}>{p.objectif || 0}</strong>
-              </p>
-            </div>
-          ))}
+          {/* Petits blocs textuels intégrés (Parcelle: Cible vs Actuel) */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "1rem", marginTop: "2rem" }}>
+            {parcelles.map(p => (
+              <div key={p.id} style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem", border: "1px solid #b9e7cb", borderLeft: "4px solid var(--primary)" }}>
+                <h4 style={{ margin: "0 0 0.25rem 0", color: "var(--text)", fontSize: "0.9rem" }}>{p.nom}</h4>
+                <p style={{ margin: 0, display: "flex", justifyContent: "center", gap: "0.4rem", fontSize: "0.95rem" }}>
+                   <strong title="Actuellement mis en terre" style={{ color: "var(--primary)" }}>{p.plants_count || 0}</strong>
+                   <span style={{ color: "var(--border-strong)" }}>/</span>
+                   <strong title="Cible (objectif)" style={{ color: "var(--muted-text)" }}>{p.objectif || 0}</strong>
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
