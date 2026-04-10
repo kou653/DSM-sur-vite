@@ -168,69 +168,63 @@ function DashboardPage() {
       </header>
 
       {/* 2. Les 6 Blocs (4 en haut, 2 en bas) */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", marginBottom: "3rem" }}>
-         {/* Top 4 */}
-         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem" }}>
-            {/* Objectif Projet */}
-            <article className="dashboard-stat-card">
-              <div className="dashboard-stat-icon"><Target size={18} /></div>
-              <div>
-                <p>Objectif Projet</p>
-                <h3 style={{ fontSize: "1.6rem" }}>{objProjet}</h3>
-              </div>
-            </article>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gridAutoRows: "1fr", gap: "1.5rem", marginBottom: "3rem" }}>
+        {/* Objectif Projet */}
+        <article className="dashboard-stat-card">
+          <div className="dashboard-stat-icon"><Target size={18} /></div>
+          <div>
+            <p>Objectif Projet</p>
+            <h3 style={{ fontSize: "1.6rem" }}>{objProjet}</h3>
+          </div>
+        </article>
 
-            {/* Parcelles (Clickable) */}
-            <Link to={`/dashboard/projet/${selectedProjectId}/parcelles`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
-              <div className="dashboard-stat-icon" style={{ background: "rgba(59,130,246,0.1)", color: "#3b82f6" }}><MapPinned size={18} /></div>
-              <div>
-                <p>Parcelles</p>
-                <h3 style={{ fontSize: "1.6rem" }}>{parcelles.length}</h3>
-              </div>
-            </Link>
+        {/* Parcelles (Clickable) */}
+        <Link to={`/dashboard/projet/${selectedProjectId}/parcelles`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
+          <div className="dashboard-stat-icon" style={{ background: "rgba(59,130,246,0.1)", color: "#3b82f6" }}><MapPinned size={18} /></div>
+          <div>
+            <p>Parcelles</p>
+            <h3 style={{ fontSize: "1.6rem" }}>{parcelles.length}</h3>
+          </div>
+        </Link>
 
-            {/* Coopératives (Clickable) */}
-            <Link to={`/dashboard/projet/${selectedProjectId}/cooperatives`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
-              <div className="dashboard-stat-icon" style={{ background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}><Building2 size={18} /></div>
-              <div>
-                <p>Coopératives</p>
-                <h3 style={{ fontSize: "1.6rem" }}>{cooperatives.length}</h3>
-              </div>
-            </Link>
+        {/* Coopératives (Clickable) */}
+        <Link to={`/dashboard/projet/${selectedProjectId}/cooperatives`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
+          <div className="dashboard-stat-icon" style={{ background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}><Building2 size={18} /></div>
+          <div>
+            <p>Coopératives</p>
+            <h3 style={{ fontSize: "1.6rem" }}>{cooperatives.length}</h3>
+          </div>
+        </Link>
 
-            {/* Evolution (Progress Bar) */}
-            <article className="dashboard-stat-card" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "center" }}>
-              <p style={{ margin: "0 0 0.5rem 0", color: "var(--muted-text)", fontSize: "0.85rem", fontWeight: "600", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "0.35rem" }}><Activity size={14} /> Evolution absolue</p>
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                 <h3 style={{ margin: 0, fontSize: "1.4rem" }}>{evolutionGlobalPercent.toFixed(1)}%</h3>
-                 <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "var(--primary)" }}>{effectifPlantes} act.</span>
-              </div>
-              <div style={{ width: "100%", height: "8px", background: "var(--surface-hover)", borderRadius: "4px", overflow: "hidden", position: "relative" }}>
-                 <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${evolutionGlobalPercent}%`, background: "var(--primary)", borderRadius: "4px" }} />
-              </div>
-            </article>
-         </div>
+        {/* Evolution (Progress Bar) */}
+        <article className="dashboard-stat-card" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "center" }}>
+          <p style={{ margin: "0 0 0.5rem 0", color: "var(--muted-text)", fontSize: "0.85rem", fontWeight: "600", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "0.35rem" }}><Activity size={14} /> Evolution absolue</p>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+             <h3 style={{ margin: 0, fontSize: "1.4rem" }}>{evolutionGlobalPercent.toFixed(1)}%</h3>
+             <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "var(--primary)" }}>{effectifPlantes} act.</span>
+          </div>
+          <div style={{ width: "100%", height: "8px", background: "var(--surface-hover)", borderRadius: "4px", overflow: "hidden", position: "relative" }}>
+             <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${evolutionGlobalPercent}%`, background: "var(--primary)", borderRadius: "4px" }} />
+          </div>
+        </article>
 
-         {/* Bottom 2 */}
-         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-            {/* Plants Vivants */}
-            <article className="dashboard-stat-card">
-              <div className="dashboard-stat-icon" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981" }}><Sprout size={18} /></div>
-              <div>
-                <p>Plants vivants</p>
-                <h3 style={{ fontSize: "1.6rem" }}>{vivants}</h3>
-              </div>
-            </article>
+        {/* Plants Vivants */}
+        <article className="dashboard-stat-card">
+          <div className="dashboard-stat-icon" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981" }}><Sprout size={18} /></div>
+          <div>
+            <p>Plants vivants</p>
+            <h3 style={{ fontSize: "1.6rem" }}>{vivants}</h3>
+          </div>
+        </article>
 
-            {/* Taux survie */}
-            <Link to={`/dashboard/projet/${selectedProjectId}/monitoring`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit" }}>
-              <div className="dashboard-stat-icon" style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b" }}><TrendingUp size={18} /></div>
-              <div>
-                <p>Taux de survie</p>
-                <h3 style={{ fontSize: "1.6rem" }}>{monitoring?.taux_survie}%</h3>
-              </div>
-            </Link>
-         </div>
+        {/* Taux survie */}
+        <Link to={`/dashboard/projet/${selectedProjectId}/monitoring`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit" }}>
+          <div className="dashboard-stat-icon" style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b" }}><TrendingUp size={18} /></div>
+          <div>
+            <p>Taux de survie</p>
+            <h3 style={{ fontSize: "1.6rem" }}>{monitoring?.taux_survie}%</h3>
+          </div>
+        </Link>
       </div>
 
       {/* 3. Section Chart : Evolution par parcelle */}
@@ -298,17 +292,17 @@ function DashboardPage() {
       </section>
 
       {/* 5. Section Coopératives en bas */}
-      <section>
-        <h2 style={{ fontSize: "1.3rem", display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+      <section style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", border: "1px solid #b9e7cb" }}>
+        <h2 style={{ fontSize: "1.3rem", display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
           <Building2 size={18} className="primary-text" /> 
           Coopératives
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
            {cooperatives.map(coop => (
-             <article key={coop.id} style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", border: "1px solid #b9e7cb" }}>
-                <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.2rem", color: "var(--text)" }}>{coop.nom}</h3>
-                <p style={{ margin: "0 0 1rem 0", color: "var(--primary)", fontWeight: "500" }}>{coop.entreprise || "-"}</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.95rem" }}>
+             <article key={coop.id} style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)", padding: "1.25rem", border: "1px solid #b9e7cb" }}>
+                <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.1rem", color: "var(--text)" }}>{coop.nom}</h3>
+                <p style={{ margin: "0 0 1rem 0", color: "var(--primary)", fontWeight: "500", fontSize: "0.9rem" }}>{coop.entreprise || "-"}</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.85rem" }}>
                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--muted-text)" }}>
                      <MapPinned size={14} /> <span>{coop.ville}</span>
                    </div>
