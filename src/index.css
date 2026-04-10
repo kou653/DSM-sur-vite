@@ -1049,11 +1049,11 @@ textarea {
   border: 1px solid #d8eadb;
   border-radius: 18px;
   overflow: hidden;
-  background:
-    radial-gradient(circle at top left, rgba(135, 205, 169, 0.18), transparent 22%),
-    radial-gradient(circle at top right, rgba(135, 205, 169, 0.16), transparent 20%),
-    radial-gradient(circle at bottom left, rgba(135, 205, 169, 0.12), transparent 24%),
-    #f4fbf5;
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    rgba(20, 150, 85, 0.07) 100%
+  );
 }
 
 .users-toolbar,
@@ -1788,7 +1788,6 @@ textarea {
 
 body,
 .dashboard-shell,
-.users-page,
 .map-card,
 .monitoring-card,
 .users-stat-card,
@@ -1805,6 +1804,10 @@ body,
 .auth-card,
 .auth-card-login {
   background: #ffffff;
+  color: #000000;
+}
+
+.users-page {
   color: #000000;
 }
 
