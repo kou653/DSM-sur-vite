@@ -1511,7 +1511,7 @@ textarea {
 }
 
 .hover-card-effect {
-  border: 1px solid transparent !important;
+  border: 1px solid var(--border) !important;
   transition: all 0.25s ease !important;
 }
 
