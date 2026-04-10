@@ -249,7 +249,7 @@ function ParcellesPage() {
       {actionError ? <p className="form-error">{actionError}</p> : null}
       {successMessage ? <p className="evolution-success">{successMessage}</p> : null}
 
-      <div className="dashboard-stat-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: "1rem", gap: "1.5rem" }}>
+      <div className="dashboard-stat-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", marginBottom: "1rem", gap: "1.5rem" }}>
         <article style={{ 
           background: "#ffffff", 
           display: "flex", 
@@ -315,7 +315,7 @@ function ParcellesPage() {
           </div>
 
           <form className="users-form" onSubmit={handleSubmit}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
               <label className="filter-field">
                 <span>Nom de la parcelle</span>
                 <input type="text" name="nom" value={formState.nom} onChange={handleInputChange} required />
@@ -337,7 +337,7 @@ function ParcellesPage() {
               </select>
             </label>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
               <label className="filter-field">
                 <span>Superficie (ha)</span>
                 <input type="number" step="0.01" name="superficie" value={formState.superficie} onChange={handleInputChange} required />
@@ -349,7 +349,7 @@ function ParcellesPage() {
               </label>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
               <label className="filter-field">
                 <span>Latitude</span>
                 <input type="number" step="0.00000001" name="lat" value={formState.lat} onChange={handleInputChange} required />
@@ -379,8 +379,8 @@ function ParcellesPage() {
 
       {!loading && filteredParcelles.length > 0 ? (
         <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
+          display: "grid", 
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
           gap: "1.5rem",
           marginTop: "0.5rem"
         }}>

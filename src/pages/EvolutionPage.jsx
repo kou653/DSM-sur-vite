@@ -65,8 +65,8 @@ function EvolutionPage() {
 
       {!loading && parcelles.length > 0 ? (
         <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
+          display: "grid", 
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
           gap: "1.5rem",
           marginTop: "2rem"
         }}>

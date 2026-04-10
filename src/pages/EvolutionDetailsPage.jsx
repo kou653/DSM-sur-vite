@@ -146,7 +146,7 @@ function EvolutionDetailsPage() {
              <h2>Ajouter une photo à l'historique</h2>
            </div>
            
-           <form className="users-form" onSubmit={handleUploadSubmit}>
+           <form className="users-form" onSubmit={handleUploadSubmit} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
               {uploadError && <p className="form-error">{uploadError}</p>}
               
               <label className="filter-field">

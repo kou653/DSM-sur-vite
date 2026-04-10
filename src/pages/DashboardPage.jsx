@@ -168,7 +168,7 @@ function DashboardPage() {
       </header>
 
       {/* 2. Les 6 Blocs (4 en haut, 2 en bas) */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gridAutoRows: "1fr", gap: "1.5rem", marginBottom: "3rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
         {/* Objectif Projet */}
         <article className="dashboard-stat-card">
           <div className="dashboard-stat-icon"><Target size={18} /></div>
@@ -255,8 +255,8 @@ function DashboardPage() {
         </div>
       </section>
 
-      {/* 4. Section Circulaire & Liste des superficies */}
-      <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", marginBottom: "3rem" }}>
+      {/* 4. Section Circulaire & Liste des superficies (Responsive Grid) */}
+      <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem", marginBottom: "3rem" }}>
          {/* Pie Chart */}
          <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", border: "1px solid #b9e7cb" }}>
            <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.1rem" }}>Etat global écologique des plants</h3>

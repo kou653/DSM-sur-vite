@@ -168,7 +168,7 @@ function ParcelleDetailsPage() {
       </div>
 
       {/* Row 1: Objective and Evolution */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "2rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
         {/* Objectif Block */}
         <article style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "1.5rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
@@ -204,7 +204,7 @@ function ParcelleDetailsPage() {
       </div>
 
       {/* Row 2: 4 Info Blocks */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.5rem", marginBottom: "2.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem", marginBottom: "2.5rem" }}>
         <article className="dashboard-stat-card">
           <div className="dashboard-stat-icon"><MapPinned size={16} strokeWidth={2.1} /></div>
           <div>
@@ -253,7 +253,7 @@ function ParcelleDetailsPage() {
             <h3 style={{ marginTop: 0, marginBottom: "1rem", fontSize: "1.1rem" }}>Enregistrer un nouveau plant</h3>
             {plantFormError && <p className="form-error" style={{ marginBottom: "1rem" }}>{plantFormError}</p>}
 
-            <form onSubmit={handleCreatePlant} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", alignItems: "start" }}>
+            <form onSubmit={handleCreatePlant} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", alignItems: "start" }}>
               <div className="filter-field" style={{ position: "relative" }}>
                 <span>Espèce (Autocomplétion)</span>
                 <input
@@ -305,7 +305,7 @@ function ParcelleDetailsPage() {
                 <input type="date" name="date_plantation" value={plantFormState.date_plantation} onChange={handlePlantInputChange} required />
               </label>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "1rem" }}>
                 <label className="filter-field">
                   <span>GPS Lat</span>
                   <input type="number" step="0.00000001" name="lat" value={plantFormState.lat} onChange={handlePlantInputChange} required />

@@ -304,7 +304,7 @@ function UsersPage() {
       {actionError ? <p className="form-error">{actionError}</p> : null}
       {successMessage ? <p className="evolution-success">{successMessage}</p> : null}
 
-      <div className="users-stats-grid">
+      <div className="users-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
         {stats.map((stat) => {
           const Icon = stat.icon;
 
@@ -442,7 +442,7 @@ function UsersPage() {
         ) : null}
 
         {!loading && filteredUsers.length > 0 ? (
-          <div className="users-table-wrapper">
+          <div className="users-table-wrapper" style={{ overflowX: "auto" }}>
             <table className="users-table">
               <thead>
                 <tr>

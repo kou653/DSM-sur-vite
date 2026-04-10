@@ -331,11 +331,11 @@ function CooperativesPage() {
         {loading ? <p className="muted-text">Chargement des cooperatives...</p> : null}
 
         {!loading && filteredCooperatives.length === 0 ? (
-          <p className="muted-text">Aucune cooperative ne correspond a la recherche.</p>
+          <p className="muted-text" style={{ marginTop: "1.5rem" }}>Aucune cooperative ne correspond a la recherche.</p>
         ) : null}
 
         {!loading && filteredCooperatives.length > 0 ? (
-          <div className="users-table-wrapper">
+          <div className="users-table-wrapper" style={{ overflowX: "auto" }}>
             <table className="users-table">
               <thead>
                 <tr>

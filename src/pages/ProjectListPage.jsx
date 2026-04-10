@@ -298,7 +298,7 @@ function ProjectListPage() {
           </div>
 
           <form className="users-form" onSubmit={handleCreateProject}>
-            <div className="project-create-grid">
+            <div className="project-create-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
               <label className="filter-field">
                 <span>Nom du projet</span>
                 <input
@@ -333,7 +333,7 @@ function ProjectListPage() {
               />
             </label>
 
-            <div className="project-create-grid">
+            <div className="project-create-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
               <label className="filter-field">
                 <span>Date de debut</span>
                 <input
@@ -357,7 +357,7 @@ function ProjectListPage() {
               </label>
             </div>
 
-            <div className="project-create-grid">
+            <div className="project-create-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
               <label className="filter-field">
                 <span>Objectif global</span>
                 <input
