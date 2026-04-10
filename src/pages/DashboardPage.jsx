@@ -248,7 +248,7 @@ function DashboardPage() {
           {/* Petits blocs textuels intégrés (Parcelle: Cible vs Actuel) */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "1rem", marginTop: "2rem" }}>
             {parcelles.map(p => (
-              <div key={p.id} style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem", border: "1px solid #b9e7cb", borderLeft: "4px solid var(--primary)" }}>
+              <div key={p.id} style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem", border: "1px solid #b9e7cb" }}>
                 <h4 style={{ margin: "0 0 0.25rem 0", color: "var(--text)", fontSize: "0.9rem" }}>{p.nom}</h4>
                 <p style={{ margin: 0, display: "flex", justifyContent: "center", gap: "0.4rem", fontSize: "0.95rem" }}>
                    <strong title="Actuellement mis en terre" style={{ color: "var(--primary)" }}>{p.plants_count || 0}</strong>
