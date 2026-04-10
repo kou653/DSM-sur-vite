@@ -1,10 +1,11 @@
-import { MapPinned, Pencil, Plus, Search, X } from "lucide-react";
+import { MapPinned, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context.js";
 import {
   createProjetParcelle,
   getProjetParcelles,
+  deleteParcelle,
   updateParcelle,
 } from "../api/parcelles.js";
 import { getProjetCooperatives } from "../api/referentiels.js";
@@ -174,6 +175,32 @@ function ParcellesPage() {
 
       await fetchParcelles();
       closeForm();
+    } catch (error) {
+      setActionError(
+        error.response?.data?.message || "Operation impossible pour cette parcelle."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleDeleteParcelle(parcelle) {
+    const confirmed = window.confirm(
+      `Voulez-vous vraiment supprimer la parcelle ${parcelle.name} ?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setSubmitting(true);
+    setActionError("");
+    setSuccessMessage("");
+
+    try {
+      await deleteParcelle(parcelle.id);
+      setSuccessMessage("Parcelle supprimée avec succès.");
+      await fetchParcelles();
     } catch (error) {
       setActionError(
         error.response?.data?.message || "Operation impossible pour cette parcelle."
@@ -356,6 +383,26 @@ function ParcellesPage() {
         }}>
           {filteredParcelles.map((parcelle) => (
             <div key={parcelle.id} style={{ position: "relative" }}>
+              {role === "administrateur" && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDeleteParcelle(parcelle);
+                  }}
+                  className="project-card-delete-button"
+                  title="Supprimer la parcelle"
+                  style={{
+                    position: "absolute",
+                    top: "0.5rem",
+                    left: "0.5rem",
+                    zIndex: 2
+                  }}
+                  disabled={submitting}
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+
               <Link
                 to={String(parcelle.id)}
                 style={{
