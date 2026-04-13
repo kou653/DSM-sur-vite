@@ -14,14 +14,36 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { Download } from "lucide-react";
+import { useState, useEffect } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context.js";
 
 function DashboardLayout() {
   const { role, selectedProjectId, user, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
   const location = useLocation();
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === "accepted") {
+      setDeferredPrompt(null);
+    }
+  };
 
   const isProjectRoute = /^\/dashboard\/projet\/\d+(\/|$)/.test(location.pathname);
   const projectBasePath = selectedProjectId
@@ -217,12 +239,36 @@ function DashboardLayout() {
             <Menu size={16} />
           </button>
 
-          <div className="dashboard-topbar-user">
-            <div className="dashboard-topbar-avatar">
-              {(user?.nom_complet || "U").slice(0, 1).toUpperCase()}
+          <div className="dashboard-topbar-user" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button 
+              onClick={() => {
+                if (deferredPrompt) {
+                  handleInstallClick();
+                } else {
+                  alert("L'installation PWA n'est pas encore disponible. Le navigateur n'a pas déclenché l'événement (peut-être l'app est-elle déjà installée, ou le cache doit être vidé).");
+                }
+              }}
+              className="dashboard-add-button" 
+              style={{ 
+                padding: '4px 10px', 
+                fontSize: '0.85rem', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '4px',
+                opacity: deferredPrompt ? 1 : 0.6
+              }}
+              title="Installer l'application sur votre appareil"
+            >
+              <Download size={14} /> Installer
+            </button>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <div className="dashboard-topbar-avatar">
+                {(user?.nom_complet || "U").slice(0, 1).toUpperCase()}
+              </div>
+              <span>{user?.nom_complet || "Utilisateur"}</span>
+              <ChevronDown size={14} strokeWidth={2.2} />
             </div>
-            <span>{user?.nom_complet || "Utilisateur"}</span>
-            <ChevronDown size={14} strokeWidth={2.2} />
           </div>
         </header>
 
