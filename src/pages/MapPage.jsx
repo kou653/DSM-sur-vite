@@ -37,10 +37,10 @@ const createUserIcon = () =>
     popupAnchor: [0, -40],
   });
 
-const COTE_DIVOIRE_CENTER = [7.54, -5.55];
-const COTE_DIVOIRE_BOUNDS = [
-  [4.2, -8.7],
-  [10.8, -2.3],
+const AFRICA_CENTER = [0.0, 20.0];
+const AFRICA_BOUNDS = [
+  [-38.0, -25.0], // South-West
+  [38.0, 55.0],   // North-East
 ];
 
 function parseCoordinate(value) {
@@ -92,8 +92,8 @@ function MapPage() {
   const [userPosition, setUserPosition] = useState(null);
   const [routeTarget, setRouteTarget] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
-  const [mapCenter, setMapCenter] = useState(COTE_DIVOIRE_CENTER);
-  const [zoom, setZoom] = useState(7);
+  const [mapCenter, setMapCenter] = useState(AFRICA_CENTER);
+  const [zoom, setZoom] = useState(4);
   const watchIdRef = useRef(null);
   const routeDebounceRef = useRef(null);
 
@@ -430,9 +430,9 @@ function MapPage() {
           zoom={zoom}
           scrollWheelZoom
           className="leaflet-container"
-          maxBounds={COTE_DIVOIRE_BOUNDS}
+          maxBounds={AFRICA_BOUNDS}
           maxBoundsViscosity={1}
-          minZoom={7}
+          minZoom={3}
           maxZoom={18}
         >
           <ChangeView center={mapCenter} zoom={zoom} />
