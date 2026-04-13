@@ -52,6 +52,7 @@ function App() {
               <Route element={<RoleGuard allowedRoles={["administrateur"]} />}>
                 <Route path="especes" element={<EspecesPage />} />
                 <Route path="monitoring" element={<MonitoringPage />} />
+                <Route path="utilisateurs" element={<UsersPage />} />
               </Route>
             </Route>
           </Route>

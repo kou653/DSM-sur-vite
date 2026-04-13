@@ -122,7 +122,7 @@ function DashboardLayout() {
           title: "Administration",
           items: [
             {
-              to: "/dashboard/utilisateurs",
+              to: (isProjectRoute && projectBasePath) ? `${projectBasePath}/utilisateurs` : "/dashboard/utilisateurs",
               label: "Utilisateurs",
               icon: Users,
             },

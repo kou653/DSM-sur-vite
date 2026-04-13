@@ -1,4 +1,4 @@
-import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine } from "lucide-react";
+import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -163,7 +163,7 @@ function DashboardPage() {
       {/* 1. Titre du projet */}
       <header style={{ marginBottom: "2rem" }}>
         <h1 style={{ fontSize: "2rem", color: "var(--text)", margin: "0 0 0.5rem 0", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <NotebookTabs size={28} className="primary-text" /> 
+          <Trees size={28} className="primary-text" /> 
           {projet.nom}
         </h1>
         <p className="muted-text" style={{ margin: 0, fontSize: "1.1rem" }}>Vue d'ensemble et progression générale du projet.</p>
