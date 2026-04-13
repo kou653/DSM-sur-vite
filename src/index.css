@@ -1163,6 +1163,8 @@ textarea {
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 10px 26px rgba(52, 88, 62, 0.1);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .users-stat-card {
@@ -1233,6 +1235,7 @@ textarea {
 
 .users-table {
   width: 100%;
+  min-width: 800px; /* Minimum width to trigger scroll */
   border-collapse: collapse;
 }
 
@@ -1241,6 +1244,7 @@ textarea {
   padding: 14px 12px;
   border-bottom: 1px solid #dcebdd;
   text-align: left;
+  white-space: nowrap;
 }
 
 .users-table th {
