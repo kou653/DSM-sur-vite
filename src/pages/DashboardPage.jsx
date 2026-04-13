@@ -1,4 +1,4 @@
-import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs } from "lucide-react";
+import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -170,7 +170,7 @@ function DashboardPage() {
       </header>
 
       {/* 2. Les 6 Blocs (4 en haut, 2 en bas) */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.5rem", marginBottom: "3rem" }}>
         {/* Objectif Projet */}
         <article className="dashboard-stat-card">
           <div className="dashboard-stat-icon"><Target size={18} /></div>
@@ -182,7 +182,7 @@ function DashboardPage() {
 
         {/* Parcelles (Clickable) */}
         <Link to={`/dashboard/projet/${selectedProjectId}/parcelles`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
-          <div className="dashboard-stat-icon" style={{ background: "rgba(59,130,246,0.1)", color: "#3b82f6" }}><MapPinned size={18} /></div>
+          <div className="dashboard-stat-icon" style={{ background: "rgba(59,130,246,0.1)", color: "#3b82f6" }}><TreePine size={18} /></div>
           <div>
             <p>Parcelles</p>
             <h3 style={{ fontSize: "1.6rem" }}>{parcelles.length}</h3>
@@ -245,7 +245,7 @@ function DashboardPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "1rem", marginTop: "2rem" }}>
             {parcelles.map(p => (
               <div key={p.id} style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem", border: "1px solid #b9e7cb" }}>
-                <h4 style={{ margin: "0 0 0.25rem 0", color: "var(--text)", fontSize: "0.9rem" }}>{p.nom}</h4>
+                <h4 style={{ margin: "0 0 0.25rem 0", color: "var(--text)", fontSize: "0.9rem", display: "flex", alignItems: "center", gap: "4px" }}><TreePine size={14} className="primary-text" /> {p.nom}</h4>
                 <p style={{ margin: 0, display: "flex", justifyContent: "center", gap: "0.4rem", fontSize: "0.95rem" }}>
                    <strong title="Actuellement mis en terre" style={{ color: "var(--primary)" }}>{p.plants_count || 0}</strong>
                    <span style={{ color: "var(--border-strong)" }}>/</span>
@@ -285,7 +285,7 @@ function DashboardPage() {
                  }}>
                    {p.superficie} ha
                  </span>
-                 <strong style={{ color: "var(--text)" }}>{p.nom}</strong>
+                 <strong style={{ color: "var(--text)", display: "flex", alignItems: "center", gap: "6px" }}><TreePine size={16} className="primary-text" /> {p.nom}</strong>
                </li>
              ))}
              {parcelles.length === 0 && <p className="muted-text">Aucune parcelle associée.</p>}
