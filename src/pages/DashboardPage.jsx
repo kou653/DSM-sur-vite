@@ -107,7 +107,8 @@ function DashboardPage() {
         backgroundColor: "rgba(148, 163, 184, 0.5)",
         borderColor: "rgba(148, 163, 184, 1)",
         borderWidth: 1,
-        borderRadius: 4
+        borderRadius: 4,
+        maxBarThickness: 40
       },
       {
         label: "Actuel (Mis en terre)",
@@ -115,7 +116,8 @@ function DashboardPage() {
         backgroundColor: "rgba(16, 185, 129, 0.7)",
         borderColor: "rgb(16, 185, 129)",
         borderWidth: 1,
-        borderRadius: 4
+        borderRadius: 4,
+        maxBarThickness: 40
       }
     ]
   };
