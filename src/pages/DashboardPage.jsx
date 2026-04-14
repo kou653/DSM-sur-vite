@@ -1,4 +1,4 @@
-import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees } from "lucide-react";
+import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees, Layers } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -104,8 +104,8 @@ function DashboardPage() {
       {
         label: "Cible (Objectif)",
         data: parcelles.map(p => p.objectif || 0),
-        backgroundColor: "rgba(148, 163, 184, 0.5)",
-        borderColor: "rgba(148, 163, 184, 1)",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        borderColor: "rgb(75, 74, 74)",
         borderWidth: 1,
         borderRadius: 4,
         maxBarThickness: 40
@@ -171,63 +171,64 @@ function DashboardPage() {
 
       {/* 2. Les 6 Blocs (4 en haut, 2 en bas) */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.5rem", marginBottom: "3rem" }}>
-        {/* Objectif Projet */}
-        <article className="dashboard-stat-card">
-          <div className="dashboard-stat-icon"><Target size={18} /></div>
-          <div>
-            <p>Objectif Projet</p>
-            <h3 style={{ fontSize: "1.6rem" }}>{objProjet}</h3>
-          </div>
-        </article>
+      {/* Objectif Projet */}
+      <article className="dashboard-stat-card">
+        <div className="dashboard-stat-icon"><Target size={18} /></div>
+        <div>
+          <p style={{ textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em" }}>Objectif Projet</p>
+          <h3 style={{ fontSize: "1.6rem" }}>{objProjet} plants</h3>
+        </div>
+      </article>
 
-        {/* Parcelles (Clickable) */}
-        <Link to={`/dashboard/projet/${selectedProjectId}/parcelles`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
-          <div className="dashboard-stat-icon" style={{ background: "rgba(59,130,246,0.1)", color: "#3b82f6" }}><TreePine size={18} /></div>
-          <div>
-            <p>Parcelles</p>
-            <h3 style={{ fontSize: "1.6rem" }}>{parcelles.length}</h3>
-          </div>
-        </Link>
+      {/* Parcelles */}
+      <Link to={`/dashboard/projet/${selectedProjectId}/parcelles`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
+        <div className="dashboard-stat-icon" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981" }}><Layers size={18} /></div>
+        <div>
+          <p style={{ textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em" }}>Parcelles</p>
+          <h3 style={{ fontSize: "1.6rem" }}>{parcelles.length}</h3>
+        </div>
+      </Link>
 
-        {/* Coopératives (Clickable) */}
-        <Link to={`/dashboard/projet/${selectedProjectId}/cooperatives`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
-          <div className="dashboard-stat-icon" style={{ background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}><Building2 size={18} /></div>
-          <div>
-            <p>Coopératives</p>
-            <h3 style={{ fontSize: "1.6rem" }}>{cooperatives.length}</h3>
-          </div>
-        </Link>
+      {/* Coopératives */}
+      <Link to={`/dashboard/projet/${selectedProjectId}/cooperatives`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
+        <div className="dashboard-stat-icon" style={{ background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}><Building2 size={18} /></div>
+        <div>
+          <p style={{ textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em" }}>Coopératives</p>
+          <h3 style={{ fontSize: "1.6rem" }}>{cooperatives.length}</h3>
+        </div>
+      </Link>
 
-        {/* Evolution (Progress Bar) */}
-        <article className="dashboard-stat-card" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "center" }}>
-          <p style={{ margin: "0 0 0.5rem 0", color: "var(--muted-text)", fontSize: "0.85rem", fontWeight: "600", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "0.35rem" }}><Activity size={14} /> Evolution absolue</p>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-             <h3 style={{ margin: 0, fontSize: "1.4rem" }}>{evolutionGlobalPercent.toFixed(1)}%</h3>
-             <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "var(--primary)" }}>{effectifPlantes} act.</span>
+      {/* Evolution */}
+      <article className="dashboard-stat-card" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "center" }}>
+        <p style={{ margin: "0 0 0.4rem 0", textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: "0.35rem" }}>
+          <Activity size={14} /> Évolution
+        </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <h3 style={{ margin: 0, fontSize: "1.4rem", minWidth: "52px" }}>{evolutionGlobalPercent.toFixed(0)}%</h3>
+          <div style={{ flex: 1, height: "10px", background: "var(--surface-hover)", borderRadius: "4px", overflow: "hidden" }}>
+            <div style={{ width: `${evolutionGlobalPercent}%`, height: "100%", background: "var(--primary)", borderRadius: "4px" }} />
           </div>
-          <div style={{ width: "100%", height: "8px", background: "var(--surface-hover)", borderRadius: "4px", overflow: "hidden", position: "relative" }}>
-             <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${evolutionGlobalPercent}%`, background: "var(--primary)", borderRadius: "4px" }} />
-          </div>
-        </article>
+        </div>
+      </article>
 
-        {/* Plants Vivants */}
-        <article className="dashboard-stat-card">
-          <div className="dashboard-stat-icon" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981" }}><Sprout size={18} /></div>
-          <div>
-            <p>Plants vivants</p>
-            <h3 style={{ fontSize: "1.6rem" }}>{vivants}</h3>
-          </div>
-        </article>
+      {/* Plants Vivants */}
+      <article className="dashboard-stat-card">
+        <div className="dashboard-stat-icon" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981" }}><Sprout size={18} /></div>
+        <div>
+          <p style={{ textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em" }}>Plants vivants</p>
+          <h3 style={{ fontSize: "1.6rem" }}>{vivants}</h3>
+        </div>
+      </article>
 
-        {/* Taux survie */}
-        <Link to={`/dashboard/projet/${selectedProjectId}/monitoring`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit" }}>
-          <div className="dashboard-stat-icon" style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b" }}><TrendingUp size={18} /></div>
-          <div>
-            <p>Taux de survie</p>
-            <h3 style={{ fontSize: "1.6rem" }}>{monitoring?.taux_survie}%</h3>
-          </div>
-        </Link>
-      </div>
+      {/* Taux de survie */}
+      <Link to={`/dashboard/projet/${selectedProjectId}/monitoring`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit" }}>
+        <div className="dashboard-stat-icon" style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b" }}><TrendingUp size={18} /></div>
+        <div>
+          <p style={{ textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em" }}>Taux survie</p>
+          <h3 style={{ fontSize: "1.6rem" }}>{monitoring?.taux_survie}%</h3>
+        </div>
+      </Link>
+    </div>
 
       {/* 3. Section Chart : Evolution par parcelle */}
       <section style={{ marginBottom: "3rem" }}>
@@ -242,15 +243,12 @@ function DashboardPage() {
           </div>
 
           {/* Petits blocs textuels intégrés (Parcelle: Cible vs Actuel) */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "1rem", marginTop: "2rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem", marginTop: "2rem" }}>
             {parcelles.map(p => (
-              <div key={p.id} style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem", border: "1px solid #b9e7cb" }}>
-                <h4 style={{ margin: "0 0 0.25rem 0", color: "var(--text)", fontSize: "0.9rem", display: "flex", alignItems: "center", gap: "4px" }}><TreePine size={14} className="primary-text" /> {p.nom}</h4>
-                <p style={{ margin: 0, display: "flex", justifyContent: "center", gap: "0.4rem", fontSize: "0.95rem" }}>
-                   <strong title="Actuellement mis en terre" style={{ color: "var(--primary)" }}>{p.plants_count || 0}</strong>
-                   <span style={{ color: "var(--border-strong)" }}>/</span>
-                   <strong title="Cible (objectif)" style={{ color: "var(--muted-text)" }}>{p.objectif || 0}</strong>
-                </p>
+              <div key={p.id} style={{ background: "var(--surface-hover)", borderRadius: "var(--radius-md)", padding: "0.85rem 1rem", border: "1px solid #b9e7cb" }}>
+                <h4 style={{ margin: "0 0 0.4rem 0", color: "var(--text)", fontSize: "0.9rem", display: "flex", alignItems: "center", gap: "4px" }}><TreePine size={14} className="primary-text" /> {p.nom}</h4>
+                {/* <p style={{ margin: "0 0 0.2rem 0", fontSize: "0.9rem", color: "var(--text)" }}>{p.objectif || 0} plants</p> */}
+                <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--muted-text)" }}>{p.plants_count || 0} / {p.objectif || 0} plants</p>
               </div>
             ))}
           </div>
@@ -260,15 +258,50 @@ function DashboardPage() {
       {/* 4. Section Circulaire & Liste des superficies (Responsive Grid) */}
       <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem", marginBottom: "3rem" }}>
          {/* Pie Chart */}
-         <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", border: "1px solid #b9e7cb" }}>
+         {/* <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", border: "1px solid #b9e7cb" }}>
            <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.1rem" }}>Etat global écologique des plants</h3>
            <div style={{ height: "250px", width: "100%", display: "flex", justifyContent: "center" }}>
              <Pie data={pieChartData} options={pieChartOptions} />
            </div>
-         </div>
+         </div> */}
+          <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", border: "1px solid #b9e7cb" }}>
+            <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span style={{ width: "16px", height: "16px", borderRadius: "50%", border: "2px solid #10b981", display: "inline-block" }} />
+              État des plants
+            </h3>
+            <div style={{ height: "250px", width: "100%", display: "flex", justifyContent: "center" }}>
+              <Pie
+                data={{
+                  labels: ["Vivants", "Morts"],
+                  datasets: [{
+                    data: [vivants, morts],
+                    backgroundColor: ["#10b981", "#ef4444"],
+                    hoverBackgroundColor: ["#059669", "#dc2626"],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                  }]
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  cutout: "60%",
+                  plugins: {
+                    legend: {
+                      position: "bottom",
+                      labels: {
+                        usePointStyle: true,
+                        pointStyle: "circle",
+                        formatter: (label, ctx) => `${label}: ${ctx.dataset.data[ctx.dataIndex]}`
+                      }
+                    }
+                  }
+                }}
+              />
+            </div>
+          </div>
 
          {/* Liste Parcelles + Superficies */}
-         <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", overflowY: "auto", maxHeight: "330px", border: "1px solid #b9e7cb" }}>
+         {/* <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", overflowY: "auto", maxHeight: "330px", border: "1px solid #b9e7cb" }}>
            <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.1rem" }}>Répartition topographique</h3>
            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
              {parcelles.map(p => (
@@ -290,7 +323,21 @@ function DashboardPage() {
              ))}
              {parcelles.length === 0 && <p className="muted-text">Aucune parcelle associée.</p>}
            </ul>
-         </div>
+         </div> */}
+        <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", overflowY: "auto", maxHeight: "330px", border: "1px solid #b9e7cb" }}>
+          <h3 style={{ margin: "0 0 1.25rem 0", fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Layers size={18} className="primary-text" /> Superficie des parcelles (ha)
+          </h3>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            {parcelles.map(p => (
+              <li key={p.id} style={{ padding: "0.85rem 1rem", borderRadius: "var(--radius-md)", border: "1px solid #b9e7cb", background: "var(--surface-hover)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ color: "var(--text)", fontSize: "0.95rem" }}>{p.nom}</span>
+                <strong style={{ color: "var(--text)", fontSize: "0.95rem" }}>{p.superficie} ha</strong>
+              </li>
+            ))}
+            {parcelles.length === 0 && <p className="muted-text">Aucune parcelle associée.</p>}
+          </ul>
+        </div>
       </section>
 
       {/* 5. Section Coopératives en bas */}
