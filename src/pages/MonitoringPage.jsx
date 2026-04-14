@@ -1,3 +1,4 @@
+import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees, Layers, Users, CheckCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   CartesianGrid,
@@ -302,17 +303,23 @@ function MonitoringPage() {
         <>
           <section className="monitoring-stats-grid">
             <article className="monitoring-stat-card">
-              <p>Plants mis en terre</p>
+              <p>
+                <Sprout size={18} color="#149655" /> Plants mis en terre
+              </p>
               <h3>{loadingPlants ? "--" : parcelleStats.plantsMiseEnTerre}</h3>
             </article>
 
             <article className="monitoring-stat-card">
-              <p>Plants vivants</p>
+              <p>
+                <CheckCircle size={18} color="#149655" /> Plants vivants
+              </p>
               <h3>{loadingPlants ? "--" : parcelleStats.plantsVivants}</h3>
             </article>
 
             <article className="monitoring-stat-card">
-              <p>Taux de suivi</p>
+              <p>
+                <TrendingUp size={14} color="#149655" /> Taux de suivi
+              </p>
               <h3>{loadingPlants ? "--" : `${parcelleStats.tauxSuivi}%`}</h3>
             </article>
           </section>

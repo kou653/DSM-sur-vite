@@ -1722,16 +1722,19 @@ textarea {
 
 .monitoring-stat-card {
   padding: 18px 20px;
-  border: 1px solid #dce9dd;
+  border: 1px solid #ffffff;
   border-radius: 16px;
-  background: linear-gradient(180deg, #ffffff 0%, #f5fbf6 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
   box-shadow: 0 12px 26px rgba(50, 84, 60, 0.08);
 }
 
 .monitoring-stat-card p {
   margin: 0;
-  color: #6f8272;
+  color: #474747;
   font-size: 0.98rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .monitoring-stat-card h3 {
