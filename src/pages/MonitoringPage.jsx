@@ -243,141 +243,143 @@ function MonitoringPage() {
   );
 
   return (
-    <section className="monitoring-page">
-      <header className="monitoring-header">
-        <h1>Monitoring</h1>
-        <p>Suivi detaille de l'evolution mensuelle par especes et parcelle.</p>
-      </header>
+    <section className="users-page">
+      <section className="monitoring-page">
+        <header className="monitoring-header">
+          <h1>Monitoring</h1>
+          <p>Suivi detaille de l'evolution mensuelle par especes et parcelle.</p>
+        </header>
 
-      <section className="monitoring-card">
-        <div className="monitoring-card-heading">
-          <h2>Selection des filtres</h2>
-        </div>
+        <section className="monitoring-card">
+          <div className="monitoring-card-heading">
+            <h2>Selection des filtres</h2>
+          </div>
 
-        <div className="monitoring-filter-grid">
-          <label className="filter-field">
-            <span>Parcelle</span>
-            <select
-              value={selectedParcelleId}
-              onChange={(event) => setSelectedParcelleId(event.target.value)}
-              disabled={loadingFilters}
-            >
-              <option value="">Selectionner une parcelle</option>
-              {parcelles.map((parcelle) => (
-                <option key={parcelle.id} value={parcelle.id}>
-                  {parcelle.nom}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="monitoring-filter-grid">
+            <label className="filter-field">
+              <span>Parcelle</span>
+              <select
+                value={selectedParcelleId}
+                onChange={(event) => setSelectedParcelleId(event.target.value)}
+                disabled={loadingFilters}
+              >
+                <option value="">Selectionner une parcelle</option>
+                {parcelles.map((parcelle) => (
+                  <option key={parcelle.id} value={parcelle.id}>
+                    {parcelle.nom}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-          <label className="filter-field">
-            <span>Espece</span>
-            <select
-              value={selectedEspeceId}
-              onChange={(event) => setSelectedEspeceId(event.target.value)}
-              disabled={!selectedParcelleId || loadingPlants}
-            >
-              <option value="">Toutes les especes</option>
-              {availableEspeces.map((espece) => (
-                <option key={espece.id} value={espece.id}>
-                  {espece.nom}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </section>
-
-      {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
-
-      {!selectedParcelleId ? (
-        <section className="monitoring-card monitoring-empty-state">
-          <p className="muted-text">
-            Selectionnez une parcelle pour afficher les indicateurs et la courbe d'evolution mensuelle.
-          </p>
+            <label className="filter-field">
+              <span>Espece</span>
+              <select
+                value={selectedEspeceId}
+                onChange={(event) => setSelectedEspeceId(event.target.value)}
+                disabled={!selectedParcelleId || loadingPlants}
+              >
+                <option value="">Toutes les especes</option>
+                {availableEspeces.map((espece) => (
+                  <option key={espece.id} value={espece.id}>
+                    {espece.nom}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </section>
-      ) : null}
 
-      {selectedParcelleId ? (
-        <>
-          <section className="monitoring-stats-grid">
-            <article className="monitoring-stat-card">
-              <p>
-                <Sprout size={18} color="#149655" /> Plants mis en terre
-              </p>
-              <h3>{loadingPlants ? "--" : parcelleStats.plantsMiseEnTerre}</h3>
-            </article>
+        {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
 
-            <article className="monitoring-stat-card">
-              <p>
-                <CheckCircle size={18} color="#149655" /> Plants vivants
-              </p>
-              <h3>{loadingPlants ? "--" : parcelleStats.plantsVivants}</h3>
-            </article>
-
-            <article className="monitoring-stat-card">
-              <p>
-                <TrendingUp size={14} color="#149655" /> Taux de suivi
-              </p>
-              <h3>{loadingPlants ? "--" : `${parcelleStats.tauxSuivi}%`}</h3>
-            </article>
+        {!selectedParcelleId ? (
+          <section className="monitoring-card monitoring-empty-state">
+            <p className="muted-text">
+              Selectionnez une parcelle pour afficher les indicateurs et la courbe d'evolution mensuelle.
+            </p>
           </section>
+        ) : null}
 
-          <section className="monitoring-card monitoring-chart-card">
-            <div className="monitoring-card-heading">
-              <h2>Evolution mensuelle des especes</h2>
-              <p>
-                Le graphique montre l'evolution mensuelle des plants mis en terre et vivants.
-              </p>
-            </div>
+        {selectedParcelleId ? (
+          <>
+            <section className="monitoring-stats-grid">
+              <article className="monitoring-stat-card">
+                <p>
+                  <Sprout size={18} color="#149655" /> Plants mis en terre
+                </p>
+                <h3>{loadingPlants ? "--" : parcelleStats.plantsMiseEnTerre}</h3>
+              </article>
 
-            {loadingPlants ? (
-              <p className="muted-text">Chargement des donnees de la parcelle...</p>
-            ) : monthlyEvolution.length === 0 ? (
-              <p className="muted-text">
-                Aucune donnee mensuelle n'est disponible pour les filtres selectionnes.
-              </p>
-            ) : (
-              <div className="monitoring-chart-shell">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={monthlyEvolution}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#d9e6db" />
-                    <XAxis dataKey="label" stroke="#6f8272" />
-                    <YAxis allowDecimals={false} stroke="#6f8272" />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "14px",
-                        border: "1px solid #d8e7da",
-                        boxShadow: "0 12px 28px rgba(52, 88, 62, 0.1)",
-                      }}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="plantsMiseEnTerre"
-                      name="Plants mis en terre"
-                      stroke="#1f9953"
-                      strokeWidth={3}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="plantsVivants"
-                      name="Plants vivants"
-                      stroke="#f59e0b"
-                      strokeWidth={3}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+              <article className="monitoring-stat-card">
+                <p>
+                  <CheckCircle size={18} color="#149655" /> Plants vivants
+                </p>
+                <h3>{loadingPlants ? "--" : parcelleStats.plantsVivants}</h3>
+              </article>
+
+              <article className="monitoring-stat-card">
+                <p>
+                  <TrendingUp size={14} color="#149655" /> Taux de suivi
+                </p>
+                <h3>{loadingPlants ? "--" : `${parcelleStats.tauxSuivi}%`}</h3>
+              </article>
+            </section>
+
+            <section className="monitoring-card monitoring-chart-card">
+              <div className="monitoring-card-heading">
+                <h2>Evolution mensuelle des especes</h2>
+                <p>
+                  Le graphique montre l'evolution mensuelle des plants mis en terre et vivants.
+                </p>
               </div>
-            )}
-          </section>
-        </>
-      ) : null}
+
+              {loadingPlants ? (
+                <p className="muted-text">Chargement des donnees de la parcelle...</p>
+              ) : monthlyEvolution.length === 0 ? (
+                <p className="muted-text">
+                  Aucune donnee mensuelle n'est disponible pour les filtres selectionnes.
+                </p>
+              ) : (
+                <div className="monitoring-chart-shell">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={monthlyEvolution}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#d9e6db" />
+                      <XAxis dataKey="label" stroke="#6f8272" />
+                      <YAxis allowDecimals={false} stroke="#6f8272" />
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: "14px",
+                          border: "1px solid #d8e7da",
+                          boxShadow: "0 12px 28px rgba(52, 88, 62, 0.1)",
+                        }}
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="plantsMiseEnTerre"
+                        name="Plants mis en terre"
+                        stroke="#1f9953"
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="plantsVivants"
+                        name="Plants vivants"
+                        stroke="#f59e0b"
+                        strokeWidth={3}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </section>
+          </>
+        ) : null}
+      </section>
     </section>
   );
 }
