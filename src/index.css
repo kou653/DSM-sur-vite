@@ -1153,7 +1153,11 @@ textarea {
   margin: 0;
   color: #04130a;
   font-size: 1.15rem;
-  font-weight: 800;
+  font-weight: 400;
+}
+
+.account-profile .users-role-pill {
+  font-weight: 400;
 }
 
 .account-stats-grid {
@@ -1178,14 +1182,14 @@ textarea {
   align-items: center;
   gap: 8px;
   color: var(--muted);
-  font-weight: 800;
+  font-weight: 400;
 }
 
 .account-stat-card h3 {
   margin: 0;
   color: #04130a;
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1215,12 +1219,13 @@ textarea {
 .account-project-card-top h3 {
   margin: 0;
   font-size: 1.15rem;
+  font-weight: 400;
 }
 
 .account-project-card-top p {
   margin: 4px 0 0;
   color: var(--muted);
-  font-weight: 800;
+  font-weight: 400;
 }
 
 .account-project-description {
