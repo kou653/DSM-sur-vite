@@ -8,7 +8,8 @@ import { useAuth } from "../contexts/auth-context.js";
 
 function ParcelleDetailsPage() {
   const { role, selectedProjectId } = useAuth();
-  const { parcelleId, projectId } = useParams();
+  const { parcelleId } = useParams();
+  // const { parcelleId, projectId } = useParams();
 
   // Core parcelle info
   const [parcelle, setParcelle] = useState(null);
@@ -242,10 +243,10 @@ function ParcelleDetailsPage() {
   const progressPercentage = objectifCible > 0 ? Math.min((objectifAtteint / objectifCible) * 100, 100) : 0;
   const canManage = ["administrateur", "agent terrain"].includes(role);
   const resolvedProjectId = projectId || selectedProjectId;
-  const documentationsHref =
-    resolvedProjectId && parcelleId
-      ? `/dashboard/projet/${resolvedProjectId}/parcelles/${parcelleId}/documentations`
-      : "/dashboard";
+  // const documentationsHref =
+  //   resolvedProjectId && parcelleId
+  //     ? `/dashboard/projet/${resolvedProjectId}/parcelles/${parcelleId}/documentations`
+  //     : "/dashboard";
 
   return (
     <section className="users-page" style={{ paddingBottom: "4rem" }}>
@@ -536,7 +537,7 @@ function ParcelleDetailsPage() {
                   <th>Date de plantation</th>
                   <th>État</th>
                   <th>Documenter</th>
-                  <th>Voir la documentation</th>
+                  {/* <th>Voir la documentation</th> */}
                 </tr>
               </thead>
               <tbody>
@@ -571,7 +572,7 @@ function ParcelleDetailsPage() {
                         <span className="muted-text">--</span>
                       )}
                     </td>
-                    <td>
+                    {/* <td>
                       <Link
                         className="secondary-action"
                         style={{ padding: "6px 10px", fontSize: "0.85rem", display: "inline-flex", alignItems: "center" }}
@@ -579,7 +580,7 @@ function ParcelleDetailsPage() {
                       >
                         Voir la documentation
                       </Link>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>
