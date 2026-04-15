@@ -12,11 +12,12 @@ import {
   TreePine,
   UserCircle2,
   Users,
+  User,
   X,
 } from "lucide-react";
 import { Download } from "lucide-react";
-import { useState, useEffect } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useRef, useState, useEffect } from "react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context.js";
 
 function DashboardLayout() {
@@ -24,6 +25,19 @@ function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  // Fermer le menu si on clique ailleurs
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -212,9 +226,9 @@ function DashboardLayout() {
             <p className="dashboard-user-name">{user?.nom_complet || "Utilisateur"}</p>
             <p className="dashboard-user-role">{role || "Profil"}</p>
           </div>
-          <button type="button" className="dashboard-logout" onClick={logout}>
+          {/* <button type="button" className="dashboard-logout" onClick={logout}>
             <LogOut size={15} />
-          </button>
+          </button> */}
         </div>
       </aside>
 
@@ -240,7 +254,7 @@ function DashboardLayout() {
           </button>
 
           <div className="dashboard-topbar-user" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button 
+            <button
               onClick={() => {
                 if (deferredPrompt) {
                   handleInstallClick();
@@ -248,12 +262,12 @@ function DashboardLayout() {
                   alert("L'installation PWA n'est pas encore disponible. Le navigateur n'a pas déclenché l'événement (peut-être l'app est-elle déjà installée, ou le cache doit être vidé).");
                 }
               }}
-              className="dashboard-add-button" 
-              style={{ 
-                padding: '4px 10px', 
-                fontSize: '0.85rem', 
-                display: 'flex', 
-                alignItems: 'center', 
+              className="dashboard-add-button"
+              style={{
+                padding: '4px 10px',
+                fontSize: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
                 gap: '4px',
                 opacity: deferredPrompt ? 1 : 0.6
               }}
@@ -261,13 +275,74 @@ function DashboardLayout() {
             >
               <Download size={14} /> Installer
             </button>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-              <div className="dashboard-topbar-avatar">
-                {(user?.nom_complet || "U").slice(0, 1).toUpperCase()}
+
+            <div style={{ position: "relative" }} ref={menuRef}>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "7px", cursor: "pointer" }}
+                onClick={() => setMenuOpen(prev => !prev)}
+              >
+                <div className="dashboard-topbar-avatar">
+                  {(user?.nom_complet || "U").slice(0, 1).toUpperCase()}
+                </div>
+                <span>{user?.nom_complet || "Utilisateur"}</span>
+                <ChevronDown size={14} strokeWidth={2.2} />
               </div>
-              <span>{user?.nom_complet || "Utilisateur"}</span>
-              <ChevronDown size={14} strokeWidth={2.2} />
+
+              {menuOpen && (
+                <div style={{
+                  position: "absolute",
+                  top: "calc(100% + 8px)",
+                  right: 0,
+                  background: "#ffffff",
+                  border: "1px solid #b9e7cb",
+                  borderRadius: "12px",
+                  boxShadow: "0 8px 24px rgba(20,150,85,0.1)",
+                  minWidth: "200px",
+                  zIndex: 100,
+                  overflow: "hidden"
+                }}>
+
+                  {/* Nom et email */}
+                  <div style={{ padding: "12px 16px" }}>
+                    <p style={{ margin: 0, fontWeight: "600", fontSize: "0.95rem", color: "#0f1c10" }}>
+                      {user?.nom_complet || "Utilisateur"}
+                    </p>
+                    <p style={{ margin: "2px 0 0", fontSize: "0.82rem", color: "#7d8d80" }}>
+                      {user?.email || ""}
+                    </p>
+                  </div>
+
+                  <div style={{ height: "1px", background: "#b9e7cb" }} />
+
+                  <Link
+                    to="/dashboard/compte"
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "8px",
+                      padding: "11px 16px", color: "#0f1c10",
+                      textDecoration: "none", fontSize: "0.92rem"
+                    }}
+                  >
+                    <User size={15} /> Mon compte
+                  </Link>
+
+                  <div style={{ height: "1px", background: "#b9e7cb" }} />
+
+                  <button
+                    type="button"
+                    className="dashboard-logout"
+                    onClick={() => { logout(); setMenuOpen(false); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "8px",
+                      width: "100%", padding: "14px 16px",
+                      fontSize: "0.92rem", border: "none",
+                      background: "none", cursor: "pointer", color: "#ff0000ff"
+                    }}
+                  >
+                    <LogOut size={15} /> Se déconnecter
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
