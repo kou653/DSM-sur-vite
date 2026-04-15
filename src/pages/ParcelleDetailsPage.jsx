@@ -8,8 +8,7 @@ import { useAuth } from "../contexts/auth-context.js";
 
 function ParcelleDetailsPage() {
   const { role, selectedProjectId } = useAuth();
-  const { parcelleId } = useParams();
-  // const { parcelleId, projectId } = useParams();
+  const { parcelleId, projectId } = useParams();
 
   // Core parcelle info
   const [parcelle, setParcelle] = useState(null);
