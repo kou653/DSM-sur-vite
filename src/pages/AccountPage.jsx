@@ -1,5 +1,6 @@
 import { BriefcaseBusiness, Mail, ShieldCheck } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getProjet } from "../api/projets.js";
 import { useAuth } from "../contexts/auth-context.js";
 
 function getRoleLabel(role) {
@@ -38,13 +39,76 @@ function normalizeProjects(projects) {
   }));
 }
 
+function normalizeProjectDetail(payload) {
+  const project = payload?.projet || payload;
+
+  return {
+    id: Number(project?.id),
+    name: project?.nom || project?.name || `Projet ${project?.id ?? ""}`,
+    region: project?.region || "Region non renseignee",
+    description:
+      project?.description || "Aucune description disponible pour ce projet.",
+  };
+}
+
 function AccountPage() {
   const { user, role } = useAuth();
 
   const name = user?.nom_complet || "Utilisateur";
   const email = user?.email || "Email non renseigne";
   const roleLabel = getRoleLabel(role);
-  const projects = useMemo(() => normalizeProjects(user?.projects), [user?.projects]);
+  const assignedProjects = useMemo(
+    () => normalizeProjects(user?.projects),
+    [user?.projects]
+  );
+  const [projects, setProjects] = useState(assignedProjects);
+  const [loadingProjects, setLoadingProjects] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    setProjects(assignedProjects);
+
+    async function fetchProjects() {
+      if (assignedProjects.length === 0) {
+        return;
+      }
+
+      setLoadingProjects(true);
+
+      try {
+        const responses = await Promise.all(
+          assignedProjects.map(async (project) => {
+            if (!project.id) {
+              return project;
+            }
+
+            try {
+              const { data } = await getProjet(project.id);
+              const normalized = normalizeProjectDetail(data);
+              return normalized.id ? normalized : project;
+            } catch {
+              return project;
+            }
+          })
+        );
+
+        if (isMounted) {
+          setProjects(responses);
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingProjects(false);
+        }
+      }
+    }
+
+    fetchProjects();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [assignedProjects]);
 
   return (
     <section className="users-page">
@@ -92,7 +156,7 @@ function AccountPage() {
               <BriefcaseBusiness size={15} strokeWidth={2} />
               <span>Projets affectes</span>
             </p>
-            <h3>{projects.length}</h3>
+            <h3>{assignedProjects.length}</h3>
           </article>
         </div>
       </section>
@@ -102,7 +166,11 @@ function AccountPage() {
           <h2>Mes projets</h2>
         </div>
 
-        {projects.length === 0 ? (
+        {loadingProjects ? (
+          <p className="muted-text">Chargement des projets...</p>
+        ) : null}
+
+        {!loadingProjects && projects.length === 0 ? (
           <p className="muted-text">
             Aucun projet ne vous a ete affecte pour le moment.
           </p>
@@ -125,4 +193,3 @@ function AccountPage() {
 }
 
 export default AccountPage;
-
