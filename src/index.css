@@ -1903,6 +1903,31 @@ textarea {
   height: 360px;
 }
 
+.monitoring-doc-list {
+  display: grid;
+  gap: 12px;
+}
+
+.monitoring-doc-item {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-alt);
+}
+
+.monitoring-doc-item-top p {
+  margin: 0;
+  color: var(--text);
+}
+
+.monitoring-doc-text {
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--text);
+}
+
 .monitoring-empty-state {
   min-height: 120px;
   display: grid;

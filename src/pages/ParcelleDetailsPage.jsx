@@ -1,8 +1,8 @@
-import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronRight, Crosshair, MapPinned, Plus, Target, X, ZoomIn } from "lucide-react";
+import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronRight, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getParcelle } from "../api/parcelles.js";
-import { createPlant, getParcellePlants, updatePlantStatus } from "../api/plants.js";
+import { createPlant, getParcellePlants, updatePlantDocumentation, updatePlantStatus } from "../api/plants.js";
 import { getEspeces } from "../api/referentiels.js";
 import { useAuth } from "../contexts/auth-context.js";
 
@@ -18,6 +18,14 @@ function ParcelleDetailsPage() {
   // Plants
   const [plants, setPlants] = useState([]);
   const [loadingPlants, setLoadingPlants] = useState(true);
+
+  // Plant documentation
+  const [isDocumentationFormOpen, setIsDocumentationFormOpen] = useState(false);
+  const [documentationPlant, setDocumentationPlant] = useState(null);
+  const [documentationText, setDocumentationText] = useState("");
+  const [documentationSubmitting, setDocumentationSubmitting] = useState(false);
+  const [documentationError, setDocumentationError] = useState("");
+  const [documentationSuccess, setDocumentationSuccess] = useState("");
 
   // Reference data
   const [especes, setEspeces] = useState([]);
@@ -93,6 +101,50 @@ function ParcelleDetailsPage() {
       // Handle plant refresh fail
     }
   };
+
+  function openDocumentationForm(plant) {
+    setDocumentationSuccess("");
+    setDocumentationError("");
+    setDocumentationPlant(plant);
+    setDocumentationText(plant?.documentation || "");
+    setIsDocumentationFormOpen(true);
+  }
+
+  function closeDocumentationForm() {
+    setIsDocumentationFormOpen(false);
+    setDocumentationPlant(null);
+    setDocumentationText("");
+    setDocumentationSubmitting(false);
+    setDocumentationError("");
+  }
+
+  async function handleSaveDocumentation(event) {
+    event.preventDefault();
+
+    if (!documentationPlant?.id) {
+      setDocumentationError("Plant introuvable.");
+      return;
+    }
+
+    setDocumentationSubmitting(true);
+    setDocumentationError("");
+    setDocumentationSuccess("");
+
+    try {
+      await updatePlantDocumentation(documentationPlant.id, documentationText);
+      await refreshPlants();
+      setDocumentationSuccess("Documentation enregistree.");
+      setIsDocumentationFormOpen(false);
+      setDocumentationPlant(null);
+      setDocumentationText("");
+    } catch (error) {
+      setDocumentationError(
+        error.response?.data?.message || "Impossible d'enregistrer la documentation."
+      );
+    } finally {
+      setDocumentationSubmitting(false);
+    }
+  }
 
   function handlePlantInputChange(e) {
     const { name, value } = e.target;
@@ -333,6 +385,62 @@ function ParcelleDetailsPage() {
           </div>
         )}
 
+        {canManage && isDocumentationFormOpen ? (
+          <div style={{ padding: "1.5rem", background: "var(--surface-hover)", borderBottom: "1px solid var(--border)" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
+              <div>
+                <h3 style={{ marginTop: 0, marginBottom: "0.25rem", fontSize: "1.1rem" }}>
+                  Documenter le plant #{documentationPlant?.id}
+                </h3>
+                <p className="muted-text" style={{ marginTop: 0 }}>
+                  {documentationPlant?.espece?.nom_commun || "Espece"} ({documentationPlant?.espece?.nom_scientifique || "-"})
+                </p>
+              </div>
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={closeDocumentationForm}
+                disabled={documentationSubmitting}
+              >
+                Fermer
+              </button>
+            </div>
+
+            {documentationError ? (
+              <p className="form-error" style={{ marginBottom: "1rem" }}>
+                {documentationError}
+              </p>
+            ) : null}
+
+            <form onSubmit={handleSaveDocumentation} style={{ display: "grid", gap: "12px" }}>
+              <label className="filter-field">
+                <span>Documentation</span>
+                <textarea
+                  rows={4}
+                  value={documentationText}
+                  onChange={(event) => setDocumentationText(event.target.value)}
+                  placeholder="Decrivez l'observation, les actions menees, ou toute information utile..."
+                />
+              </label>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                <button type="submit" className="primary-action" disabled={documentationSubmitting}>
+                  {documentationSubmitting ? "Enregistrement..." : "Enregistrer"}
+                </button>
+                <button type="button" className="secondary-action" onClick={closeDocumentationForm} disabled={documentationSubmitting}>
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : null}
+
+        {documentationSuccess ? (
+          <p className="evolution-success" style={{ margin: "12px 18px 0" }}>
+            {documentationSuccess}
+          </p>
+        ) : null}
+
         {/* Plants Data Table */}
         {!loadingPlants && plants.length === 0 ? (
           <p className="muted-text" style={{ padding: "1.5rem" }}>Aucun plant enregistré pour cette parcelle.</p>
@@ -352,6 +460,7 @@ function ParcelleDetailsPage() {
                   <th>GPS</th>
                   <th>Date de plantation</th>
                   <th>État</th>
+                  <th>Documenter</th>
                 </tr>
               </thead>
               <tbody>
@@ -370,6 +479,21 @@ function ParcelleDetailsPage() {
                         {plant.status === "vivant" ? <CheckCircle2 size={12} /> : <X size={12} />}
                         {plant.status === "vivant" ? "Vivant" : "Mort"}
                       </span>
+                    </td>
+                    <td>
+                      {canManage ? (
+                        <button
+                          type="button"
+                          className="secondary-action"
+                          style={{ padding: "6px 10px", fontSize: "0.85rem", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                          onClick={() => openDocumentationForm(plant)}
+                        >
+                          <FileText size={14} strokeWidth={2} />
+                          Documenter
+                        </button>
+                      ) : (
+                        <span className="muted-text">--</span>
+                      )}
                     </td>
                   </tr>
                 ))}

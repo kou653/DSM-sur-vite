@@ -61,6 +61,7 @@ function normalizePlants(payload) {
     id: Number(plant.id),
     datePlantation: plant.date_plantation || null,
     status: plant.status || null,
+    documentation: plant.documentation || null,
     especeId: Number(plant.espece_id ?? plant.espece?.id ?? 0) || null,
     especeNom:
       plant.espece?.nom_commun ||
@@ -376,6 +377,45 @@ function MonitoringPage() {
                   </ResponsiveContainer>
                 </div>
               )}
+            </section>
+
+            <section className="monitoring-card monitoring-doc-card">
+              <div className="monitoring-card-heading">
+                <h2>Documentation</h2>
+                <p>Retrouvez ici les documentations laissees sur les plants.</p>
+              </div>
+
+              {loadingPlants ? (
+                <p className="muted-text">Chargement des documentations...</p>
+              ) : (() => {
+                const documentedPlants = filteredPlants.filter((plant) =>
+                  Boolean(String(plant.documentation || "").trim())
+                );
+
+                if (documentedPlants.length === 0) {
+                  return (
+                    <p className="muted-text">
+                      Aucune documentation n'est disponible pour les filtres selectionnes.
+                    </p>
+                  );
+                }
+
+                return (
+                  <div className="monitoring-doc-list">
+                    {documentedPlants.map((plant) => (
+                      <article key={plant.id} className="monitoring-doc-item">
+                        <div className="monitoring-doc-item-top">
+                          <p>
+                            Plant #{plant.id}
+                            {plant.especeNom ? ` - ${plant.especeNom}` : ""}
+                          </p>
+                        </div>
+                        <p className="monitoring-doc-text">{plant.documentation}</p>
+                      </article>
+                    ))}
+                  </div>
+                );
+              })()}
             </section>
           </>
         ) : null}
