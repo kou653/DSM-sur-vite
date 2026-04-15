@@ -1,4 +1,4 @@
-import { MapPinned, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Crosshair, MapPinned, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context.js";
@@ -62,6 +62,9 @@ function ParcellesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingParcelle, setEditingParcelle] = useState(null);
   const [formState, setFormState] = useState(buildInitialFormState());
+  const [gpsPicking, setGpsPicking] = useState(false);
+  const [gpsError, setGpsError] = useState("");
+  const [gpsSuccess, setGpsSuccess] = useState("");
 
   const fetchParcelles = useCallback(async () => {
     if (!selectedProjectId) {
@@ -144,6 +147,8 @@ function ParcellesPage() {
     setEditingParcelle(null);
     setFormState(buildInitialFormState());
     setActionError("");
+    setGpsError("");
+    setGpsSuccess("");
   }
 
   function handleInputChange(event) {
@@ -152,6 +157,47 @@ function ParcellesPage() {
       ...current,
       [name]: value,
     }));
+  }
+
+  function getCurrentPosition() {
+    if (!navigator.geolocation) {
+      return Promise.reject(new Error("Geolocalisation indisponible."));
+    }
+
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve(position),
+        (error) => reject(error),
+        { enableHighAccuracy: true, timeout: 12000 }
+      );
+    });
+  }
+
+  async function handlePickCurrentGpsForParcelle() {
+    setGpsSuccess("");
+    setGpsError("");
+    setGpsPicking(true);
+
+    try {
+      const position = await getCurrentPosition();
+      const { latitude, longitude } = position.coords || {};
+
+      if (typeof latitude !== "number" || typeof longitude !== "number") {
+        throw new Error("Coordonnees GPS invalides.");
+      }
+
+      setFormState((current) => ({
+        ...current,
+        lat: String(latitude),
+        lng: String(longitude),
+      }));
+
+      setGpsSuccess("Position actuelle appliquee au formulaire.");
+    } catch (error) {
+      setGpsError(error?.message || "Impossible de recuperer la position actuelle.");
+    } finally {
+      setGpsPicking(false);
+    }
   }
 
   async function handleSubmit(event) {
@@ -248,6 +294,8 @@ function ParcellesPage() {
       {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
       {actionError ? <p className="form-error">{actionError}</p> : null}
       {successMessage ? <p className="evolution-success">{successMessage}</p> : null}
+      {gpsError ? <p className="form-error">{gpsError}</p> : null}
+      {gpsSuccess ? <p className="evolution-success">{gpsSuccess}</p> : null}
 
       <div className="dashboard-stat-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", marginBottom: "1rem", gap: "1.5rem" }}>
         <article style={{ 
@@ -360,6 +408,19 @@ function ParcellesPage() {
                 <input type="number" step="0.00000001" name="lng" value={formState.lng} onChange={handleInputChange} required />
               </label>
             </div>
+
+            {!editingParcelle ? (
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  className="secondary-action"
+                  onClick={handlePickCurrentGpsForParcelle}
+                  disabled={gpsPicking}
+                >
+                  <Crosshair size={14} strokeWidth={2} /> {gpsPicking ? "Position..." : "Position actuelle"}
+                </button>
+              </div>
+            ) : null}
 
             <div className="crud-actions">
               <button type="submit" className="primary-action" disabled={submitting}>

@@ -8,8 +8,7 @@ import { useAuth } from "../contexts/auth-context.js";
 
 function ParcelleDetailsPage() {
   const { role, selectedProjectId } = useAuth();
-  const { parcelleId } = useParams();
-  // const { parcelleId, projectId } = useParams();
+  const { parcelleId, projectId } = useParams();
 
   // Core parcelle info
   const [parcelle, setParcelle] = useState(null);
@@ -27,6 +26,11 @@ function ParcelleDetailsPage() {
   const [documentationSubmitting, setDocumentationSubmitting] = useState(false);
   const [documentationError, setDocumentationError] = useState("");
   const [documentationSuccess, setDocumentationSuccess] = useState("");
+
+  // GPS helper (geolocation)
+  const [gpsPicking, setGpsPicking] = useState(false);
+  const [gpsError, setGpsError] = useState("");
+  const [gpsSuccess, setGpsSuccess] = useState("");
 
   // Reference data
   const [especes, setEspeces] = useState([]);
@@ -147,6 +151,47 @@ function ParcelleDetailsPage() {
     }
   }
 
+  function getCurrentPosition() {
+    if (!navigator.geolocation) {
+      return Promise.reject(new Error("Geolocalisation indisponible."));
+    }
+
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve(position),
+        (error) => reject(error),
+        { enableHighAccuracy: true, timeout: 12000 }
+      );
+    });
+  }
+
+  async function handlePickCurrentGpsForForm() {
+    setGpsSuccess("");
+    setGpsError("");
+    setGpsPicking(true);
+
+    try {
+      const position = await getCurrentPosition();
+      const { latitude, longitude } = position.coords || {};
+
+      if (typeof latitude !== "number" || typeof longitude !== "number") {
+        throw new Error("Coordonnees GPS invalides.");
+      }
+
+      setPlantFormState((current) => ({
+        ...current,
+        lat: String(latitude),
+        lng: String(longitude),
+      }));
+
+      setGpsSuccess("Position actuelle appliquee au formulaire.");
+    } catch (error) {
+      setGpsError(error?.message || "Impossible de recuperer la position actuelle.");
+    } finally {
+      setGpsPicking(false);
+    }
+  }
+
   function handlePlantInputChange(e) {
     const { name, value } = e.target;
     setPlantFormState(cur => ({ ...cur, [name]: value }));
@@ -196,10 +241,11 @@ function ParcelleDetailsPage() {
   const objectifAtteint = parcelle.objectif_atteint || 0;
   const progressPercentage = objectifCible > 0 ? Math.min((objectifAtteint / objectifCible) * 100, 100) : 0;
   const canManage = ["administrateur", "agent terrain"].includes(role);
-  // const documentationsHref =
-  //   projectId && parcelleId
-  //     ? `/dashboard/projet/${projectId}/parcelles/${parcelleId}/documentations`
-  //     : "/dashboard";
+  const resolvedProjectId = projectId || selectedProjectId;
+  const documentationsHref =
+    resolvedProjectId && parcelleId
+      ? `/dashboard/projet/${resolvedProjectId}/parcelles/${parcelleId}/documentations`
+      : "/dashboard";
 
   return (
     <section className="users-page" style={{ paddingBottom: "4rem" }}>
@@ -309,6 +355,8 @@ function ParcelleDetailsPage() {
           <div style={{ padding: "1.5rem", background: "var(--surface-hover)", borderBottom: "1px solid var(--border)" }}>
             <h3 style={{ marginTop: 0, marginBottom: "1rem", fontSize: "1.1rem" }}>Enregistrer un nouveau plant</h3>
             {plantFormError && <p className="form-error" style={{ marginBottom: "1rem" }}>{plantFormError}</p>}
+            {gpsError ? <p className="form-error" style={{ marginBottom: "1rem" }}>{gpsError}</p> : null}
+            {gpsSuccess ? <p className="evolution-success" style={{ marginBottom: "1rem" }}>{gpsSuccess}</p> : null}
 
             <form onSubmit={handleCreatePlant} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", alignItems: "start" }}>
               <div className="filter-field" style={{ position: "relative" }}>
@@ -371,6 +419,17 @@ function ParcelleDetailsPage() {
                   <span>GPS Lng</span>
                   <input type="number" step="0.00000001" name="lng" value={plantFormState.lng} onChange={handlePlantInputChange} required />
                 </label>
+              </div>
+
+              <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  className="secondary-action"
+                  onClick={handlePickCurrentGpsForForm}
+                  disabled={gpsPicking}
+                >
+                  <Crosshair size={14} strokeWidth={2} /> {gpsPicking ? "Position..." : "Position actuelle"}
+                </button>
               </div>
 
               <label className="filter-field">
@@ -446,6 +505,17 @@ function ParcelleDetailsPage() {
           </p>
         ) : null}
 
+        {gpsError ? (
+          <p className="form-error" style={{ margin: "12px 18px 0" }}>
+            {gpsError}
+          </p>
+        ) : null}
+        {gpsSuccess ? (
+          <p className="evolution-success" style={{ margin: "12px 18px 0" }}>
+            {gpsSuccess}
+          </p>
+        ) : null}
+
         {/* Plants Data Table */}
         {!loadingPlants && plants.length === 0 ? (
           <p className="muted-text" style={{ padding: "1.5rem" }}>Aucun plant enregistré pour cette parcelle.</p>
@@ -466,7 +536,7 @@ function ParcelleDetailsPage() {
                   <th>Date de plantation</th>
                   <th>État</th>
                   <th>Documenter</th>
-                  {/* <th>Voir la documentation</th> */}
+                  <th>Voir la documentation</th>
                 </tr>
               </thead>
               <tbody>
@@ -501,7 +571,7 @@ function ParcelleDetailsPage() {
                         <span className="muted-text">--</span>
                       )}
                     </td>
-                    {/* <td>
+                    <td>
                       <Link
                         className="secondary-action"
                         style={{ padding: "6px 10px", fontSize: "0.85rem", display: "inline-flex", alignItems: "center" }}
@@ -509,7 +579,7 @@ function ParcelleDetailsPage() {
                       >
                         Voir la documentation
                       </Link>
-                    </td> */}
+                    </td>
                   </tr>
                 ))}
               </tbody>
