@@ -158,11 +158,11 @@ function ParcelleDetailsPage() {
         <div className="users-hero" style={{ margin: 0 }}>
           <div>
             <h1>{parcelle.nom || `Parcelle #${parcelle.id}`}</h1>
-            <p style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            {/* <p style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
               <span>Détails et évolution de la zone</span>
               <ChevronRight size={14} />
               <strong style={{ color: "var(--primary)" }}>{parcelle.projet?.nom || "Projet Actif"}</strong>
-            </p>
+            </p> */}
           </div>
         </div>
       </div>

@@ -1211,7 +1211,7 @@ textarea {
   padding: 16px 18px;
   border: 1px solid var(--border);
   border-radius: 18px;
-  background: #ffffff;
+  background: var(--surface-alt);
   box-shadow: 0 10px 22px rgba(52, 88, 62, 0.08);
   min-width: 0;
 }
@@ -1219,7 +1219,7 @@ textarea {
 .account-project-card-top h3 {
   margin: 0;
   font-size: 1.15rem;
-  font-weight: 400;
+  font-weight: 800;
 }
 
 .account-project-card-top p {
