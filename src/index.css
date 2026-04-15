@@ -1092,6 +1092,150 @@ textarea {
   font-size: 1.05rem;
 }
 
+.account-header {
+  padding: 18px 18px 8px;
+}
+
+.account-header h1 {
+  margin: 0;
+  color: #111c12;
+  font-size: 2rem;
+  line-height: 1.05;
+}
+
+.account-header p {
+  margin: 6px 0 0;
+  color: #182119;
+  font-size: 1.05rem;
+}
+
+.account-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid #d8e7da;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 26px rgba(52, 88, 62, 0.1);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.account-card-heading h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.account-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.account-avatar {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: #e9f8ef;
+  color: #149655;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.account-profile-meta {
+  display: grid;
+  gap: 6px;
+}
+
+.account-name {
+  margin: 0;
+  color: #04130a;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.account-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.account-stat-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-alt);
+  min-width: 0;
+}
+
+.account-stat-card p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.account-stat-card h3 {
+  margin: 0;
+  color: #04130a;
+  font-size: 1.05rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-stat-card-full {
+  grid-column: 1 / -1;
+}
+
+.account-project-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.account-project-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 22px rgba(52, 88, 62, 0.08);
+  min-width: 0;
+}
+
+.account-project-card-top h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.account-project-card-top p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.account-project-description {
+  margin: 0;
+  color: #182119;
+}
+
+@media (max-width: 960px) {
+
+  .account-stats-grid,
+  .account-project-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .users-hero-icon {
   display: grid;
   place-items: center;
@@ -1282,11 +1426,11 @@ textarea {
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #c8e2cc;
   background: #eff9f0;
   color: #357048;
-  font-size: 0.96rem;
+  font-size: 0.94rem;
 }
 
 .users-role-pill-admin {

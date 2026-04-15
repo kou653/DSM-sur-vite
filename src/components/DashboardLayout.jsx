@@ -143,7 +143,7 @@ function DashboardLayout() {
       title: "Compte",
       items: [
         {
-          to: "/dashboard",
+          to: "/dashboard/compte",
           label: "Mon compte",
           icon: UserCircle2,
         },

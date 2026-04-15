@@ -4,6 +4,7 @@ import ProjectAccessGuard from "./components/guards/ProjectAccessGuard.jsx";
 import ProtectedRoute from "./components/guards/ProtectedRoute.jsx";
 import RoleGuard from "./components/guards/RoleGuard.jsx";
 import AccessDeniedPage from "./pages/AccessDeniedPage.jsx";
+import AccountPage from "./pages/AccountPage.jsx";
 import CooperativesPage from "./pages/CooperativesPage.jsx";
 import ProjectLayout from "./components/ProjectLayout.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
@@ -29,6 +30,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<ProjectListPage />} />
+          <Route path="/dashboard/compte" element={<AccountPage />} />
 
           <Route element={<RoleGuard allowedRoles={["administrateur"]} />}>
             <Route path="/dashboard/utilisateurs" element={<UsersPage />} />
