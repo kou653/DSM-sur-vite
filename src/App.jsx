@@ -17,6 +17,7 @@ import MapPage from "./pages/MapPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import ParcellesPage from "./pages/ParcellesPage.jsx";
 import ParcelleDetailsPage from "./pages/ParcelleDetailsPage.jsx";
+// import PlantDocumentationsPage from "./pages/PlantDocumentationsPage.jsx";
 import ProjectListPage from "./pages/ProjectListPage.jsx";
 import UsersPage from "./pages/UsersPage.jsx";
 
@@ -43,6 +44,10 @@ function App() {
               <Route path="parcelles">
                 <Route index element={<ParcellesPage />} />
                 <Route path=":parcelleId" element={<ParcelleDetailsPage />} />
+                {/* <Route
+                  path=":parcelleId/documentations"
+                  element={<PlantDocumentationsPage />}
+                /> */}
               </Route>
               <Route path="carte" element={<MapPage />} />
               <Route path="cooperatives" element={<CooperativesPage />} />
