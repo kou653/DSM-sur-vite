@@ -177,7 +177,7 @@ function DashboardPage() {
         <article className="dashboard-stat-card">
           <div className="dashboard-stat-icon"><Target size={18} /></div>
           <div>
-            <p style={{ textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em" }}>Objectif Projet</p>
+            <p style={{ textTransform: "uppercase", fontSize: "0.78rem", letterSpacing: "0.05em" }}>Objectif Projet</p>
             <h3 style={{ fontSize: "1.6rem" }}>{objProjet} plants</h3>
           </div>
         </article>
@@ -186,7 +186,7 @@ function DashboardPage() {
         <Link to={`/dashboard/projet/${selectedProjectId}/parcelles`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
           <div className="dashboard-stat-icon" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981" }}><Layers size={18} /></div>
           <div>
-            <p style={{ textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em" }}>Parcelles</p>
+            <p style={{ textTransform: "uppercase", fontSize: "0.78rem", letterSpacing: "0.05em" }}>Parcelles</p>
             <h3 style={{ fontSize: "1.6rem" }}>{parcelles.length}</h3>
           </div>
         </Link>
@@ -195,14 +195,14 @@ function DashboardPage() {
         <Link to={`/dashboard/projet/${selectedProjectId}/cooperatives`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
           <div className="dashboard-stat-icon" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981" }}><Users size={18} /></div>
           <div>
-            <p style={{ textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em" }}>Coopératives</p>
+            <p style={{ textTransform: "uppercase", fontSize: "0.78rem", letterSpacing: "0.05em" }}>Coopératives</p>
             <h3 style={{ fontSize: "1.6rem" }}>{cooperatives.length}</h3>
           </div>
         </Link>
 
         {/* Evolution */}
         <article className="dashboard-stat-card" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "center" }}>
-          <p style={{ margin: "0 0 0.4rem 0", textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: "0.35rem" }}>
+          <p style={{ margin: "0 0 0.4rem 0", textTransform: "uppercase", fontSize: "0.78rem", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: "0.35rem" }}>
             <Activity size={14} color="#0f7352ff" /> Évolution
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
@@ -217,7 +217,7 @@ function DashboardPage() {
         <article className="dashboard-stat-card">
           <div className="dashboard-stat-icon" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981" }}><Sprout size={18} /></div>
           <div>
-            <p style={{ textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em" }}>Plants vivants</p>
+            <p style={{ textTransform: "uppercase", fontSize: "0.78rem", letterSpacing: "0.05em" }}>Plants vivants</p>
             <h3 style={{ fontSize: "1.6rem" }}>{vivants}</h3>
           </div>
         </article>
@@ -226,7 +226,7 @@ function DashboardPage() {
         <Link to={`/dashboard/projet/${selectedProjectId}/monitoring`} className="dashboard-stat-card hover-card-effect" style={{ textDecoration: "none", color: "inherit" }}>
           <div className="dashboard-stat-icon" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981" }}><TrendingUp size={18} /></div>
           <div>
-            <p style={{ textTransform: "uppercase", fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.05em" }}>Taux survie</p>
+            <p style={{ textTransform: "uppercase", fontSize: "0.78rem", letterSpacing: "0.05em" }}>Taux survie</p>
             <h3 style={{ fontSize: "1.6rem" }}>{monitoring?.taux_survie}%</h3>
           </div>
         </Link>
@@ -310,8 +310,7 @@ function DashboardPage() {
                <li key={p.id} style={{ padding: "0.75rem 0", borderBottom: "1px solid var(--border-soft)", display: "flex", alignItems: "center", gap: "1rem" }}>
                  <span style={{ 
                    background: "var(--surface-hover)", 
-                   color: "var(--primary)", 
-                   fontWeight: "600", 
+                   color: "var(--primary)",  
                    padding: "0.25rem 0.5rem", 
                    borderRadius: "4px", 
                    fontSize: "0.85rem",

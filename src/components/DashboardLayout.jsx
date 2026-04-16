@@ -304,7 +304,7 @@ function DashboardLayout() {
 
                   {/* Nom et email */}
                   <div style={{ padding: "12px 16px" }}>
-                    <p style={{ margin: 0, fontWeight: "600", fontSize: "0.95rem", color: "#0f1c10" }}>
+                    <p style={{ margin: 0, fontSize: "0.95rem", color: "#0f1c10" }}>
                       {user?.nom_complet || "Utilisateur"}
                     </p>
                     <p style={{ margin: "2px 0 0", fontSize: "0.82rem", color: "#7d8d80" }}>

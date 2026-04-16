@@ -65,7 +65,7 @@ function EvolutionPage() {
 
       {!loading && parcelles.length > 0 ? (
         <div style={{
-          display: "grid", 
+          display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
           gap: "1.5rem",
           marginTop: "2rem"
@@ -86,28 +86,28 @@ function EvolutionPage() {
               }}
               className="hover-card-effect"
             >
-               <div style={{ padding: "2rem 1.5rem", flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
-                  <h3 style={{ margin: 0, fontSize: "1.3rem", color: "var(--text)", fontWeight: "700" }}>
-                    {parcelle.nom || `Parcelle #${parcelle.id}`}
-                  </h3>
-                  <span style={{ color: "var(--primary)", fontSize: "1rem", fontWeight: "600" }}>
-                    {Number(parcelle.superficie || 0)} ha
-                  </span>
-               </div>
-               
-               <div style={{ 
-                 background: "var(--surface-hover)", 
-                 padding: "1rem 1.5rem", 
-                 borderTop: "1px solid var(--border-soft)",
-                 display: "flex",
-                 alignItems: "center",
-                 justifyContent: "center",
-                 color: "var(--primary)",
-                 fontWeight: "600",
-                 fontSize: "0.95rem"
-               }}>
-                 <span>Voir les photos</span>
-               </div>
+              <div style={{ padding: "2rem 1.5rem", flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1.3rem", color: "var(--text)", fontWeight: "700" }}>
+                  {parcelle.nom || `Parcelle #${parcelle.id}`}
+                </h3>
+                <span style={{ color: "var(--primary)", fontSize: "1rem", fontWeight: "600" }}>
+                  {Number(parcelle.superficie || 0)} ha
+                </span>
+              </div>
+
+              <div style={{
+                background: "var(--surface-hover)",
+                padding: "1rem 1.5rem",
+                borderTop: "1px solid var(--border-soft)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--primary)",
+                fontWeight: "600",
+                fontSize: "0.95rem"
+              }}>
+                <span>Voir les photos</span>
+              </div>
             </Link>
           ))}
         </div>
