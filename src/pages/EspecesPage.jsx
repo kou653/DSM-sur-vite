@@ -1,4 +1,4 @@
-import { Leaf, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { ChevronDown, Leaf, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   createEspece,
@@ -32,6 +32,8 @@ function EspecesPage() {
   const { role } = useAuth();
   const [especes, setEspeces] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [columnFilters, setColumnFilters] = useState({ nom_commun: "", nom_scientifique: "" });
+  const [openDropdown, setOpenDropdown] = useState(null); // "nom_commun" | "nom_scientifique" | null
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [actionError, setActionError] = useState("");
@@ -61,20 +63,35 @@ function EspecesPage() {
     fetchEspeces();
   }, []);
 
+  useEffect(() => {
+    if (!openDropdown) return;
+    const close = () => setOpenDropdown(null);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [openDropdown]);
+
   const filteredEspeces = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
-    if (!normalizedSearch) {
-      return especes;
-    }
+    return especes.filter((espece) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        [espece.name, espece.scientificName].join(" ").toLowerCase().includes(normalizedSearch);
 
-    return especes.filter((espece) =>
-      [espece.name, espece.scientificName]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedSearch)
-    );
-  }, [especes, searchTerm]);
+      const matchesNomCommun =
+        !columnFilters.nom_commun || espece.name === columnFilters.nom_commun;
+
+      const matchesNomScientifique =
+        !columnFilters.nom_scientifique || espece.scientificName === columnFilters.nom_scientifique;
+
+      return matchesSearch && matchesNomCommun && matchesNomScientifique;
+    });
+  }, [especes, searchTerm, columnFilters]);
+
+  const uniqueValues = useMemo(() => ({
+    nom_commun: [...new Set(especes.map((e) => e.name))].sort(),
+    nom_scientifique: [...new Set(especes.map((e) => e.scientificName))].sort(),
+  }), [especes]);
 
   function openCreateForm() {
     setEditingEspece(null);
@@ -281,8 +298,72 @@ function EspecesPage() {
             <table className="users-table">
               <thead>
                 <tr>
-                  <th>Nom commun</th>
-                  <th>Nom scientifique</th>
+                  {[
+                    { key: "nom_commun", label: "Nom commun" },
+                    { key: "nom_scientifique", label: "Nom scientifique" },
+                  ].map(({ key, label }) => (
+                    <th key={key} style={{ position: "relative" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span>{label}</span>
+                        <button
+                          type="button"
+                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}
+                          onClick={(e) => { e.stopPropagation(); setOpenDropdown((prev) => (prev === key ? null : key)); }}
+                        >
+                          <ChevronDown size={13} strokeWidth={2} />
+                          {columnFilters[key] && (
+                            <span style={{
+                              display: "inline-block", width: 7, height: 7,
+                              borderRadius: "50%", background: "var(--color-primary, #16a34a)",
+                              marginLeft: 3,
+                            }} />
+                          )}
+                        </button>
+                      </div>
+
+                      {openDropdown === key && (
+                        <div
+                          style={{
+                            position: "absolute", top: "100%", left: 0, zIndex: 50,
+                            background: "var(--color-surface, #fff)",
+                            border: "1px solid var(--color-border, #e2e8f0)",
+                            borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+                            minWidth: 200, padding: "6px 0",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => { setColumnFilters((f) => ({ ...f, [key]: "" })); setOpenDropdown(null); }}
+                            style={{
+                              display: "block", width: "100%", textAlign: "left",
+                              padding: "7px 14px", background: "none", border: "none",
+                              cursor: "pointer", fontStyle: "italic",
+                              color: "var(--color-muted, #94a3b8)",
+                            }}
+                          >
+                            Tous
+                          </button>
+
+                          {uniqueValues[key].map((val) => (
+                            <button
+                              key={val}
+                              type="button"
+                              onClick={() => { setColumnFilters((f) => ({ ...f, [key]: val })); setOpenDropdown(null); }}
+                              style={{
+                                display: "block", width: "100%", textAlign: "left",
+                                padding: "7px 14px", background: columnFilters[key] === val
+                                  ? "var(--color-primary-light, #dcfce7)" : "none",
+                                border: "none", cursor: "pointer",
+                                fontWeight: columnFilters[key] === val ? 600 : 400,
+                              }}
+                            >
+                              {val}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </th>
+                  ))}
                   {role === "administrateur" ? <th>Actions</th> : null}
                 </tr>
               </thead>
@@ -327,6 +408,7 @@ function EspecesPage() {
       </section>
     </section>
   );
+
 }
 
 export default EspecesPage;

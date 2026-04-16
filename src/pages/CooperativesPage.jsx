@@ -1,4 +1,4 @@
-import { Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { ChevronDown, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   createProjetCooperative,
@@ -48,7 +48,8 @@ function CooperativesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCooperative, setEditingCooperative] = useState(null);
   const [formState, setFormState] = useState(buildInitialFormState());
-
+  const [columnFilters, setColumnFilters] = useState({ nom: "", entreprise: "", ville: "", village: "" });
+  const [openDropdown, setOpenDropdown] = useState(null);
   async function fetchCooperatives() {
     if (!selectedProjectId) {
       setCooperatives([]);
@@ -75,27 +76,37 @@ function CooperativesPage() {
     fetchCooperatives();
   }, [selectedProjectId]);
 
+  useEffect(() => {
+    if (!openDropdown) return;
+    const close = () => setOpenDropdown(null);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [openDropdown]);
+
   const filteredCooperatives = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
-    if (!normalizedSearch) {
-      return cooperatives;
-    }
+    return cooperatives.filter((cooperative) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        [cooperative.nom, cooperative.entreprise, cooperative.contact, cooperative.email, cooperative.ville, cooperative.village]
+          .join(" ").toLowerCase().includes(normalizedSearch);
 
-    return cooperatives.filter((cooperative) =>
-      [
-        cooperative.nom,
-        cooperative.entreprise,
-        cooperative.contact,
-        cooperative.email,
-        cooperative.ville,
-        cooperative.village,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedSearch)
-    );
-  }, [cooperatives, searchTerm]);
+      const matchesNom = !columnFilters.nom || cooperative.nom === columnFilters.nom;
+      const matchesEntreprise = !columnFilters.entreprise || cooperative.entreprise === columnFilters.entreprise;
+      const matchesVille = !columnFilters.ville || cooperative.ville === columnFilters.ville;
+      const matchesVillage = !columnFilters.village || cooperative.village === columnFilters.village;
+
+      return matchesSearch && matchesNom && matchesEntreprise && matchesVille && matchesVillage;
+    });
+  }, [cooperatives, searchTerm, columnFilters]);
+
+  const uniqueValues = useMemo(() => ({
+    nom: [...new Set(cooperatives.map((c) => c.nom))].sort(),
+    entreprise: [...new Set(cooperatives.map((c) => c.entreprise))].sort(),
+    ville: [...new Set(cooperatives.map((c) => c.ville))].sort(),
+    village: [...new Set(cooperatives.map((c) => c.village))].sort(),
+  }), [cooperatives]);
 
   function openCreateForm() {
     setEditingCooperative(null);
@@ -339,12 +350,87 @@ function CooperativesPage() {
             <table className="users-table">
               <thead>
                 <tr>
-                  <th>Nom</th>
-                  <th>Entreprise</th>
+                  {[
+                    { key: "nom", label: "Nom" },
+                    { key: "entreprise", label: "Entreprise" },
+                  ].map(({ key, label }) => (
+                    <th key={key} style={{ position: "relative" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span>{label}</span>
+                        <button
+                          type="button"
+                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}
+                          onClick={(e) => { e.stopPropagation(); setOpenDropdown((prev) => (prev === key ? null : key)); }}
+                        >
+                          <ChevronDown size={13} strokeWidth={2} />
+                          {columnFilters[key] && (
+                            <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "var(--primary, #16a34a)", marginLeft: 3 }} />
+                          )}
+                        </button>
+                      </div>
+                      {openDropdown === key && (
+                        <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "var(--surface, #fff)", border: "1px solid var(--border, #e2e8f0)", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.10)", minWidth: 200, padding: "6px 0" }}>
+                          <button type="button"
+                            onClick={() => { setColumnFilters((f) => ({ ...f, [key]: "" })); setOpenDropdown(null); }}
+                            style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted-text, #94a3b8)" }}
+                          >
+                            Tous
+                          </button>
+                          {uniqueValues[key].map((val) => (
+                            <button key={val} type="button"
+                              onClick={() => { setColumnFilters((f) => ({ ...f, [key]: val })); setOpenDropdown(null); }}
+                              style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: columnFilters[key] === val ? "var(--surface-hover, #dcfce7)" : "none", border: "none", cursor: "pointer", fontWeight: columnFilters[key] === val ? 600 : 400 }}
+                            >
+                              {val}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </th>
+                  ))}
+
                   <th>Contact</th>
                   <th>Email</th>
-                  <th>Ville</th>
-                  <th>Village</th>
+
+                  {[
+                    { key: "ville", label: "Ville" },
+                    { key: "village", label: "Village" },
+                  ].map(({ key, label }) => (
+                    <th key={key} style={{ position: "relative" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span>{label}</span>
+                        <button
+                          type="button"
+                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}
+                          onClick={(e) => { e.stopPropagation(); setOpenDropdown((prev) => (prev === key ? null : key)); }}
+                        >
+                          <ChevronDown size={13} strokeWidth={2} />
+                          {columnFilters[key] && (
+                            <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "var(--primary, #16a34a)", marginLeft: 3 }} />
+                          )}
+                        </button>
+                      </div>
+                      {openDropdown === key && (
+                        <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "var(--surface, #fff)", border: "1px solid var(--border, #e2e8f0)", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.10)", minWidth: 200, padding: "6px 0" }}>
+                          <button type="button"
+                            onClick={() => { setColumnFilters((f) => ({ ...f, [key]: "" })); setOpenDropdown(null); }}
+                            style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted-text, #94a3b8)" }}
+                          >
+                            Tous
+                          </button>
+                          {uniqueValues[key].map((val) => (
+                            <button key={val} type="button"
+                              onClick={() => { setColumnFilters((f) => ({ ...f, [key]: val })); setOpenDropdown(null); }}
+                              style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: columnFilters[key] === val ? "var(--surface-hover, #dcfce7)" : "none", border: "none", cursor: "pointer", fontWeight: columnFilters[key] === val ? 600 : 400 }}
+                            >
+                              {val}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </th>
+                  ))}
+
                   <th>Action</th>
                 </tr>
               </thead>

@@ -1,4 +1,4 @@
-import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronRight, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn } from "lucide-react";
+import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronDown, ChevronRight, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getParcelle } from "../api/parcelles.js";
@@ -18,7 +18,8 @@ function ParcelleDetailsPage() {
   // Plants
   const [plants, setPlants] = useState([]);
   const [loadingPlants, setLoadingPlants] = useState(true);
-
+  const [columnFilters, setColumnFilters] = useState({ espece: "", nom_scientifique: "", status: "" });
+  const [openDropdown, setOpenDropdown] = useState(null);
   // Plant documentation
   const [isDocumentationFormOpen, setIsDocumentationFormOpen] = useState(false);
   const [documentationPlant, setDocumentationPlant] = useState(null);
@@ -94,6 +95,13 @@ function ParcelleDetailsPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    if (!openDropdown) return;
+    const close = () => setOpenDropdown(null);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [openDropdown]);
 
   const refreshPlants = async () => {
     try {
@@ -241,6 +249,20 @@ function ParcelleDetailsPage() {
   const objectifAtteint = parcelle.objectif_atteint || 0;
   const progressPercentage = objectifCible > 0 ? Math.min((objectifAtteint / objectifCible) * 100, 100) : 0;
   const canManage = ["administrateur", "agent terrain"].includes(role);
+
+  const filteredPlants = plants.filter((plant) => {
+    const matchesEspece = !columnFilters.espece || (plant.espece?.nom_commun || "Inconnu") === columnFilters.espece;
+    const matchesScientifique = !columnFilters.nom_scientifique || (plant.espece?.nom_scientifique || "-") === columnFilters.nom_scientifique;
+    const matchesStatus = !columnFilters.status || plant.status === columnFilters.status;
+    return matchesEspece && matchesScientifique && matchesStatus;
+  });
+
+  const uniquePlantValues = {
+    espece: [...new Set(plants.map((p) => p.espece?.nom_commun || "Inconnu"))].sort(),
+    nom_scientifique: [...new Set(plants.map((p) => p.espece?.nom_scientifique || "-"))].sort(),
+    status: [...new Set(plants.map((p) => p.status))].sort(),
+  };
+
   const resolvedProjectId = projectId || selectedProjectId;
   // const documentationsHref =
   //   resolvedProjectId && parcelleId
@@ -530,17 +552,98 @@ function ParcelleDetailsPage() {
             <table className="users-table">
               <thead>
                 <tr>
-                  <th>Espèce</th>
-                  <th>Nom scientifique</th>
+                  {[
+                    { key: "espece", label: "Espèce" },
+                    { key: "nom_scientifique", label: "Nom scientifique" },
+                  ].map(({ key, label }) => (
+                    <th key={key} style={{ position: "relative" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span>{label}</span>
+                        <button
+                          type="button"
+                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}
+                          onClick={(e) => { e.stopPropagation(); setOpenDropdown((prev) => (prev === key ? null : key)); }}
+                        >
+                          <ChevronDown size={13} strokeWidth={2} />
+                          {columnFilters[key] && (
+                            <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "var(--primary, #16a34a)", marginLeft: 3 }} />
+                          )}
+                        </button>
+                      </div>
+
+                      {openDropdown === key && (
+                        <div style={{
+                          position: "absolute", top: "100%", left: 0, zIndex: 50,
+                          background: "var(--surface, #fff)", border: "1px solid var(--border, #e2e8f0)",
+                          borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.10)", minWidth: 200, padding: "6px 0",
+                        }}>
+                          <button type="button"
+                            onClick={() => { setColumnFilters((f) => ({ ...f, [key]: "" })); setOpenDropdown(null); }}
+                            style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted-text, #94a3b8)" }}
+                          >
+                            Tous
+                          </button>
+                          {uniquePlantValues[key].map((val) => (
+                            <button key={val} type="button"
+                              onClick={() => { setColumnFilters((f) => ({ ...f, [key]: val })); setOpenDropdown(null); }}
+                              style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: columnFilters[key] === val ? "var(--surface-hover, #dcfce7)" : "none", border: "none", cursor: "pointer", fontWeight: columnFilters[key] === val ? 600 : 400 }}
+                            >
+                              {val}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </th>
+                  ))}
+
                   <th>GPS</th>
                   <th>Date de plantation</th>
-                  <th>État</th>
+
+                  {/* Colonne État avec dropdown */}
+                  <th style={{ position: "relative" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span>État</span>
+                      <button
+                        type="button"
+                        style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}
+                        onClick={(e) => { e.stopPropagation(); setOpenDropdown((prev) => (prev === "status" ? null : "status")); }}
+                      >
+                        <ChevronDown size={13} strokeWidth={2} />
+                        {columnFilters.status && (
+                          <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "var(--primary, #16a34a)", marginLeft: 3 }} />
+                        )}
+                      </button>
+                    </div>
+
+                    {openDropdown === "status" && (
+                      <div style={{
+                        position: "absolute", top: "100%", left: 0, zIndex: 50,
+                        background: "var(--surface, #fff)", border: "1px solid var(--border, #e2e8f0)",
+                        borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.10)", minWidth: 150, padding: "6px 0",
+                      }}>
+                        <button type="button"
+                          onClick={() => { setColumnFilters((f) => ({ ...f, status: "" })); setOpenDropdown(null); }}
+                          style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted-text, #94a3b8)" }}
+                        >
+                          Tous
+                        </button>
+                        {uniquePlantValues.status.map((val) => (
+                          <button key={val} type="button"
+                            onClick={() => { setColumnFilters((f) => ({ ...f, status: val })); setOpenDropdown(null); }}
+                            style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: columnFilters.status === val ? "var(--surface-hover, #dcfce7)" : "none", border: "none", cursor: "pointer", fontWeight: columnFilters.status === val ? 600 : 400 }}
+                          >
+                            {val === "vivant" ? "Vivant" : "Mort"}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </th>
+
                   <th>Documenter</th>
-                  {/* <th>Voir la documentation</th> */}
                 </tr>
               </thead>
               <tbody>
-                {plants.map(plant => (
+                {filteredPlants.map(plant => (
                   <tr key={plant.id}>
                     <td><strong>{plant.espece?.nom_commun || "Inconnu"}</strong></td>
                     <td><em style={{ color: "var(--muted-text)" }}>{plant.espece?.nom_scientifique || "-"}</em></td>
@@ -582,6 +685,13 @@ function ParcelleDetailsPage() {
                     </td> */}
                   </tr>
                 ))}
+                {filteredPlants.length === 0 && (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: "center", padding: "1.5rem" }} className="muted-text">
+                      Aucun plant ne correspond aux filtres.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

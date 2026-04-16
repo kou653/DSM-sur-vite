@@ -93,7 +93,8 @@ function UsersPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formState, setFormState] = useState(buildInitialFormState());
-
+  const [columnFilters, setColumnFilters] = useState({ name: "", role: "" });
+  const [openDropdown, setOpenDropdown] = useState(null);
   async function fetchUsers() {
     setLoading(true);
     setErrorMessage("");
@@ -128,20 +129,32 @@ function UsersPage() {
     fetchProjects();
   }, []);
 
+  useEffect(() => {
+    if (!openDropdown) return;
+    const close = () => setOpenDropdown(null);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [openDropdown]);
+
   const filteredUsers = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
-    if (!normalizedSearch) {
-      return users;
-    }
+    return users.filter((user) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        [user.name, user.email, getRoleLabel(user.role)].join(" ").toLowerCase().includes(normalizedSearch);
 
-    return users.filter((user) =>
-      [user.name, user.email, getRoleLabel(user.role)]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedSearch)
-    );
-  }, [searchTerm, users]);
+      const matchesName = !columnFilters.name || user.name === columnFilters.name;
+      const matchesRole = !columnFilters.role || user.role === columnFilters.role;
+
+      return matchesSearch && matchesName && matchesRole;
+    });
+  }, [searchTerm, users, columnFilters]);
+
+  const uniqueValues = useMemo(() => ({
+    name: [...new Set(users.map((u) => u.name))].sort(),
+    role: [...new Set(users.map((u) => u.role).filter(Boolean))].sort(),
+  }), [users]);
 
   const stats = useMemo(() => {
     const total = users.length;
@@ -446,20 +459,79 @@ function UsersPage() {
             <table className="users-table">
               <thead>
                 <tr>
-                  <th>
-                    <span className="users-th-label">
-                      Nom
-                      <ChevronDown size={14} strokeWidth={2} />
-                    </span>
+                  {/* Nom */}
+                  <th style={{ position: "relative" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span>Nom</span>
+                      <button
+                        type="button"
+                        style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}
+                        onClick={(e) => { e.stopPropagation(); setOpenDropdown((prev) => (prev === "name" ? null : "name")); }}
+                      >
+                        <ChevronDown size={13} strokeWidth={2} />
+                        {columnFilters.name && (
+                          <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "var(--primary, #16a34a)", marginLeft: 3 }} />
+                        )}
+                      </button>
+                    </div>
+                    {openDropdown === "name" && (
+                      <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "var(--surface, #fff)", border: "1px solid var(--border, #e2e8f0)", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.10)", minWidth: 200, padding: "6px 0" }}>
+                        <button type="button"
+                          onClick={() => { setColumnFilters((f) => ({ ...f, name: "" })); setOpenDropdown(null); }}
+                          style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted-text, #94a3b8)" }}
+                        >
+                          Tous
+                        </button>
+                        {uniqueValues.name.map((val) => (
+                          <button key={val} type="button"
+                            onClick={() => { setColumnFilters((f) => ({ ...f, name: val })); setOpenDropdown(null); }}
+                            style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: columnFilters.name === val ? "var(--surface-hover, #dcfce7)" : "none", border: "none", cursor: "pointer", fontWeight: columnFilters.name === val ? 600 : 400 }}
+                          >
+                            {val}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </th>
+
                   <th>Email</th>
-                  <th>
-                    <span className="users-th-label">
-                      Role
-                      <ChevronDown size={14} strokeWidth={2} />
-                    </span>
+
+                  {/* Rôle */}
+                  <th style={{ position: "relative" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span>Rôle</span>
+                      <button
+                        type="button"
+                        style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}
+                        onClick={(e) => { e.stopPropagation(); setOpenDropdown((prev) => (prev === "role" ? null : "role")); }}
+                      >
+                        <ChevronDown size={13} strokeWidth={2} />
+                        {columnFilters.role && (
+                          <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "var(--primary, #16a34a)", marginLeft: 3 }} />
+                        )}
+                      </button>
+                    </div>
+                    {openDropdown === "role" && (
+                      <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "var(--surface, #fff)", border: "1px solid var(--border, #e2e8f0)", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.10)", minWidth: 180, padding: "6px 0" }}>
+                        <button type="button"
+                          onClick={() => { setColumnFilters((f) => ({ ...f, role: "" })); setOpenDropdown(null); }}
+                          style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted-text, #94a3b8)" }}
+                        >
+                          Tous
+                        </button>
+                        {uniqueValues.role.map((val) => (
+                          <button key={val} type="button"
+                            onClick={() => { setColumnFilters((f) => ({ ...f, role: val })); setOpenDropdown(null); }}
+                            style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: columnFilters.role === val ? "var(--surface-hover, #dcfce7)" : "none", border: "none", cursor: "pointer", fontWeight: columnFilters.role === val ? 600 : 400 }}
+                          >
+                            {getRoleLabel(val)}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </th>
-                  <th>Projets affectes</th>
+
+                  <th>Projets affectés</th>
                   <th>Actions</th>
                 </tr>
               </thead>
