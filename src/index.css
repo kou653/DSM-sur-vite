@@ -1,5 +1,29 @@
 @import "leaflet/dist/leaflet.css";
 
+@font-face {
+  font-family: "ITC Avant Garde";
+  src: url("/src/assets/fonts/ITCAvantGardeStd-Bk.woff2") format("woff2");
+  font-weight: 300;
+  /* Book */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "ITC Avant Garde";
+  src: url("/src/assets/fonts/ITCAvantGardeStd-Bold.woff2") format("woff2");
+  font-weight: 700;
+  /* Bold */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "ITC Avant Garde";
+  src: url("/src/assets/fonts/ITCAvantGardeStd-Bold.woff2") format("woff2");
+  font-weight: 700;
+  /* Bold Oblique (simulé) */
+  font-style: italic;
+}
+
 :root {
   --bg: #f3efe5;
   --surface: #fffdf8;
@@ -12,7 +36,7 @@
   --accent-strong: #1e4827;
   --shadow: 0 18px 50px rgba(86, 73, 49, 0.12);
   --radius: 24px;
-  --font-base: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font-base: "ITC Avant Garde", sans-serif;
   --dashboard-hero-height: 600px;
   --dashboard-font-size: 17px;
 
@@ -2158,4 +2182,31 @@ body,
 
 .marker-pin::after {
   background: #ffffff;
+}
+
+/* Titres et accroches */
+h1,
+h2,
+h3,
+.dashboard-brand,
+.dashboard-overview-header h1,
+.users-hero h1,
+.monitoring-header h1 {
+  font-weight: 350;
+}
+
+/* Textes courants */
+body,
+p,
+td,
+th,
+.dashboard-sidebar-link,
+.dashboard-project-description {
+  font-weight: 300;
+}
+
+/* Accroches publicitaires */
+.accroche {
+  font-weight: 700;
+  font-style: italic;
 }
