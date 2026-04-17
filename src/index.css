@@ -2273,6 +2273,15 @@ th,
   box-shadow: none !important;
 }
 
+/* Specific block styling for PDF export */
+.is-exporting #parcelle-objective-row article,
+.is-exporting #parcelle-info-grid .dashboard-stat-card,
+.is-exporting .monitoring-stats-grid .monitoring-stat-card {
+  background: var(--surface-alt) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+}
+
 @media print {
   .pdf-only-header {
     display: block !important;

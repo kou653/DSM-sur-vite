@@ -87,7 +87,7 @@ function ParcelleDetailsPage() {
         lng: prev.lng || parcelleData.lng || ""
       }));
 
-    } catch (_error) {
+    } catch {
       setErrorMessage("Impossible de charger les sous-données de la parcelle.");
     } finally {
       setLoading(false);
@@ -113,7 +113,7 @@ function ParcelleDetailsPage() {
         ? plantsRes.data
         : plantsRes.data?.plants || plantsRes.data?.data || [];
       setPlants(rawPlants);
-    } catch (_e) {
+    } catch {
       // Handle plant refresh fail
     }
   };
