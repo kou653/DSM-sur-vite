@@ -183,7 +183,7 @@ function DashboardPage() {
         {/* Evolution */}
         <article className="dashboard-stat-card" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "center" }}>
           <p style={{ margin: "0 0 0.4rem 0", textTransform: "uppercase", fontSize: "0.78rem", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: "0.35rem" }}>
-            <Activity size={14} color="#0f7352ff" /> Évolution
+            <Activity size={14} color="#0f7352ff" /> Évolution des objectifs
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <h3 style={{ margin: 0, fontSize: "1.4rem", minWidth: "52px" }}>{evolutionGlobalPercent.toFixed(0)}%</h3>
