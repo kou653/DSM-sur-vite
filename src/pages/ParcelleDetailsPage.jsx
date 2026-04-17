@@ -338,8 +338,14 @@ function ParcelleDetailsPage() {
     <section className="users-page" style={{ paddingBottom: "4rem" }}>
       {/* Breadcrumb / Top Return */}
       <div className="pdf-only-header">
-        <h1 style={{ color: "#149655", margin: 0 }}>Détails de la Parcelle</h1>
-        <p style={{ color: "#666" }}>Généré le {new Date().toLocaleDateString()}</p>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <img src="/Fichier 3.png" alt="Logo" style={{ height: "45px" }} />
+          <div>
+            <h1 style={{ color: "#149655", margin: 0, fontSize: "1.5rem" }}>{parcelle.nom || `Parcelle #${parcelle.id}`}</h1>
+            <p style={{ color: "#666", margin: 0 }}>Rapport de Détails</p>
+          </div>
+        </div>
+        <p style={{ color: "#666", textAlign: "right", margin: 0 }}>Généré le {new Date().toLocaleDateString()}</p>
       </div>
 
       <div style={{ marginBottom: "1.5rem" }} className="breadcrumb">

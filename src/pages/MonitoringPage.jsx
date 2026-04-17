@@ -319,8 +319,16 @@ function MonitoringPage() {
       <section className="monitoring-page">
         <header className="monitoring-header">
           <div className="pdf-only-header">
-            <h1 style={{ color: "#149655", margin: 0 }}>Rapport de Monitoring</h1>
-            <p style={{ color: "#666" }}>Généré le {new Date().toLocaleDateString()}</p>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <img src="/Fichier 3.png" alt="Logo" style={{ height: "45px" }} />
+              <div>
+                <h1 style={{ color: "#149655", margin: 0, fontSize: "1.5rem" }}>
+                  {parcelles.find(p => String(p.id) === String(selectedParcelleId))?.nom || "Monitoring"} ({especes.find(e => String(e.id) === String(selectedEspeceId))?.nom || "Tous les plants"})
+                </h1>
+                <p style={{ color: "#666", margin: 0 }}>Rapport de Monitoring</p>
+              </div>
+            </div>
+            <p style={{ color: "#666", textAlign: "right", margin: 0 }}>Généré le {new Date().toLocaleDateString()}</p>
           </div>
           <div>
             <h1>Monitoring</h1>
