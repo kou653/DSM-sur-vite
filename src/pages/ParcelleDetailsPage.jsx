@@ -1,13 +1,46 @@
-import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronDown, ChevronRight, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn } from "lucide-react";
+import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronDown, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getParcelle } from "../api/parcelles.js";
 import { createPlant, getParcellePlants, updatePlantDocumentation } from "../api/plants.js";
 import { getEspeces } from "../api/referentiels.js";
 import { useAuth } from "../contexts/auth-context.js";
+
+const MONTH_LABELS = ["Jan","Fev","Mar","Avr","Mai","Juin","Juil","Aou","Sep","Oct","Nov","Dec"];
+
+function buildMonthlyEvolution(plants) {
+  const monthlyMap = new Map();
+  plants.forEach((plant) => {
+    const rawDate = plant.date_plantation;
+    if (!rawDate) return;
+    const date = new Date(rawDate);
+    if (Number.isNaN(date.getTime())) return;
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const existing = monthlyMap.get(monthKey) ?? {
+      key: monthKey,
+      label: `${MONTH_LABELS[date.getMonth()]} ${date.getFullYear()}`,
+      plantsMiseEnTerre: 0,
+      plantsVivants: 0,
+    };
+    existing.plantsMiseEnTerre += 1;
+    if ((plant.status || "") === "vivant") existing.plantsVivants += 1;
+    monthlyMap.set(monthKey, existing);
+  });
+  return Array.from(monthlyMap.values()).sort((a, b) => a.key.localeCompare(b.key));
+}
 
 function ParcelleDetailsPage() {
   const { role, selectedProjectId } = useAuth();
@@ -240,14 +273,26 @@ function ParcelleDetailsPage() {
     }
   }
 
+  const monthlyEvolution = useMemo(() => buildMonthlyEvolution(plants), [plants]);
+
   const exportPDF = async () => {
     const mainElement = document.querySelector(".users-page");
     if (!mainElement) return;
 
+    // Make the hidden chart container visible for capture
+    const chartContainer = document.getElementById("pdf-monitoring-chart");
+    if (chartContainer) {
+      chartContainer.style.position = "relative";
+      chartContainer.style.left = "auto";
+      chartContainer.style.top = "auto";
+      chartContainer.style.visibility = "visible";
+      chartContainer.style.height = "560px";
+    }
+
     mainElement.classList.add("is-exporting");
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const pdf = new jsPDF({
         orientation: "landscape",
@@ -261,19 +306,22 @@ function ParcelleDetailsPage() {
       const printableWidth = pdfWidth - margin * 2;
       let currentY = margin;
 
-      // Identify sections to capture
+      // Ordered sections:
+      // 1. Header  2. Toolbar  3. Objective row  4. Info grid
+      // 5. Monitoring chart (hidden container)  6. Plants table
       const selectors = [
         ".pdf-only-header",
         ".users-toolbar",
         "#parcelle-objective-row",
         "#parcelle-info-grid",
-        ".users-table-panel"
+        "#pdf-monitoring-chart",
+        ".users-table-panel",
       ];
 
       let isFirstSection = true;
 
       for (const selector of selectors) {
-        const element = mainElement.querySelector(selector);
+        const element = document.querySelector(selector);
         if (!element || element.offsetHeight === 0) continue;
 
         const canvas = await html2canvas(element, {
@@ -303,6 +351,14 @@ function ParcelleDetailsPage() {
       console.error("PDF Export error:", error);
     } finally {
       mainElement.classList.remove("is-exporting");
+      // Re-hide chart container
+      if (chartContainer) {
+        chartContainer.style.position = "absolute";
+        chartContainer.style.left = "-9999px";
+        chartContainer.style.top = "0";
+        chartContainer.style.visibility = "hidden";
+        chartContainer.style.height = "560px";
+      }
     }
   };
 
@@ -441,6 +497,65 @@ function ParcelleDetailsPage() {
             <h3 style={{ fontSize: "1.1rem" }}>{plants.length}</h3>
           </div>
         </article>
+      </div>
+
+      {/* Hidden Monitoring Chart – rendered off-screen for PDF capture */}
+      <div
+        id="pdf-monitoring-chart"
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          top: 0,
+          visibility: "hidden",
+          width: "1100px",
+          height: "560px",
+          background: "#fff",
+          padding: "1.5rem 1.5rem 2rem 1.5rem",
+          boxSizing: "border-box",
+        }}
+      >
+        <h2 style={{ margin: "0 0 1rem 0", fontSize: "1.1rem", color: "#149655" }}>Évolution mensuelle des plants</h2>
+        {monthlyEvolution.length === 0 ? (
+          <p style={{ color: "#888" }}>Aucune donnée mensuelle disponible.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={440}>
+            <LineChart data={monthlyEvolution}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#d9e6db" />
+              <XAxis dataKey="label" stroke="#6f8272" />
+              <YAxis allowDecimals={false} stroke="#6f8272" />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "14px",
+                  border: "1px solid #d8e7da",
+                  boxShadow: "0 12px 28px rgba(52,88,62,0.1)",
+                }}
+              />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="plantsMiseEnTerre"
+                name="Plants mis en terre"
+                stroke="#1f9953"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+                activeDot={{ r: 6 }}
+                isAnimationActive={false}
+                connectNulls
+              />
+              <Line
+                type="monotone"
+                dataKey="plantsVivants"
+                name="Plants vivants"
+                stroke="#f59e0b"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+                activeDot={{ r: 6 }}
+                isAnimationActive={false}
+                connectNulls
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* Plants Table Section */}
