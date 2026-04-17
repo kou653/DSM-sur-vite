@@ -24,7 +24,7 @@ function EvolutionPage() {
       const response = await getProjetParcelles(selectedProjectId);
       const rawParcelles = Array.isArray(response.data) ? response.data : response.data?.parcelles || response.data?.data || [];
       setParcelles(rawParcelles);
-    } catch (error) {
+    } catch {
       setErrorMessage("Impossible de charger les parcelles du projet.");
     } finally {
       setLoading(false);

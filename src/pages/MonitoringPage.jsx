@@ -146,7 +146,7 @@ function MonitoringPage() {
 
         setParcelles(normalizeParcelles(parcellesResponse.data));
         setEspeces(normalizeEspeces(especesResponse.data));
-      } catch (_error) {
+      } catch {
         if (isMounted) {
           setErrorMessage("Impossible de charger les filtres du monitoring.");
         }
@@ -186,7 +186,7 @@ function MonitoringPage() {
         }
 
         setPlants(normalizePlants(data));
-      } catch (_error) {
+      } catch {
         if (isMounted) {
           setPlants([]);
           setErrorMessage("Impossible de charger les donnees de la parcelle selectionnee.");

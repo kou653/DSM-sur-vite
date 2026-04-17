@@ -139,26 +139,6 @@ function DashboardPage() {
   // Pie Chart: Alive vs Dead
   const vivants = monitoring?.vivants || 0;
   const morts = monitoring?.morts || 0;
-  const pieChartData = {
-    labels: ["Vivants", "Morts"],
-    datasets: [
-      {
-        data: [vivants, morts],
-        backgroundColor: ["#10b981", "#ef4444"],
-        hoverBackgroundColor: ["#059669", "#dc2626"],
-        borderWidth: 0,
-        hoverOffset: 4
-      }
-    ]
-  };
-
-  const pieChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: "right" }
-    }
-  };
 
   return (
     <section className="users-page" style={{ paddingBottom: "4rem" }}>

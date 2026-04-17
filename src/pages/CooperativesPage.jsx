@@ -1,5 +1,5 @@
 import { ChevronDown, Pencil, Plus, Search, Trash2, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   createProjetCooperative,
   deleteCooperative,
@@ -50,7 +50,7 @@ function CooperativesPage() {
   const [formState, setFormState] = useState(buildInitialFormState());
   const [columnFilters, setColumnFilters] = useState({ nom: "", entreprise: "", ville: "", village: "" });
   const [openDropdown, setOpenDropdown] = useState(null);
-  async function fetchCooperatives() {
+  const fetchCooperatives = useCallback(async () => {
     if (!selectedProjectId) {
       setCooperatives([]);
       setLoading(false);
@@ -63,18 +63,16 @@ function CooperativesPage() {
     try {
       const { data } = await getProjetCooperatives(selectedProjectId);
       setCooperatives(normalizeCooperatives(data));
-    } catch (error) {
-      setErrorMessage(
-        error.response?.data?.message || "Impossible de charger les cooperatives."
-      );
+    } catch {
+      setErrorMessage("Impossible de charger les cooperatives.");
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedProjectId]);
 
   useEffect(() => {
     fetchCooperatives();
-  }, [selectedProjectId]);
+  }, [selectedProjectId, fetchCooperatives]);
 
   useEffect(() => {
     if (!openDropdown) return;
@@ -165,10 +163,8 @@ function CooperativesPage() {
 
       await fetchCooperatives();
       closeForm();
-    } catch (error) {
-      setActionError(
-        error.response?.data?.message || "Operation impossible pour cette cooperative."
-      );
+    } catch {
+      setActionError("Operation impossible pour cette cooperative.");
     } finally {
       setSubmitting(false);
     }
@@ -191,10 +187,8 @@ function CooperativesPage() {
       await deleteCooperative(cooperative.id);
       setSuccessMessage("Cooperative supprimee avec succes.");
       await fetchCooperatives();
-    } catch (error) {
-      setActionError(
-        error.response?.data?.message || "Suppression impossible pour cette cooperative."
-      );
+    } catch {
+      setActionError("Suppression impossible pour cette cooperative.");
     } finally {
       setSubmitting(false);
     }

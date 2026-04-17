@@ -38,7 +38,7 @@ function EvolutionDetailsPage() {
       const evoData = Array.isArray(evoRes.data) ? evoRes.data : evoRes.data?.evolution || evoRes.data?.data || [];
       setImages(evoData);
 
-    } catch (error) {
+    } catch {
       setErrorMessage("Impossible de charger l'historique visuel de cette parcelle.");
     } finally {
       setLoading(false);
@@ -94,7 +94,7 @@ function EvolutionDetailsPage() {
     try {
       await deleteEvolutionImage(imageId);
       setImages(images.filter(img => img.id !== imageId));
-    } catch (error) {
+    } catch {
       alert("Erreur lors de la suppression de l'image.");
     }
   };

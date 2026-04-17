@@ -52,7 +52,7 @@ function ProjectListPage() {
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formState, setFormState] = useState(buildInitialFormState());
-  const { role, accessibleProjectIds, selectedProjectId, setSelectedProjectId } =
+  const { role, accessibleProjectIds, setSelectedProjectId } =
     useAuth();
 
   const fetchProjects = useCallback(async () => {
