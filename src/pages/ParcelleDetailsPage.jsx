@@ -1,14 +1,17 @@
 import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronDown, ChevronRight, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn } from "lucide-react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getParcelle } from "../api/parcelles.js";
-import { createPlant, getParcellePlants, updatePlantDocumentation, updatePlantStatus } from "../api/plants.js";
+import { createPlant, getParcellePlants, updatePlantDocumentation } from "../api/plants.js";
 import { getEspeces } from "../api/referentiels.js";
 import { useAuth } from "../contexts/auth-context.js";
 
 function ParcelleDetailsPage() {
   const { role, selectedProjectId } = useAuth();
-  const { parcelleId, projectId } = useParams();
+  const { parcelleId } = useParams();
 
   // Core parcelle info
   const [parcelle, setParcelle] = useState(null);
@@ -84,7 +87,7 @@ function ParcelleDetailsPage() {
         lng: prev.lng || parcelleData.lng || ""
       }));
 
-    } catch (error) {
+    } catch (_error) {
       setErrorMessage("Impossible de charger les sous-données de la parcelle.");
     } finally {
       setLoading(false);
@@ -110,7 +113,7 @@ function ParcelleDetailsPage() {
         ? plantsRes.data
         : plantsRes.data?.plants || plantsRes.data?.data || [];
       setPlants(rawPlants);
-    } catch (e) {
+    } catch (_e) {
       // Handle plant refresh fail
     }
   };
@@ -237,6 +240,74 @@ function ParcelleDetailsPage() {
     }
   }
 
+  const exportPDF = async () => {
+    const mainElement = document.querySelector(".users-page");
+    if (!mainElement) return;
+
+    mainElement.classList.add("is-exporting");
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const printableWidth = pdfWidth - margin * 2;
+      let currentY = margin;
+
+      // Identify sections to capture
+      const selectors = [
+        ".pdf-only-header",
+        ".users-toolbar",
+        "#parcelle-objective-row",
+        "#parcelle-info-grid",
+        ".users-table-panel"
+      ];
+
+      let isFirstSection = true;
+
+      for (const selector of selectors) {
+        const element = mainElement.querySelector(selector);
+        if (!element || element.offsetHeight === 0) continue;
+
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: "#ffffff",
+          windowWidth: 1200,
+        });
+
+        const imgData = canvas.toDataURL("image/png");
+        const imgProps = pdf.getImageProperties(imgData);
+        const imgHeightMm = (imgProps.height * printableWidth) / imgProps.width;
+
+        if (!isFirstSection && currentY + imgHeightMm > pdfHeight - margin) {
+          pdf.addPage();
+          currentY = margin;
+        }
+
+        pdf.addImage(imgData, "PNG", margin, currentY, printableWidth, imgHeightMm);
+        currentY += imgHeightMm + 8;
+        isFirstSection = false;
+      }
+
+      pdf.save(`Parcelle-${parcelle?.nom || parcelleId}-${new Date().toISOString().slice(0, 10)}.pdf`);
+    } catch (error) {
+      console.error("PDF Export error:", error);
+    } finally {
+      mainElement.classList.remove("is-exporting");
+    }
+  };
+
+
+
   if (loading) {
     return <section className="users-page"><p className="muted-text">Chargement des détails de la parcelle...</p></section>;
   }
@@ -263,16 +334,15 @@ function ParcelleDetailsPage() {
     status: [...new Set(plants.map((p) => p.status))].sort(),
   };
 
-  const resolvedProjectId = projectId || selectedProjectId;
-  // const documentationsHref =
-  //   resolvedProjectId && parcelleId
-  //     ? `/dashboard/projet/${resolvedProjectId}/parcelles/${parcelleId}/documentations`
-  //     : "/dashboard";
-
   return (
     <section className="users-page" style={{ paddingBottom: "4rem" }}>
       {/* Breadcrumb / Top Return */}
-      <div style={{ marginBottom: "1.5rem" }}>
+      <div className="pdf-only-header">
+        <h1 style={{ color: "#149655", margin: 0 }}>Détails de la Parcelle</h1>
+        <p style={{ color: "#666" }}>Généré le {new Date().toLocaleDateString()}</p>
+      </div>
+
+      <div style={{ marginBottom: "1.5rem" }} className="breadcrumb">
         <Link to={`/dashboard/projet/${selectedProjectId}/parcelles`} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", textDecoration: "none", color: "var(--muted-text)", fontWeight: "500", fontSize: "0.95rem" }}>
           <ArrowLeft size={16} />
           Retour aux parcelles
@@ -283,17 +353,23 @@ function ParcelleDetailsPage() {
         <div className="users-hero" style={{ margin: 0 }}>
           <div>
             <h1>{parcelle.nom || `Parcelle #${parcelle.id}`}</h1>
-            {/* <p style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <span>Détails et évolution de la zone</span>
-              <ChevronRight size={14} />
-              <strong style={{ color: "var(--primary)" }}>{parcelle.projet?.nom || "Projet Actif"}</strong>
-            </p> */}
           </div>
         </div>
+        <button
+          type="button"
+          onClick={exportPDF}
+          className="dashboard-add-button"
+          style={{ display: "flex", alignItems: "center", gap: "8px" }}
+        >
+          <FileText size={16} />
+          Exporter en PDF
+        </button>
       </div>
 
+
       {/* Row 1: Objective and Evolution */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
+      <div id="parcelle-objective-row" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
+
         {/* Objectif Block */}
         <article style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "1.5rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
@@ -329,7 +405,8 @@ function ParcelleDetailsPage() {
       </div>
 
       {/* Row 2: 4 Info Blocks */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem", marginBottom: "2.5rem" }}>
+      <div id="parcelle-info-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem", marginBottom: "2.5rem" }}>
+
         <article className="dashboard-stat-card">
           <div className="dashboard-stat-icon"><MapPinned size={16} strokeWidth={2.1} /></div>
           <div>
@@ -674,15 +751,6 @@ function ParcelleDetailsPage() {
                         <span className="muted-text">--</span>
                       )}
                     </td>
-                    {/* <td>
-                      <Link
-                        className="secondary-action"
-                        style={{ padding: "6px 10px", fontSize: "0.85rem", display: "inline-flex", alignItems: "center" }}
-                        to={documentationsHref}
-                      >
-                        Voir la documentation
-                      </Link>
-                    </td> */}
                   </tr>
                 ))}
                 {filteredPlants.length === 0 && (

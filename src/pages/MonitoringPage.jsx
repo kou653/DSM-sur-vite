@@ -1,4 +1,7 @@
-import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees, Layers, Users, CheckCircle } from "lucide-react";
+import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees, Layers, Users, CheckCircle, FileText } from "lucide-react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+
 import { useEffect, useMemo, useState } from "react";
 import {
   CartesianGrid,
@@ -143,7 +146,7 @@ function MonitoringPage() {
 
         setParcelles(normalizeParcelles(parcellesResponse.data));
         setEspeces(normalizeEspeces(especesResponse.data));
-      } catch (error) {
+      } catch (_error) {
         if (isMounted) {
           setErrorMessage("Impossible de charger les filtres du monitoring.");
         }
@@ -183,7 +186,7 @@ function MonitoringPage() {
         }
 
         setPlants(normalizePlants(data));
-      } catch (error) {
+      } catch (_error) {
         if (isMounted) {
           setPlants([]);
           setErrorMessage("Impossible de charger les donnees de la parcelle selectionnee.");
@@ -243,13 +246,97 @@ function MonitoringPage() {
     [filteredPlants]
   );
 
+  const exportPDF = async () => {
+    const mainElement = document.querySelector(".monitoring-page");
+    if (!mainElement) return;
+
+    mainElement.classList.add("is-exporting");
+
+    try {
+      // Delay to ensure CSS state is applied
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const printableWidth = pdfWidth - margin * 2;
+      let currentY = margin;
+
+      // Identify sections to capture
+      const selectors = [
+        ".monitoring-header",
+        ".monitoring-stats-grid",
+        ".monitoring-chart-card",
+        ".monitoring-doc-card"
+      ];
+
+      let isFirstSection = true;
+
+      for (const selector of selectors) {
+        const element = mainElement.querySelector(selector);
+        if (!element || element.offsetHeight === 0) continue;
+
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: "#ffffff",
+          windowWidth: 1200,
+        });
+
+        const imgData = canvas.toDataURL("image/png");
+        const imgProps = pdf.getImageProperties(imgData);
+        const imgHeightMm = (imgProps.height * printableWidth) / imgProps.width;
+
+        if (!isFirstSection && currentY + imgHeightMm > pdfHeight - margin) {
+          pdf.addPage();
+          currentY = margin;
+        }
+
+        pdf.addImage(imgData, "PNG", margin, currentY, printableWidth, imgHeightMm);
+        currentY += imgHeightMm + 8;
+        isFirstSection = false;
+      }
+
+      pdf.save(`Monitoring-${new Date().toISOString().slice(0, 10)}.pdf`);
+    } catch (error) {
+      console.error("PDF Export error:", error);
+    } finally {
+      mainElement.classList.remove("is-exporting");
+    }
+  };
+
+
+
   return (
     <section className="users-page">
       <section className="monitoring-page">
         <header className="monitoring-header">
-          <h1>Monitoring</h1>
-          <p>Suivi detaille de l'evolution mensuelle par especes et parcelle.</p>
+          <div className="pdf-only-header">
+            <h1 style={{ color: "#149655", margin: 0 }}>Rapport de Monitoring</h1>
+            <p style={{ color: "#666" }}>Généré le {new Date().toLocaleDateString()}</p>
+          </div>
+          <div>
+            <h1>Monitoring</h1>
+            <p>Suivi detaille de l'evolution mensuelle par especes et parcelle.</p>
+          </div>
+          <button
+            type="button"
+            onClick={exportPDF}
+            className="dashboard-add-button"
+            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          >
+            <FileText size={16} />
+            Exporter en PDF
+          </button>
         </header>
+
 
         <section className="monitoring-card">
           <div className="monitoring-card-heading">

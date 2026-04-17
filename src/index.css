@@ -2210,3 +2210,71 @@ th,
   font-weight: 700;
   font-style: italic;
 }
+
+/* --- Report/PDF Export Styles --- */
+.monitoring-report-print-zone,
+.parcelle-report-print-zone {
+  width: 100%;
+}
+
+/* Force styles for PDF rendering */
+.pdf-only-header {
+  display: none;
+}
+
+/* State applied during PDF generation */
+.is-exporting {
+  width: 1100px !important;
+  /* Wider for landscape */
+  background: white !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+  color: #1a1a1a !important;
+}
+
+.is-exporting .pdf-only-header {
+  display: block !important;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #149655;
+  padding-bottom: 10px;
+}
+
+/* Elements to hide in PDF */
+.is-exporting .dashboard-add-button,
+.is-exporting .monitoring-header button,
+.is-exporting .users-toolbar button,
+.is-exporting .monitoring-filter-grid,
+.is-exporting .users-toolbar,
+.is-exporting .monitoring-header p:not(h1),
+.is-exporting .dashboard-topbar,
+.is-exporting .dashboard-sidebar,
+.is-exporting .breadcrumb,
+.is-exporting a[href*="retour"],
+.is-exporting a[href*="documentations"],
+.is-exporting .secondary-action,
+.is-exporting .primary-action,
+.is-exporting table th:last-child,
+.is-exporting table td:last-child {
+  display: none !important;
+}
+
+/* Avoid page breaks inside cards */
+.is-exporting .monitoring-card,
+.is-exporting .monitoring-stats-grid,
+.is-exporting .monitoring-chart-card,
+.is-exporting .monitoring-doc-card,
+.is-exporting article,
+.is-exporting section,
+.is-exporting .users-table-panel {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+  margin-bottom: 30px !important;
+  border: 1px solid #eee !important;
+  box-shadow: none !important;
+}
+
+@media print {
+  .pdf-only-header {
+    display: block !important;
+  }
+}
