@@ -1,10 +1,12 @@
-import { ChevronDown, Leaf, Pencil, Plus, Search, Trash2, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ChevronDown, Leaf, Pencil, Plus, Search, Trash2, X, FileSpreadsheet } from "lucide-react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import * as XLSX from 'xlsx';
 import {
   createEspece,
   deleteEspece,
   getEspeces,
   updateEspece,
+  bulkCreateEspeces
 } from "../api/referentiels.js";
 import { useAuth } from "../contexts/auth-context.js";
 
@@ -30,11 +32,13 @@ function buildInitialFormState(espece = null) {
 
 function EspecesPage() {
   const { role } = useAuth();
+  const fileInputRef = useRef(null);
   const [especes, setEspeces] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [columnFilters, setColumnFilters] = useState({ nom_commun: "", nom_scientifique: "" });
   const [openDropdown, setOpenDropdown] = useState(null); // "nom_commun" | "nom_scientifique" | null
   const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [actionError, setActionError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -50,10 +54,8 @@ function EspecesPage() {
     try {
       const { data } = await getEspeces();
       setEspeces(normalizeEspeces(data));
-    } catch (error) {
-      setErrorMessage(
-        error.response?.data?.message || "Impossible de charger les especes."
-      );
+    } catch {
+      setErrorMessage("Impossible de charger les especes.");
     } finally {
       setLoading(false);
     }
@@ -146,10 +148,8 @@ function EspecesPage() {
 
       await fetchEspeces();
       closeForm();
-    } catch (error) {
-      setActionError(
-        error.response?.data?.message || "Operation impossible pour cette espece."
-      );
+    } catch {
+      setActionError("Operation impossible pour cette espece.");
     } finally {
       setSubmitting(false);
     }
@@ -172,14 +172,60 @@ function EspecesPage() {
       await deleteEspece(espece.id);
       setSuccessMessage("Espece supprimee avec succes.");
       await fetchEspeces();
-    } catch (error) {
-      setActionError(
-        error.response?.data?.message || "Suppression impossible pour cette espece."
-      );
+    } catch {
+      setActionError("Suppression impossible pour cette espece.");
     } finally {
       setSubmitting(false);
     }
   }
+
+  const handleExcelImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImporting(true);
+    setActionError("");
+    setSuccessMessage("");
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        // Map and Validate columns
+        const payloadEspeces = jsonData.map(row => {
+          // Flexible mapping for various naming variations
+          const nomCommun = row['Nom Commun'] || row['nom_commun'] || row['Nom'] || row['nom'];
+          const nomScientifique = row['Nom Scientifique'] || row['nom_scientifique'] || row['Scientifique'] || row['scientifique'];
+
+          if (!nomCommun || !nomScientifique) return null;
+
+          return {
+            nom_commun: String(nomCommun).trim(),
+            nom_scientifique: String(nomScientifique).trim()
+          };
+        }).filter(Boolean);
+
+        if (payloadEspeces.length === 0) {
+          throw new Error("Aucune donnée valide trouvée. Assurez-vous d'avoir les colonnes 'Nom Commun' et 'Nom Scientifique'.");
+        }
+
+        const response = await bulkCreateEspeces({ especes: payloadEspeces });
+        setSuccessMessage(response.data.message || "Importation réussie.");
+        await fetchEspeces();
+      } catch (err) {
+        setActionError(err.message || "Erreur lors de la lecture du fichier Excel.");
+      } finally {
+        setImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
 
   return (
     <section className="users-page">
@@ -206,10 +252,30 @@ function EspecesPage() {
           </label>
 
           {role === "administrateur" ? (
-            <button type="button" className="dashboard-add-button" onClick={openCreateForm}>
-              <Plus size={14} strokeWidth={2.4} />
-              Ajouter
-            </button>
+            <>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept=".xlsx, .xls, .csv"
+                onChange={handleExcelImport}
+              />
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importing}
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <FileSpreadsheet size={16} strokeWidth={2} />
+                {importing ? "Importation..." : "Importer Excel"}
+              </button>
+
+              <button type="button" className="dashboard-add-button" onClick={openCreateForm}>
+                <Plus size={14} strokeWidth={2.4} />
+                Ajouter
+              </button>
+            </>
           ) : null}
         </div>
       </div>
@@ -408,7 +474,6 @@ function EspecesPage() {
       </section>
     </section>
   );
-
 }
 
 export default EspecesPage;

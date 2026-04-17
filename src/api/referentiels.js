@@ -2,6 +2,7 @@ import api from "./axios";
 
 export const getEspeces = () => api.get("/especes");
 export const createEspece = (payload) => api.post("/especes", payload);
+export const bulkCreateEspeces = (payload) => api.post("/especes/bulk", payload);
 export const updateEspece = (id, payload) => api.put(`/especes/${id}`, payload);
 export const deleteEspece = (id) => api.delete(`/especes/${id}`);
 
