@@ -458,6 +458,8 @@ function MonitoringPage() {
                         strokeWidth={3}
                         dot={{ r: 4 }}
                         activeDot={{ r: 6 }}
+                        isAnimationActive={false}
+                        connectNulls
                       />
                       <Line
                         type="monotone"
@@ -467,6 +469,8 @@ function MonitoringPage() {
                         strokeWidth={3}
                         dot={{ r: 4 }}
                         activeDot={{ r: 6 }}
+                        isAnimationActive={false}
+                        connectNulls
                       />
                     </LineChart>
                   </ResponsiveContainer>
