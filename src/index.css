@@ -2255,8 +2255,8 @@ th,
 .is-exporting a[href*="documentations"],
 .is-exporting .secondary-action,
 .is-exporting .primary-action,
-.is-exporting table th:last-child,
-.is-exporting table td:last-child {
+.is-exporting .users-table th:last-child,
+.is-exporting .users-table td:last-child {
   display: none !important;
 }
 

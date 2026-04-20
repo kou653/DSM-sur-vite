@@ -42,6 +42,24 @@ function buildMonthlyEvolution(plants) {
   return Array.from(monthlyMap.values()).sort((a, b) => a.key.localeCompare(b.key));
 }
 
+function buildSpeciesSummary(plants) {
+  const summaryMap = new Map();
+  plants.forEach((plant) => {
+    const speciesName = plant.espece?.nom_commun || "Inconnu";
+    const existing = summaryMap.get(speciesName) ?? {
+      espece: speciesName,
+      vivants: 0,
+      morts: 0,
+      total: 0,
+    };
+    existing.total += 1;
+    if ((plant.status || "") === "vivant") existing.vivants += 1;
+    if ((plant.status || "") === "mort") existing.morts += 1;
+    summaryMap.set(speciesName, existing);
+  });
+  return Array.from(summaryMap.values()).sort((a, b) => a.espece.localeCompare(b.espece));
+}
+
 function ParcelleDetailsPage() {
   const { role, selectedProjectId } = useAuth();
   const { parcelleId } = useParams();
@@ -274,6 +292,7 @@ function ParcelleDetailsPage() {
   }
 
   const monthlyEvolution = useMemo(() => buildMonthlyEvolution(plants), [plants]);
+  const speciesSummary = useMemo(() => buildSpeciesSummary(plants), [plants]);
 
   const exportPDF = async () => {
     const mainElement = document.querySelector(".users-page");
@@ -287,6 +306,16 @@ function ParcelleDetailsPage() {
       chartContainer.style.top = "auto";
       chartContainer.style.visibility = "visible";
       chartContainer.style.height = "560px";
+    }
+
+    // Make the hidden summary table container visible for capture
+    const summaryTableContainer = document.getElementById("pdf-species-summary-table");
+    if (summaryTableContainer) {
+      summaryTableContainer.style.position = "relative";
+      summaryTableContainer.style.left = "auto";
+      summaryTableContainer.style.top = "auto";
+      summaryTableContainer.style.visibility = "visible";
+      summaryTableContainer.style.height = "auto";
     }
 
     mainElement.classList.add("is-exporting");
@@ -308,14 +337,13 @@ function ParcelleDetailsPage() {
 
       // Ordered sections:
       // 1. Header  2. Toolbar  3. Objective row  4. Info grid
-      // 5. Monitoring chart (hidden container)  6. Plants table
       const selectors = [
         ".pdf-only-header",
         ".users-toolbar",
         "#parcelle-objective-row",
         "#parcelle-info-grid",
         "#pdf-monitoring-chart",
-        ".users-table-panel",
+        "#pdf-species-summary-table",
       ];
 
       let isFirstSection = true;
@@ -351,13 +379,20 @@ function ParcelleDetailsPage() {
       console.error("PDF Export error:", error);
     } finally {
       mainElement.classList.remove("is-exporting");
-      // Re-hide chart container
       if (chartContainer) {
         chartContainer.style.position = "absolute";
         chartContainer.style.left = "-9999px";
         chartContainer.style.top = "0";
         chartContainer.style.visibility = "hidden";
         chartContainer.style.height = "560px";
+      }
+      
+      const summaryTableContainer = document.getElementById("pdf-species-summary-table");
+      if(summaryTableContainer) {
+         summaryTableContainer.style.position = "absolute";
+         summaryTableContainer.style.left = "-9999px";
+         summaryTableContainer.style.top = "0";
+         summaryTableContainer.style.visibility = "hidden";
       }
     }
   };
@@ -558,7 +593,53 @@ function ParcelleDetailsPage() {
         )}
       </div>
 
-      {/* Plants Table Section */}
+      {/* Hidden Species Summary Table – rendered off-screen for PDF capture */}
+      <div
+        id="pdf-species-summary-table"
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          top: 0,
+          visibility: "hidden",
+          width: "100%",
+          background: "#fff",
+          padding: "1.5rem",
+          boxSizing: "border-box",
+        }}
+      >
+        <h2 style={{ margin: "0 0 1.5rem 0", fontSize: "1.2rem", color: "#149655", borderBottom: "2px solid var(--border)", paddingBottom: "0.5rem" }}>
+           Inventaire par Espèce
+        </h2>
+        {speciesSummary.length === 0 ? (
+          <p style={{ color: "#888" }}>Aucun plant enregistré pour cette parcelle.</p>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.95rem", tableLayout: "fixed" }}>
+            <thead>
+              <tr style={{ backgroundColor: "var(--surface-hover)", color: "var(--text)" }}>
+                <th style={{ width: "40%", padding: "12px 16px", borderBottom: "1px solid var(--border)", fontWeight: "600" }}>Espèce</th>
+                <th style={{ width: "20%", padding: "12px 16px", borderBottom: "1px solid var(--border)", fontWeight: "600" }}>Vivant</th>
+                <th style={{ width: "20%", padding: "12px 16px", borderBottom: "1px solid var(--border)", fontWeight: "600" }}>Mort</th>
+                <th style={{ width: "20%", padding: "12px 16px", borderBottom: "1px solid var(--border)", fontWeight: "600" }}>Total (Espèce)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {speciesSummary.map((item, index) => (
+                <tr key={item.espece} style={{ 
+                     borderBottom: "1px solid var(--border)", 
+                     backgroundColor: index % 2 === 0 ? "#fff" : "var(--surface-hover)" 
+                  }}>
+                  <td style={{ padding: "12px 16px", fontWeight: "500", color: "var(--text)" }}>{item.espece}</td>
+                  <td style={{ padding: "12px 16px", color: "var(--primary)", fontWeight: "600" }}>{item.vivants}</td>
+                  <td style={{ padding: "12px 16px", color: "#ef4444", fontWeight: "600" }}>{item.morts}</td>
+                  <td style={{ padding: "12px 16px", fontWeight: "700", color: "var(--text)" }}>{item.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Plants Table Section (Visible on Screen) */}
       <section className="users-table-panel">
         <div className="users-table-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h3>Liste des plants de la parcelle</h3>
