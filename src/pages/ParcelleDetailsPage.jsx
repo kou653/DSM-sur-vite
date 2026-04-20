@@ -19,7 +19,7 @@ import { createPlant, getParcellePlants, updatePlantDocumentation } from "../api
 import { getEspeces } from "../api/referentiels.js";
 import { useAuth } from "../contexts/auth-context.js";
 
-const MONTH_LABELS = ["Jan","Fev","Mar","Avr","Mai","Juin","Juil","Aou","Sep","Oct","Nov","Dec"];
+const MONTH_LABELS = ["Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juil", "Aou", "Sep", "Oct", "Nov", "Dec"];
 
 function buildMonthlyEvolution(plants) {
   const monthlyMap = new Map();
@@ -386,13 +386,13 @@ function ParcelleDetailsPage() {
         chartContainer.style.visibility = "hidden";
         chartContainer.style.height = "560px";
       }
-      
+
       const summaryTableContainer = document.getElementById("pdf-species-summary-table");
-      if(summaryTableContainer) {
-         summaryTableContainer.style.position = "absolute";
-         summaryTableContainer.style.left = "-9999px";
-         summaryTableContainer.style.top = "0";
-         summaryTableContainer.style.visibility = "hidden";
+      if (summaryTableContainer) {
+        summaryTableContainer.style.position = "absolute";
+        summaryTableContainer.style.left = "-9999px";
+        summaryTableContainer.style.top = "0";
+        summaryTableContainer.style.visibility = "hidden";
       }
     }
   };
@@ -608,7 +608,7 @@ function ParcelleDetailsPage() {
         }}
       >
         <h2 style={{ margin: "0 0 1.5rem 0", fontSize: "1.2rem", color: "#149655", borderBottom: "2px solid var(--border)", paddingBottom: "0.5rem" }}>
-           Inventaire par Espèce
+          Inventaire par Espèce
         </h2>
         {speciesSummary.length === 0 ? (
           <p style={{ color: "#888" }}>Aucun plant enregistré pour cette parcelle.</p>
@@ -624,14 +624,14 @@ function ParcelleDetailsPage() {
             </thead>
             <tbody>
               {speciesSummary.map((item, index) => (
-                <tr key={item.espece} style={{ 
-                     borderBottom: "1px solid var(--border)", 
-                     backgroundColor: index % 2 === 0 ? "#fff" : "var(--surface-hover)" 
-                  }}>
+                <tr key={item.espece} style={{
+                  borderBottom: "1px solid var(--border)",
+                  backgroundColor: index % 2 === 0 ? "#fff" : "var(--surface-hover)"
+                }}>
                   <td style={{ padding: "12px 16px", fontWeight: "500", color: "var(--text)" }}>{item.espece}</td>
                   <td style={{ padding: "12px 16px", color: "var(--primary)", fontWeight: "600" }}>{item.vivants}</td>
-                  <td style={{ padding: "12px 16px", color: "#ef4444", fontWeight: "600" }}>{item.morts}</td>
-                  <td style={{ padding: "12px 16px", fontWeight: "700", color: "var(--text)" }}>{item.total}</td>
+                  <td style={{ padding: "12px 16px", color: "var(--primary)", fontWeight: "600" }}>{item.morts}</td>
+                  <td style={{ padding: "12px 16px", fontWeight: "700", color: "#1f9953" }}>{item.total}</td>
                 </tr>
               ))}
             </tbody>
