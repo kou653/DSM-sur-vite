@@ -1,6 +1,8 @@
-import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronDown, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn } from "lucide-react";
+import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronDown, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn, Sparkles } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import AiAnalysisModal from "../components/AiAnalysisModal.jsx";
+import { analyzePageContext } from "../api/ai.js";
 import {
   CartesianGrid,
   Legend,
@@ -74,6 +76,11 @@ function ParcelleDetailsPage() {
   const [loadingPlants, setLoadingPlants] = useState(true);
   const [columnFilters, setColumnFilters] = useState({ espece: "", nom_scientifique: "", status: "" });
   const [openDropdown, setOpenDropdown] = useState(null);
+
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState("");
+  const [aiError, setAiError] = useState("");
   // Plant documentation
   const [isDocumentationFormOpen, setIsDocumentationFormOpen] = useState(false);
   const [documentationPlant, setDocumentationPlant] = useState(null);
@@ -294,6 +301,33 @@ function ParcelleDetailsPage() {
   const monthlyEvolution = useMemo(() => buildMonthlyEvolution(plants), [plants]);
   const speciesSummary = useMemo(() => buildSpeciesSummary(plants), [plants]);
 
+  const handleAiAnalysis = async () => {
+    setAiModalOpen(true);
+    setAiLoading(true);
+    setAiError("");
+    setAiResult("");
+
+    try {
+      const data = {
+        parcelle: parcelle?.nom,
+        superficie: parcelle?.superficie,
+        ville: parcelle?.ville,
+        objectif: parcelle?.objectif,
+        objectif_atteint: parcelle?.objectif_atteint,
+        cooperative: parcelle?.cooperative?.nom,
+        plantes_totales: plants.length,
+        especes: speciesSummary.map(s => ({ nom: s.espece, vivants: s.vivants, morts: s.morts }))
+      };
+
+      const res = await analyzePageContext("Détails de la parcelle", data);
+      setAiResult(res.data.result);
+    } catch (err) {
+      setAiError(err.response?.data?.message || err.message || "Erreur lors de l'analyse IA");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const exportPDF = async () => {
     const mainElement = document.querySelector(".users-page");
     if (!mainElement) return;
@@ -452,15 +486,26 @@ function ParcelleDetailsPage() {
             <h1>{parcelle.nom || `Parcelle #${parcelle.id}`}</h1>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={exportPDF}
-          className="dashboard-add-button"
-          style={{ display: "flex", alignItems: "center", gap: "8px" }}
-        >
-          <FileText size={16} />
-          Rapport parcelle
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            type="button"
+            onClick={handleAiAnalysis}
+            className="secondary-action"
+            style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--surface-hover)", borderColor: "var(--primary)", color: "var(--primary)" }}
+          >
+            <Sparkles size={16} />
+            Analyser (IA)
+          </button>
+          <button
+            type="button"
+            onClick={exportPDF}
+            className="dashboard-add-button"
+            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          >
+            <FileText size={16} />
+            Rapport parcelle
+          </button>
+        </div>
       </div>
 
 

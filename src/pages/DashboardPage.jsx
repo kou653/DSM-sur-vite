@@ -1,8 +1,10 @@
-import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees, Layers, Users, FileText } from "lucide-react";
+import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees, Layers, Users, FileText, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import AiAnalysisModal from "../components/AiAnalysisModal.jsx";
+import { analyzePageContext } from "../api/ai.js";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -43,6 +45,11 @@ function DashboardPage() {
 
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState("");
+  const [aiError, setAiError] = useState("");
 
   const fetchDashboardData = useCallback(async () => {
     if (!selectedProjectId) {
@@ -142,6 +149,30 @@ function DashboardPage() {
   const vivants = monitoring?.vivants || 0;
   const morts = monitoring?.morts || 0;
 
+  const handleAiAnalysis = async () => {
+    setAiModalOpen(true);
+    setAiLoading(true);
+    setAiError("");
+    setAiResult("");
+
+    try {
+      const data = {
+        projet: projet?.nom,
+        objectif: projet?.objectif,
+        parcelles: parcelles.map(p => ({ nom: p.nom, superficie: p.superficie, plants: p.plants_count })),
+        statistiques: { vivants, morts, taux_survie: monitoring?.taux_survie },
+        cooperatives: cooperatives.map(c => c.nom)
+      };
+
+      const res = await analyzePageContext("Tableau de bord - Vue d'ensemble du projet", data);
+      setAiResult(res.data.result);
+    } catch (err) {
+      setAiError(err.response?.data?.message || err.message || "Erreur lors de l'analyse IA");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const exportPDF = async () => {
     const mainElement = document.querySelector(".users-page");
     if (!mainElement) return;
@@ -231,15 +262,26 @@ function DashboardPage() {
           </h1>
           <p className="muted-text" style={{ margin: 0, fontSize: "1.1rem" }}>Vue d'ensemble et progression générale du projet.</p>
         </div>
-        <button
-          type="button"
-          onClick={exportPDF}
-          className="dashboard-add-button"
-          style={{ display: "flex", alignItems: "center", gap: "8px" }}
-        >
-          <FileText size={16} />
-          Rapport projet
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            type="button"
+            onClick={handleAiAnalysis}
+            className="secondary-action"
+            style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--surface-hover)", borderColor: "var(--primary)", color: "var(--primary)" }}
+          >
+            <Sparkles size={16} />
+            Analyser (IA)
+          </button>
+          <button
+            type="button"
+            onClick={exportPDF}
+            className="dashboard-add-button"
+            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          >
+            <FileText size={16} />
+            Rapport projet
+          </button>
+        </div>
       </header>
 
       {/* 2. Les 6 Blocs (4 en haut, 2 en bas) */}
@@ -437,6 +479,13 @@ function DashboardPage() {
         </div>
       </section>
 
+      <AiAnalysisModal 
+        isOpen={aiModalOpen} 
+        onClose={() => setAiModalOpen(false)} 
+        isLoading={aiLoading} 
+        resultText={aiResult} 
+        error={aiError} 
+      />
     </section>
   );
 }
