@@ -1,6 +1,8 @@
-import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees, Layers, Users } from "lucide-react";
+import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees, Layers, Users, FileText } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -140,19 +142,108 @@ function DashboardPage() {
   const vivants = monitoring?.vivants || 0;
   const morts = monitoring?.morts || 0;
 
+  const exportPDF = async () => {
+    const mainElement = document.querySelector(".users-page");
+    if (!mainElement) return;
+
+    mainElement.classList.add("is-exporting");
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const printableWidth = pdfWidth - margin * 2;
+      let currentY = margin;
+
+      const selectors = [
+        ".pdf-only-header",
+        "#dashboard-header",
+        "#dashboard-stats-row",
+        "#dashboard-chart-section",
+        "#dashboard-pie-section",
+        "#dashboard-coop-section",
+      ];
+
+      let isFirstSection = true;
+
+      for (const selector of selectors) {
+        const element = document.querySelector(selector);
+        if (!element || element.offsetHeight === 0) continue;
+
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: "#ffffff",
+          windowWidth: 1200,
+        });
+
+        const imgData = canvas.toDataURL("image/png");
+        const imgProps = pdf.getImageProperties(imgData);
+        const imgHeightMm = (imgProps.height * printableWidth) / imgProps.width;
+
+        if (!isFirstSection && currentY + imgHeightMm > pdfHeight - margin) {
+          pdf.addPage();
+          currentY = margin;
+        }
+
+        pdf.addImage(imgData, "PNG", margin, currentY, printableWidth, imgHeightMm);
+        currentY += imgHeightMm + 8;
+        isFirstSection = false;
+      }
+
+      pdf.save(`Projet-${projet?.nom || selectedProjectId}-${new Date().toISOString().slice(0, 10)}.pdf`);
+    } catch (error) {
+      console.error("PDF Export error:", error);
+    } finally {
+      mainElement.classList.remove("is-exporting");
+    }
+  };
+
   return (
     <section className="users-page" style={{ paddingBottom: "4rem" }}>
+      {/* Header for PDF only */}
+      <div className="pdf-only-header">
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <img src="/Fichier 3.png" alt="Logo" style={{ height: "45px" }} />
+          <div>
+            <h1 style={{ color: "#149655", margin: 0, fontSize: "1.5rem" }}>{projet.nom}</h1>
+            <p style={{ color: "#666", margin: 0 }}>Rapport de Projet</p>
+          </div>
+        </div>
+        <p style={{ color: "#666", textAlign: "right", margin: 0 }}>Généré le {new Date().toLocaleDateString()}</p>
+      </div>
+
       {/* 1. Titre du projet */}
-      <header style={{ marginBottom: "2rem" }}>
-        <h1 style={{ fontSize: "2rem", color: "#149655", margin: "0 0 0.5rem 0", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <Trees size={28} className="primary-text" />
-          {projet.nom}
-        </h1>
-        <p className="muted-text" style={{ margin: 0, fontSize: "1.1rem" }}>Vue d'ensemble et progression générale du projet.</p>
+      <header id="dashboard-header" style={{ marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <h1 style={{ fontSize: "2rem", color: "#149655", margin: "0 0 0.5rem 0", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <Trees size={28} className="primary-text" />
+            {projet.nom}
+          </h1>
+          <p className="muted-text" style={{ margin: 0, fontSize: "1.1rem" }}>Vue d'ensemble et progression générale du projet.</p>
+        </div>
+        <button
+          type="button"
+          onClick={exportPDF}
+          className="dashboard-add-button"
+          style={{ display: "flex", alignItems: "center", gap: "8px" }}
+        >
+          <FileText size={16} />
+          Rapport projet
+        </button>
       </header>
 
       {/* 2. Les 6 Blocs (4 en haut, 2 en bas) */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.5rem", marginBottom: "3rem" }}>
+      <div id="dashboard-stats-row" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.5rem", marginBottom: "3rem" }}>
         {/* Objectif Projet */}
         <article className="dashboard-stat-card">
           <div className="dashboard-stat-icon"><Target size={18} /></div>
@@ -213,7 +304,7 @@ function DashboardPage() {
       </div>
 
       {/* 3. Section Chart : Evolution par parcelle */}
-      <section style={{ marginBottom: "3rem" }}>
+      <section id="dashboard-chart-section" style={{ marginBottom: "3rem" }}>
         <h2 style={{ fontSize: "1.3rem", display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
           <Crosshair size={18} className="primary-text" />
           Évolution des objectifs par parcelle
@@ -238,7 +329,7 @@ function DashboardPage() {
       </section>
 
       {/* 4. Section Circulaire & Liste des superficies (Responsive Grid) */}
-      <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem", marginBottom: "3rem" }}>
+      <section id="dashboard-pie-section" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem", marginBottom: "3rem" }}>
         {/* Pie Chart */}
         {/* <div style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", border: "1px solid #b9e7cb" }}>
            <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.1rem" }}>Etat global écologique des plants</h3>
@@ -322,7 +413,7 @@ function DashboardPage() {
       </section>
 
       {/* 5. Section Coopératives en bas */}
-      <section style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", border: "1px solid #b9e7cb" }}>
+      <section id="dashboard-coop-section" style={{ background: "#ffffff", borderRadius: "var(--radius-lg)", padding: "1.5rem", border: "1px solid #b9e7cb" }}>
         <h2 style={{ fontSize: "1.3rem", display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
           <Building2 size={18} className="primary-text" />
           Coopératives

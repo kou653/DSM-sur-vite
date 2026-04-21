@@ -459,7 +459,7 @@ function ParcelleDetailsPage() {
           style={{ display: "flex", alignItems: "center", gap: "8px" }}
         >
           <FileText size={16} />
-          Exporter en PDF
+          Rapport parcelle
         </button>
       </div>
 
