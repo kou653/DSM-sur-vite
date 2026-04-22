@@ -45,27 +45,98 @@ function AiAnalysisPage() {
   const exportToPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
+    let cursorY = 45;
 
-    doc.setFontSize(22);
+    // Header with Logo
+    doc.addImage("/Fichier 3.png", "PNG", margin, 15, 12, 12);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
     doc.setTextColor(20, 150, 85);
-    doc.text("Dronek AI - Rapport d'Analyse", margin, 30);
+    doc.text("Dronek AI", margin + 15, 25);
 
-    doc.setFontSize(12);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Contexte : ${context}`, margin, 40);
-    doc.text(`Date : ${new Date().toLocaleDateString()}`, margin, 48);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(120, 120, 120);
+    doc.text("Rapport d'analyse agronomique automatisé", margin + 15, 30);
 
-    doc.setDrawColor(200, 200, 200);
-    doc.line(margin, 55, pageWidth - margin, 55);
+    doc.setDrawColor(20, 150, 85);
+    doc.setLineWidth(0.5);
+    doc.line(margin, cursorY - 5, pageWidth - margin, cursorY - 5);
 
+    // Metadata
+    cursorY += 10;
     doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(50, 50, 50);
+    doc.text(`Analyse : ${context}`, margin, cursorY);
+    cursorY += 7;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Généré le : ${new Date().toLocaleDateString()} à ${new Date().toLocaleTimeString()}`, margin, cursorY);
+
+    cursorY += 15;
+
+    // Parse and render result text
+    const lines = result.split("\n");
     doc.setTextColor(0, 0, 0);
 
-    const splitText = doc.splitTextToSize(result, pageWidth - (margin * 2));
-    doc.text(splitText, margin, 65);
+    lines.forEach(line => {
+      if (cursorY > pageHeight - 20) {
+        doc.addPage();
+        cursorY = 20;
+      }
 
-    doc.save(`Analyse_IA_${new Date().getTime()}.pdf`);
+      if (line.startsWith("### ")) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(13);
+        doc.setTextColor(20, 150, 85);
+        doc.text(line.replace("### ", ""), margin, cursorY);
+        cursorY += 10;
+      } else if (line.startsWith("## ")) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(15);
+        doc.setTextColor(20, 150, 85);
+        doc.text(line.replace("## ", ""), margin, cursorY);
+        cursorY += 12;
+      } else if (line.startsWith("# ")) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        doc.setTextColor(20, 150, 85);
+        doc.text(line.replace("# ", ""), margin, cursorY);
+        cursorY += 15;
+      } else if (line.trim().startsWith("* ") || line.trim().startsWith("- ")) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.setTextColor(60, 60, 60);
+        const cleanLine = "• " + line.trim().substring(2);
+        const splitText = doc.splitTextToSize(cleanLine, pageWidth - (margin * 2) - 5);
+        doc.text(splitText, margin + 5, cursorY);
+        cursorY += (splitText.length * 6);
+      } else if (line.trim().length > 0) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.setTextColor(60, 60, 60);
+        // Remove bold markdown symbols **
+        const cleanLine = line.replace(/\*\*/g, "");
+        const splitText = doc.splitTextToSize(cleanLine, pageWidth - (margin * 2));
+        doc.text(splitText, margin, cursorY);
+        cursorY += (splitText.length * 7);
+      } else {
+        cursorY += 5; // Empty line
+      }
+    });
+
+    // Footer
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(9);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Page ${i} sur ${totalPages} - Document Dronek`, pageWidth / 2, pageHeight - 10, { align: "center" });
+    }
+
+    doc.save(`Rapport_Analyse_Dronek_${new Date().getTime()}.pdf`);
   };
 
   if (!location.state) {
