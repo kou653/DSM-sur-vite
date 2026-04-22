@@ -10,6 +10,7 @@ export async function analyzePageContext(context, data) {
     {
       headers: {
         Authorization: `Bearer ${token}`,
+        Accept: "application/json",
       },
     }
   );
