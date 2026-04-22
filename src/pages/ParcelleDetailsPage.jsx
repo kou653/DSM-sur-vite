@@ -1,8 +1,6 @@
 import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronDown, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn, Sparkles } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import AiAnalysisModal from "../components/AiAnalysisModal.jsx";
-import { analyzePageContext } from "../api/ai.js";
 import {
   CartesianGrid,
   Legend,
@@ -15,7 +13,7 @@ import {
 } from "recharts";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { getParcelle } from "../api/parcelles.js";
 import { createPlant, getParcellePlants, updatePlantDocumentation } from "../api/plants.js";
 import { getEspeces } from "../api/referentiels.js";
@@ -63,6 +61,7 @@ function buildSpeciesSummary(plants) {
 }
 
 function ParcelleDetailsPage() {
+  const navigate = useNavigate();
   const { role, selectedProjectId } = useAuth();
   const { parcelleId } = useParams();
 
@@ -77,10 +76,6 @@ function ParcelleDetailsPage() {
   const [columnFilters, setColumnFilters] = useState({ espece: "", nom_scientifique: "", status: "" });
   const [openDropdown, setOpenDropdown] = useState(null);
 
-  const [aiModalOpen, setAiModalOpen] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiResult, setAiResult] = useState("");
-  const [aiError, setAiError] = useState("");
   // Plant documentation
   const [isDocumentationFormOpen, setIsDocumentationFormOpen] = useState(false);
   const [documentationPlant, setDocumentationPlant] = useState(null);
@@ -301,31 +296,21 @@ function ParcelleDetailsPage() {
   const monthlyEvolution = useMemo(() => buildMonthlyEvolution(plants), [plants]);
   const speciesSummary = useMemo(() => buildSpeciesSummary(plants), [plants]);
 
-  const handleAiAnalysis = async () => {
-    setAiModalOpen(true);
-    setAiLoading(true);
-    setAiError("");
-    setAiResult("");
+  const handleAiAnalysis = () => {
+    const data = {
+      parcelle: parcelle?.nom,
+      superficie: parcelle?.superficie,
+      ville: parcelle?.ville,
+      objectif: parcelle?.objectif,
+      objectif_atteint: parcelle?.objectif_atteint,
+      cooperative: parcelle?.cooperative?.nom,
+      plantes_totales: plants.length,
+      especes: speciesSummary.map(s => ({ nom: s.espece, vivants: s.vivants, morts: s.morts }))
+    };
 
-    try {
-      const data = {
-        parcelle: parcelle?.nom,
-        superficie: parcelle?.superficie,
-        ville: parcelle?.ville,
-        objectif: parcelle?.objectif,
-        objectif_atteint: parcelle?.objectif_atteint,
-        cooperative: parcelle?.cooperative?.nom,
-        plantes_totales: plants.length,
-        especes: speciesSummary.map(s => ({ nom: s.espece, vivants: s.vivants, morts: s.morts }))
-      };
-
-      const res = await analyzePageContext("Détails de la parcelle", data);
-      setAiResult(res.data.result);
-    } catch (err) {
-      setAiError(err.response?.data?.message || err.message || "Erreur lors de l'analyse IA");
-    } finally {
-      setAiLoading(false);
-    }
+    navigate(`/dashboard/projet/${selectedProjectId}/analyse-ia`, {
+      state: { context: "Détails de la parcelle", data }
+    });
   };
 
   const exportPDF = async () => {

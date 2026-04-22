@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/guards/ProtectedRoute.jsx";
 import RoleGuard from "./components/guards/RoleGuard.jsx";
 import AccessDeniedPage from "./pages/AccessDeniedPage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
+import AiAnalysisPage from "./pages/AiAnalysisPage.jsx";
 import CooperativesPage from "./pages/CooperativesPage.jsx";
 import ProjectLayout from "./components/ProjectLayout.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
@@ -56,6 +57,7 @@ function App() {
                 <Route path=":parcelleId" element={<EvolutionDetailsPage />} />
               </Route>
 
+              <Route path="analyse-ia" element={<AiAnalysisPage />} />
               <Route element={<RoleGuard allowedRoles={["administrateur"]} />}>
                 <Route path="especes" element={<EspecesPage />} />
                 <Route path="monitoring" element={<MonitoringPage />} />

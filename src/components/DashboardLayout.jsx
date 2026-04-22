@@ -176,8 +176,8 @@ function DashboardLayout() {
       <aside className="dashboard-sidebar">
         <div className="dashboard-sidebar-header">
           <div className="dashboard-brand">
-            <div className="dashboard-brand-mark" aria-hidden="true">
-              <TreePine size={16} strokeWidth={2.4} />
+            <div className="dashboard-brand-mark" aria-hidden="true" style={{ background: 'none', padding: 0 }}>
+              <img src="/Fichier 3.png" alt="Logo" style={{ height: "24px" }} />
             </div>
             <span>DSM</span>
           </div>
