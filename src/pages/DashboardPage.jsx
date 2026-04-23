@@ -1,9 +1,11 @@
-import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees, Layers, Users, FileText, Sparkles } from "lucide-react";
+import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees, Layers, Users, FileText, Sparkles, ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { Document, Packer, Paragraph, ImageRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, WidthType, TextRun } from "docx";
+import { saveAs } from "file-saver";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -47,6 +49,7 @@ function DashboardPage() {
 
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showReportDropdown, setShowReportDropdown] = useState(false);
 
   const fetchDashboardData = useCallback(async () => {
     if (!selectedProjectId) {
@@ -95,6 +98,13 @@ function DashboardPage() {
       if (saved) setLastAiAnalysis(saved);
     }
   }, [selectedProjectId]);
+
+  useEffect(() => {
+    if (!showReportDropdown) return;
+    const close = () => setShowReportDropdown(false);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [showReportDropdown]);
 
   if (loading) {
     return <section className="users-page"><p className="muted-text">Chargement de la vue d'ensemble...</p></section>;
@@ -234,6 +244,129 @@ function DashboardPage() {
     }
   };
 
+  const exportWord = async () => {
+    try {
+      const docChildren = [];
+
+      // 1. Header
+      docChildren.push(new Paragraph({
+        text: `Rapport Projet - ${projet.nom}`,
+        heading: HeadingLevel.HEADING_1,
+        alignment: AlignmentType.CENTER,
+      }));
+      docChildren.push(new Paragraph({
+        text: `Généré le ${new Date().toLocaleDateString()}`,
+        alignment: AlignmentType.CENTER,
+      }));
+      docChildren.push(new Paragraph({ text: "" }));
+
+      // 2. Stats Summary
+      docChildren.push(new Paragraph({ text: "Vue d'ensemble", heading: HeadingLevel.HEADING_2 }));
+      docChildren.push(new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph({ text: "Objectif Projet", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ text: "Parcelles", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ text: "Coopératives", bold: true })] }),
+            ],
+          }),
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph(`${objProjet} plants`)] }),
+              new TableCell({ children: [new Paragraph(String(parcelles.length))] }),
+              new TableCell({ children: [new Paragraph(String(cooperatives.length))] }),
+            ],
+          }),
+        ],
+      }));
+      docChildren.push(new Paragraph({ text: "" }));
+
+      // 3. Ecology Stats
+      docChildren.push(new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph({ text: "Evolution Globale", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ text: "Plants Vivants", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ text: "Taux de Survie", bold: true })] }),
+            ],
+          }),
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph(`${evolutionGlobalPercent.toFixed(1)}%`)] }),
+              new TableCell({ children: [new Paragraph(String(vivants))] }),
+              new TableCell({ children: [new Paragraph(`${monitoring?.taux_survie}%`)] }),
+            ],
+          }),
+        ],
+      }));
+      docChildren.push(new Paragraph({ text: "" }));
+
+      // 4. Charts (Still as Images)
+      const chartSection = document.getElementById("dashboard-chart-section");
+      if (chartSection) {
+        docChildren.push(new Paragraph({ text: "Évolution par Parcelle", heading: HeadingLevel.HEADING_2 }));
+        const canvas = await html2canvas(chartSection, { scale: 2, backgroundColor: "#ffffff" });
+        const imgData = canvas.toDataURL("image/png");
+        const response = await fetch(imgData);
+        const buffer = await response.arrayBuffer();
+        docChildren.push(new Paragraph({
+          children: [new ImageRun({ data: buffer, transformation: { width: 600, height: (canvas.height * 600) / canvas.width } })],
+          alignment: AlignmentType.CENTER,
+        }));
+        docChildren.push(new Paragraph({ text: "" }));
+      }
+
+      // 5. Cooperative Details Table
+      docChildren.push(new Paragraph({ text: "Coopératives Partenaires", heading: HeadingLevel.HEADING_2 }));
+      docChildren.push(new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph({ text: "Nom", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ text: "Entreprise", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ text: "Ville", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ text: "Contact", bold: true })] }),
+            ],
+          }),
+          ...cooperatives.map(coop => new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph(coop.nom)] }),
+              new TableCell({ children: [new Paragraph(coop.entreprise || "-")] }),
+              new TableCell({ children: [new Paragraph(coop.ville)] }),
+              new TableCell({ children: [new Paragraph(coop.contact || "-")] }),
+            ],
+          })),
+        ],
+      }));
+      docChildren.push(new Paragraph({ text: "" }));
+
+      // 6. AI Analysis
+      if (lastAiAnalysis) {
+        docChildren.push(new Paragraph({ text: "Analyse Dronek (IA)", heading: HeadingLevel.HEADING_2 }));
+        lastAiAnalysis.split("\n").forEach(line => {
+          if (!line.trim()) return;
+          let heading = null;
+          if (line.startsWith("# ")) heading = HeadingLevel.HEADING_1;
+          else if (line.startsWith("## ")) heading = HeadingLevel.HEADING_2;
+          else if (line.startsWith("### ")) heading = HeadingLevel.HEADING_3;
+          if (heading) docChildren.push(new Paragraph({ text: line.replace(/^#+\s/, ""), heading }));
+          else docChildren.push(new Paragraph({ children: [new TextRun(line.replace(/\*\*/g, ""))] }));
+        });
+      }
+
+      const doc = new Document({ sections: [{ properties: {}, children: docChildren }] });
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, `Projet-${projet?.nom || selectedProjectId}-${new Date().toISOString().slice(0, 10)}.docx`);
+    } catch (error) {
+      console.error("Word Export error:", error);
+    }
+  };
+
   return (
     <section className="users-page" style={{ paddingBottom: "4rem" }}>
       {/* Header for PDF only */}
@@ -267,15 +400,75 @@ function DashboardPage() {
             <Sparkles size={16} />
             Analyser (IA)
           </button>
-          <button
-            type="button"
-            onClick={exportPDF}
-            className="dashboard-add-button"
-            style={{ display: "flex", alignItems: "center", gap: "8px" }}
-          >
-            <FileText size={16} />
-            Rapport projet
-          </button>
+          
+          <div style={{ position: "relative" }}>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setShowReportDropdown(!showReportDropdown); }}
+              className="dashboard-add-button"
+              style={{ display: "flex", alignItems: "center", gap: "8px" }}
+            >
+              <FileText size={16} />
+              Rapport
+              <ChevronDown size={14} style={{ transform: showReportDropdown ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+            </button>
+            
+            {showReportDropdown && (
+              <div style={{
+                position: "absolute",
+                top: "calc(100% + 5px)",
+                right: 0,
+                background: "white",
+                borderRadius: "var(--radius-md)",
+                boxShadow: "var(--shadow-lg)",
+                border: "1px solid var(--border)",
+                zIndex: 100,
+                minWidth: "160px",
+                overflow: "hidden"
+              }}>
+                <button 
+                  onClick={exportPDF}
+                  style={{
+                    width: "100%",
+                    padding: "10px 15px",
+                    textAlign: "left",
+                    background: "none",
+                    border: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    transition: "background 0.2s"
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = "var(--surface-hover)"}
+                  onMouseOut={(e) => e.currentTarget.style.background = "none"}
+                >
+                  <FileText size={14} color="#ef4444" /> Format PDF
+                </button>
+                <button 
+                  onClick={exportWord}
+                  style={{
+                    width: "100%",
+                    padding: "10px 15px",
+                    textAlign: "left",
+                    background: "none",
+                    border: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    transition: "background 0.2s"
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = "var(--surface-hover)"}
+                  onMouseOut={(e) => e.currentTarget.style.background = "none"}
+                >
+                  <FileText size={14} color="#3b82f6" /> Format Word (.docx)
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

@@ -1,9 +1,11 @@
-import { ArrowLeft, Brain, Download, Loader2, Sparkles, Wand2, FileText, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Brain, Download, Loader2, Sparkles, Wand2, FileText, CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { analyzePageContext } from "../api/ai.js";
 import jsPDF from "jspdf";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
+import { saveAs } from "file-saver";
 
 function AiAnalysisPage() {
   const location = useLocation();
@@ -16,6 +18,7 @@ function AiAnalysisPage() {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
+  const [showReportDropdown, setShowReportDropdown] = useState(false);
 
   const startAnalysis = useCallback(async () => {
     if (!context || !initialData) {
@@ -49,6 +52,13 @@ function AiAnalysisPage() {
   useEffect(() => {
     startAnalysis();
   }, [startAnalysis]);
+
+  useEffect(() => {
+    if (!showReportDropdown) return;
+    const close = () => setShowReportDropdown(false);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [showReportDropdown]);
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -146,6 +156,55 @@ function AiAnalysisPage() {
 
     doc.save(`Rapport_Analyse_Dronek_${new Date().getTime()}.pdf`);
   };
+  
+  const exportToWord = async () => {
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              text: "Rapport d'analyse Dronek AI",
+              heading: HeadingLevel.HEADING_1,
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Analyse : ${context}`,
+                  bold: true,
+                }),
+              ],
+            }),
+            new Paragraph({
+              text: `Généré le : ${new Date().toLocaleDateString()} à ${new Date().toLocaleTimeString()}`,
+            }),
+            new Paragraph({ text: "" }), // Spacer
+            ...result.split("\n").map(line => {
+              if (line.startsWith("# ")) {
+                return new Paragraph({ text: line.replace("# ", ""), heading: HeadingLevel.HEADING_1 });
+              } else if (line.startsWith("## ")) {
+                return new Paragraph({ text: line.replace("## ", ""), heading: HeadingLevel.HEADING_2 });
+              } else if (line.startsWith("### ")) {
+                return new Paragraph({ text: line.replace("### ", ""), heading: HeadingLevel.HEADING_3 });
+              } else if (line.trim().startsWith("* ") || line.trim().startsWith("- ")) {
+                return new Paragraph({
+                  text: line.trim().substring(2),
+                  bullet: { level: 0 },
+                });
+              } else {
+                return new Paragraph({
+                  children: [new TextRun(line.replace(/\*\*/g, ""))],
+                });
+              }
+            }),
+          ],
+        },
+      ],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `Rapport_Analyse_Dronek_${new Date().getTime()}.docx`);
+  };
 
   if (!location.state) {
     return (
@@ -182,9 +241,75 @@ function AiAnalysisPage() {
           <button onClick={startAnalysis} disabled={loading} className="secondary-action" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <Wand2 size={16} /> Relancer l'analyse
           </button>
-          <button onClick={exportToPDF} disabled={loading || !result} className="dashboard-add-button" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Download size={16} /> Télécharger PDF
-          </button>
+          
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowReportDropdown(!showReportDropdown); }}
+              disabled={loading || !result}
+              className="dashboard-add-button"
+              style={{ display: "flex", alignItems: "center", gap: "8px" }}
+            >
+              <FileText size={16} />
+              Rapport
+              <ChevronDown size={14} style={{ transform: showReportDropdown ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+            </button>
+            
+            {showReportDropdown && (
+              <div style={{
+                position: "absolute",
+                top: "calc(100% + 5px)",
+                right: 0,
+                background: "white",
+                borderRadius: "var(--radius-md)",
+                boxShadow: "var(--shadow-lg)",
+                border: "1px solid var(--border)",
+                zIndex: 100,
+                minWidth: "180px",
+                overflow: "hidden"
+              }}>
+                <button 
+                  onClick={exportToPDF}
+                  style={{
+                    width: "100%",
+                    padding: "10px 15px",
+                    textAlign: "left",
+                    background: "none",
+                    border: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    transition: "background 0.2s"
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = "var(--surface-hover)"}
+                  onMouseOut={(e) => e.currentTarget.style.background = "none"}
+                >
+                  <FileText size={14} color="#ef4444" /> Format PDF
+                </button>
+                <button 
+                  onClick={exportToWord}
+                  style={{
+                    width: "100%",
+                    padding: "10px 15px",
+                    textAlign: "left",
+                    background: "none",
+                    border: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    transition: "background 0.2s"
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = "var(--surface-hover)"}
+                  onMouseOut={(e) => e.currentTarget.style.background = "none"}
+                >
+                  <FileText size={14} color="#3b82f6" /> Format Word (.docx)
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
