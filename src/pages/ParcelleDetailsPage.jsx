@@ -14,6 +14,7 @@ import {
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import { getParcelle } from "../api/parcelles.js";
 import { createPlant, getParcellePlants, updatePlantDocumentation } from "../api/plants.js";
 import { getEspeces } from "../api/referentiels.js";
@@ -96,6 +97,7 @@ function ParcelleDetailsPage() {
   const [isPlantFormOpen, setIsPlantFormOpen] = useState(false);
   const [plantSubmitting, setPlantSubmitting] = useState(false);
   const [plantFormError, setPlantFormError] = useState("");
+  const [lastAiAnalysis, setLastAiAnalysis] = useState("");
 
   // Plant Autocomplete
   const [especeSearch, setEspeceSearch] = useState("");
@@ -151,6 +153,13 @@ function ParcelleDetailsPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    if (parcelleId) {
+      const saved = localStorage.getItem(`last_ai_analysis_parcelle_${parcelleId}`);
+      if (saved) setLastAiAnalysis(saved);
+    }
+  }, [parcelleId]);
 
   useEffect(() => {
     if (!openDropdown) return;
@@ -309,7 +318,7 @@ function ParcelleDetailsPage() {
     };
 
     navigate(`/dashboard/projet/${selectedProjectId}/analyse-ia`, {
-      state: { context: "Détails de la parcelle", data }
+      state: { context: "Détails de la parcelle", data, parcelleId }
     });
   };
 
@@ -363,6 +372,7 @@ function ParcelleDetailsPage() {
         "#parcelle-info-grid",
         "#pdf-monitoring-chart",
         "#pdf-species-summary-table",
+        "#parcelle-ai-section",
       ];
 
       let isFirstSection = true;
@@ -998,6 +1008,52 @@ function ParcelleDetailsPage() {
         )}
       </section>
 
+
+
+      {/* AI Analysis Section at the bottom (Hidden on screen, visible in PDF) */}
+      {lastAiAnalysis && (
+        <section id="parcelle-ai-section" style={{ 
+          marginTop: "3rem", 
+          background: "#ffffff", 
+          borderRadius: "var(--radius-lg)", 
+          padding: "2rem", 
+          border: "1px solid #b9e7cb", 
+          boxShadow: "var(--shadow-sm)",
+          // Hidden by default on screen
+          position: "absolute",
+          left: "-9999px",
+          top: "0",
+          visibility: "hidden"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "1.5rem", paddingBottom: "1rem", borderBottom: "1px solid #b9e7cb" }}>
+            <Sparkles size={24} className="primary-text" />
+            <h2 style={{ fontSize: "1.3rem", margin: 0 }}>Analyse Dronek</h2>
+          </div>
+          <div className="markdown-body" style={{ fontSize: "1.05rem", lineHeight: "1.7", color: "var(--text)" }}>
+            <ReactMarkdown>{lastAiAnalysis}</ReactMarkdown>
+          </div>
+        </section>
+      )}
+
+      <style>{`
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 { color: var(--primary); margin-top: 1.5em; margin-bottom: 0.5em; }
+        .markdown-body p { margin-bottom: 1em; }
+        .markdown-body ul, .markdown-body ol { margin-left: 20px; list-style-position: outside; margin-bottom: 1em; }
+        .markdown-body li { margin-bottom: 0.5em; }
+        .markdown-body strong { font-weight: 600; color: var(--text); }
+        #parcelle-ai-section { display: block; }
+        .is-exporting #parcelle-ai-section { 
+          position: relative !important; 
+          left: auto !important; 
+          top: auto !important; 
+          visibility: visible !important; 
+          border: none !important; 
+          background: none !important; 
+          box-shadow: none !important; 
+          padding: 1rem 0 !important; 
+        }
+        .is-exporting #parcelle-ai-section div { border-bottom: 2px solid var(--primary) !important; padding-left: 0 !important; }
+      `}</style>
     </section>
   );
 }

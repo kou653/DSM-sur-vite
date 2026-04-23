@@ -1,6 +1,7 @@
 import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, NotebookTabs, TreePine, Trees, Layers, Users, FileText, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import {
@@ -42,6 +43,7 @@ function DashboardPage() {
   const [monitoring, setMonitoring] = useState(null);
   const [parcelles, setParcelles] = useState([]);
   const [cooperatives, setCooperatives] = useState([]);
+  const [lastAiAnalysis, setLastAiAnalysis] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -86,6 +88,13 @@ function DashboardPage() {
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
+
+  useEffect(() => {
+    if (selectedProjectId) {
+      const saved = localStorage.getItem(`last_ai_analysis_project_${selectedProjectId}`);
+      if (saved) setLastAiAnalysis(saved);
+    }
+  }, [selectedProjectId]);
 
   if (loading) {
     return <section className="users-page"><p className="muted-text">Chargement de la vue d'ensemble...</p></section>;
@@ -186,6 +195,7 @@ function DashboardPage() {
         "#dashboard-chart-section",
         "#dashboard-pie-section",
         "#dashboard-coop-section",
+        "#dashboard-ai-section",
       ];
 
       let isFirstSection = true;
@@ -464,7 +474,52 @@ function DashboardPage() {
         </div>
       </section>
 
+      {/* 6. Section IA en bas (Cachée sur l'écran, visible dans le PDF) */}
+      {lastAiAnalysis && (
+        <section id="dashboard-ai-section" style={{ 
+          marginTop: "3rem", 
+          background: "#ffffff", 
+          borderRadius: "var(--radius-lg)", 
+          padding: "2rem", 
+          border: "1px solid #b9e7cb", 
+          boxShadow: "var(--shadow-sm)",
+          // Par défaut caché de l'écran
+          position: "absolute",
+          left: "-9999px",
+          top: "0",
+          visibility: "hidden"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "1.5rem", paddingBottom: "1rem", borderBottom: "1px solid #b9e7cb" }}>
+            <Sparkles size={24} className="primary-text" />
+            <h2 style={{ fontSize: "1.3rem", margin: 0 }}>Analyse Dronek</h2>
+          </div>
+          <div className="markdown-body" style={{ fontSize: "1.05rem", lineHeight: "1.7", color: "var(--text)" }}>
+            <ReactMarkdown>{lastAiAnalysis}</ReactMarkdown>
+          </div>
+        </section>
+      )}
+
+      <style>{`
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 { color: var(--primary); margin-top: 1.5em; margin-bottom: 0.5em; }
+        .markdown-body p { margin-bottom: 1em; }
+        .markdown-body ul, .markdown-body ol { margin-left: 20px; list-style-position: outside; margin-bottom: 1em; }
+        .markdown-body li { margin-bottom: 0.5em; }
+        .markdown-body strong { font-weight: 600; color: var(--text); }
+        #dashboard-ai-section { display: block; }
+        .is-exporting #dashboard-ai-section { 
+          position: relative !important; 
+          left: auto !important; 
+          top: auto !important; 
+          visibility: visible !important; 
+          border: none !important; 
+          background: none !important; 
+          box-shadow: none !important; 
+          padding: 1rem 0 !important; 
+        }
+        .is-exporting #dashboard-ai-section div { border-bottom: 2px solid var(--primary) !important; padding-left: 0 !important; }
+      `}</style>
     </section>
+
   );
 }
 

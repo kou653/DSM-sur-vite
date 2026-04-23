@@ -11,7 +11,7 @@ function AiAnalysisPage() {
   const { projectId } = useParams();
 
   // Data passed from previous page
-  const { context, data: initialData } = location.state || {};
+  const { context, data: initialData, parcelleId } = location.state || {};
 
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState("");
@@ -30,7 +30,15 @@ function AiAnalysisPage() {
 
     try {
       const res = await analyzePageContext(context, initialData);
-      setResult(res.data.result);
+      const analysisResult = res.data.result;
+      setResult(analysisResult);
+
+      // Persist to localStorage
+      if (context === "Détails de la parcelle" && parcelleId) {
+        localStorage.setItem(`last_ai_analysis_parcelle_${parcelleId}`, analysisResult);
+      } else if (context === "Tableau de bord - Vue d'ensemble du projet" && projectId) {
+        localStorage.setItem(`last_ai_analysis_project_${projectId}`, analysisResult);
+      }
     } catch (err) {
       setError(err.response?.data?.message || err.message || "Une erreur est survenue lors de l'analyse.");
     } finally {
