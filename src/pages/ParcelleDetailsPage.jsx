@@ -460,8 +460,8 @@ function ParcelleDetailsPage() {
         rows: [
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ text: "Objectif de la parcelle", bold: true })] }),
-              new TableCell({ children: [new Paragraph({ text: "Évolution de l'objectif", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Objectif de la parcelle", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Évolution de l'objectif", bold: true })] })] }),
             ],
           }),
           new TableRow({
@@ -478,10 +478,10 @@ function ParcelleDetailsPage() {
       docChildren.push(new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
         rows: [
-          new TableRow({ children: [new TableCell({ children: [new Paragraph({ text: "Superficie", bold: true })] }), new TableCell({ children: [new Paragraph(`${parcelle.superficie || "-"} ha`)] })] }),
-          new TableRow({ children: [new TableCell({ children: [new Paragraph({ text: "Ville", bold: true })] }), new TableCell({ children: [new Paragraph(parcelle.ville || "-")] })] }),
-          new TableRow({ children: [new TableCell({ children: [new Paragraph({ text: "Coopérative", bold: true })] }), new TableCell({ children: [new Paragraph(parcelle.cooperative?.nom || "-")] })] }),
-          new TableRow({ children: [new TableCell({ children: [new Paragraph({ text: "Coordonnées", bold: true })] }), new TableCell({ children: [new Paragraph(`${parcelle.lat}, ${parcelle.lng}`)] })] }),
+          new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Superficie", bold: true })] })] }), new TableCell({ children: [new Paragraph(`${parcelle.superficie || "-"} ha`)] })] }),
+          new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Ville", bold: true })] })] }), new TableCell({ children: [new Paragraph(parcelle.ville || "-")] })] }),
+          new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Coopérative", bold: true })] })] }), new TableCell({ children: [new Paragraph(parcelle.cooperative?.nom || "-")] })] }),
+          new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Coordonnées", bold: true })] })] }), new TableCell({ children: [new Paragraph(`${parcelle.lat}, ${parcelle.lng}`)] })] }),
         ],
       }));
       docChildren.push(new Paragraph({ text: "" }));
@@ -493,7 +493,7 @@ function ParcelleDetailsPage() {
         const response = await fetch(imgData);
         const buffer = await response.arrayBuffer();
         docChildren.push(new Paragraph({
-          children: [new ImageRun({ data: buffer, transformation: { width: 600, height: (canvas.height * 600) / canvas.width } })],
+          children: [new ImageRun({ data: buffer, transformation: { width: 600, height: Math.round((canvas.height * 600) / canvas.width) } })],
           alignment: AlignmentType.CENTER,
         }));
         docChildren.push(new Paragraph({ text: "" }));
@@ -505,10 +505,10 @@ function ParcelleDetailsPage() {
         rows: [
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ text: "Espèce", bold: true })] }),
-              new TableCell({ children: [new Paragraph({ text: "Vivant", bold: true })] }),
-              new TableCell({ children: [new Paragraph({ text: "Mort", bold: true })] }),
-              new TableCell({ children: [new Paragraph({ text: "Total", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Espèce", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Vivant", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Mort", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Total", bold: true })] })] }),
             ],
           }),
           ...speciesSummary.map(item => new TableRow({
@@ -532,7 +532,7 @@ function ParcelleDetailsPage() {
           else if (line.startsWith("## ")) heading = HeadingLevel.HEADING_2;
           else if (line.startsWith("### ")) heading = HeadingLevel.HEADING_3;
           if (heading) docChildren.push(new Paragraph({ text: line.replace(/^#+\s/, ""), heading }));
-          else docChildren.push(new Paragraph({ children: [new TextRun(line.replace(/\*\*/g, ""))] }));
+          else docChildren.push(new Paragraph({ children: [new TextRun({ text: line.replace(/\*\*/g, "") })] }));
         });
       }
 

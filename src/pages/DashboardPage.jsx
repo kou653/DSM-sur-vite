@@ -267,9 +267,9 @@ function DashboardPage() {
         rows: [
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ text: "Objectif Projet", bold: true })] }),
-              new TableCell({ children: [new Paragraph({ text: "Parcelles", bold: true })] }),
-              new TableCell({ children: [new Paragraph({ text: "Coopératives", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Objectif Projet", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Parcelles", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Coopératives", bold: true })] })] }),
             ],
           }),
           new TableRow({
@@ -289,9 +289,9 @@ function DashboardPage() {
         rows: [
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ text: "Evolution Globale", bold: true })] }),
-              new TableCell({ children: [new Paragraph({ text: "Plants Vivants", bold: true })] }),
-              new TableCell({ children: [new Paragraph({ text: "Taux de Survie", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Evolution Globale", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Plants Vivants", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Taux de Survie", bold: true })] })] }),
             ],
           }),
           new TableRow({
@@ -314,11 +314,53 @@ function DashboardPage() {
         const response = await fetch(imgData);
         const buffer = await response.arrayBuffer();
         docChildren.push(new Paragraph({
-          children: [new ImageRun({ data: buffer, transformation: { width: 600, height: (canvas.height * 600) / canvas.width } })],
+          children: [new ImageRun({ data: buffer, transformation: { width: 600, height: Math.round((canvas.height * 600) / canvas.width) } })],
           alignment: AlignmentType.CENTER,
         }));
         docChildren.push(new Paragraph({ text: "" }));
       }
+
+      // 4.1 État des plants
+      docChildren.push(new Paragraph({ text: "État des plants", heading: HeadingLevel.HEADING_2 }));
+      docChildren.push(new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Vivants", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Morts", bold: true })] })] }),
+            ],
+          }),
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph(String(vivants))] }),
+              new TableCell({ children: [new Paragraph(String(morts))] }),
+            ],
+          }),
+        ],
+      }));
+      docChildren.push(new Paragraph({ text: "" }));
+
+      // 4.2 Superficie des parcelles (ha)
+      docChildren.push(new Paragraph({ text: "Superficie des parcelles (ha)", heading: HeadingLevel.HEADING_2 }));
+      docChildren.push(new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Parcelle", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Superficie (ha)", bold: true })] })] }),
+            ],
+          }),
+          ...parcelles.map(p => new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph(p.nom)] }),
+              new TableCell({ children: [new Paragraph(String(p.superficie))] }),
+            ],
+          })),
+        ],
+      }));
+      docChildren.push(new Paragraph({ text: "" }));
 
       // 5. Cooperative Details Table
       docChildren.push(new Paragraph({ text: "Coopératives Partenaires", heading: HeadingLevel.HEADING_2 }));
@@ -327,10 +369,10 @@ function DashboardPage() {
         rows: [
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ text: "Nom", bold: true })] }),
-              new TableCell({ children: [new Paragraph({ text: "Entreprise", bold: true })] }),
-              new TableCell({ children: [new Paragraph({ text: "Ville", bold: true })] }),
-              new TableCell({ children: [new Paragraph({ text: "Contact", bold: true })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Nom", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Entreprise", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Ville", bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Contact", bold: true })] })] }),
             ],
           }),
           ...cooperatives.map(coop => new TableRow({
@@ -355,7 +397,7 @@ function DashboardPage() {
           else if (line.startsWith("## ")) heading = HeadingLevel.HEADING_2;
           else if (line.startsWith("### ")) heading = HeadingLevel.HEADING_3;
           if (heading) docChildren.push(new Paragraph({ text: line.replace(/^#+\s/, ""), heading }));
-          else docChildren.push(new Paragraph({ children: [new TextRun(line.replace(/\*\*/g, ""))] }));
+          else docChildren.push(new Paragraph({ children: [new TextRun({ text: line.replace(/\*\*/g, "") })] }));
         });
       }
 
