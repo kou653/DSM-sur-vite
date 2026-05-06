@@ -217,7 +217,7 @@ function UsersPage() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (formState.projects.length === 0) {
+    if (formState.role !== "administrateur" && formState.projects.length === 0) {
       setActionError("Veuillez sélectionner au moins un projet affecté.");
       return;
     }
@@ -411,25 +411,34 @@ function UsersPage() {
               />
             </label>
 
-            <div className="filter-field">
-              <span>Projets affectés</span>
-              <div className="users-projects-picker">
-                {projectsLoading ? <p className="muted-text">Chargement des projets...</p> : null}
-                {!projectsLoading && projects.length === 0 ? (
-                  <p className="muted-text">Aucun projet disponible.</p>
-                ) : null}
-                {projects.map((project) => (
-                  <label key={project.id} className="users-project-option">
-                    <input
-                      type="checkbox"
-                      checked={formState.projects.includes(project.id)}
-                      onChange={() => handleProjectToggle(project.id)}
-                    />
-                    <span>{project.name}</span>
-                  </label>
-                ))}
+            {formState.role === "administrateur" ? (
+              <div className="filter-field">
+                <span>Projets affectés</span>
+                <p className="muted-text" style={{ marginTop: "0.5rem" }}>
+                  L'administrateur a accès à l'ensemble des projets par défaut.
+                </p>
               </div>
-            </div>
+            ) : (
+              <div className="filter-field">
+                <span>Projets affectés *</span>
+                <div className="users-projects-picker">
+                  {projectsLoading ? <p className="muted-text">Chargement des projets...</p> : null}
+                  {!projectsLoading && projects.length === 0 ? (
+                    <p className="muted-text">Aucun projet disponible.</p>
+                  ) : null}
+                  {projects.map((project) => (
+                    <label key={project.id} className="users-project-option">
+                      <input
+                        type="checkbox"
+                        checked={formState.projects.includes(project.id)}
+                        onChange={() => handleProjectToggle(project.id)}
+                      />
+                      <span>{project.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="crud-actions">
               <button type="submit" className="primary-action" disabled={submitting}>
