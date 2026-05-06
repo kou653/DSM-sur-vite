@@ -34,8 +34,9 @@ function App() {
           <Route path="/dashboard" element={<ProjectListPage />} />
           <Route path="/dashboard/compte" element={<AccountPage />} />
 
-          <Route element={<RoleGuard allowedRoles={["administrateur"]} />}>
+          <Route element={<RoleGuard allowedRoles={["administrateur", "agent terrain"]} />}>
             <Route path="/dashboard/utilisateurs" element={<UsersPage />} />
+            <Route path="/dashboard/especes" element={<EspecesPage />} />
           </Route>
 
           <Route path="/dashboard/projet/:projectId" element={<ProjectAccessGuard />}>
@@ -59,7 +60,6 @@ function App() {
 
               <Route path="analyse-ia" element={<AiAnalysisPage />} />
               <Route element={<RoleGuard allowedRoles={["administrateur"]} />}>
-                <Route path="especes" element={<EspecesPage />} />
                 <Route path="monitoring" element={<MonitoringPage />} />
                 <Route path="utilisateurs" element={<UsersPage />} />
               </Route>

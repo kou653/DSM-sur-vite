@@ -1173,7 +1173,7 @@ function ParcelleDetailsPage() {
                     )}
                   </th>
 
-                  <th>Documenter</th>
+                  {role !== "commanditaire" && <th>Documenter</th>}
                 </tr>
               </thead>
               <tbody>
@@ -1193,26 +1193,28 @@ function ParcelleDetailsPage() {
                         {plant.status === "vivant" ? "Vivant" : "Mort"}
                       </span>
                     </td>
-                    <td>
-                      {canManage ? (
-                        <button
-                          type="button"
-                          className="secondary-action"
-                          style={{ padding: "6px 10px", fontSize: "0.85rem", display: "inline-flex", alignItems: "center", gap: "6px" }}
-                          onClick={() => openDocumentationForm(plant)}
-                        >
-                          <FileText size={14} strokeWidth={2} />
-                          Documenter
-                        </button>
-                      ) : (
-                        <span className="muted-text">--</span>
-                      )}
-                    </td>
+                    {role !== "commanditaire" && (
+                      <td>
+                        {canManage ? (
+                          <button
+                            type="button"
+                            className="secondary-action"
+                            style={{ padding: "6px 10px", fontSize: "0.85rem", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                            onClick={() => openDocumentationForm(plant)}
+                          >
+                            <FileText size={14} strokeWidth={2} />
+                            Documenter
+                          </button>
+                        ) : (
+                          <span className="muted-text">--</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
                 {filteredPlants.length === 0 && (
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "center", padding: "1.5rem" }} className="muted-text">
+                    <td colSpan={role === "commanditaire" ? 5 : 6} style={{ textAlign: "center", padding: "1.5rem" }} className="muted-text">
                       Aucun plant ne correspond aux filtres.
                     </td>
                   </tr>

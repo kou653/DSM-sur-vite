@@ -251,7 +251,7 @@ function EspecesPage() {
             />
           </label>
 
-          {role === "administrateur" ? (
+          {role === "administrateur" || role === "agent terrain" ? (
             <>
               <input
                 type="file"
@@ -430,7 +430,7 @@ function EspecesPage() {
                       )}
                     </th>
                   ))}
-                  {role === "administrateur" ? <th>Actions</th> : null}
+                  {role === "administrateur" || role === "agent terrain" ? <th>Actions</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -443,7 +443,7 @@ function EspecesPage() {
                       </div>
                     </td>
                     <td>{espece.scientificName}</td>
-                    {role === "administrateur" ? (
+                    {role === "administrateur" || role === "agent terrain" ? (
                       <td>
                         <div className="users-table-actions">
                           <button
@@ -454,14 +454,16 @@ function EspecesPage() {
                           >
                             <Pencil size={14} strokeWidth={2} />
                           </button>
-                          <button
-                            type="button"
-                            className="danger-action users-icon-button"
-                            onClick={() => handleDelete(espece)}
-                            disabled={submitting}
-                          >
-                            <Trash2 size={14} strokeWidth={2} />
-                          </button>
+                          {role === "administrateur" && (
+                            <button
+                              type="button"
+                              className="danger-action users-icon-button"
+                              onClick={() => handleDelete(espece)}
+                              disabled={submitting}
+                            >
+                              <Trash2 size={14} strokeWidth={2} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     ) : null}

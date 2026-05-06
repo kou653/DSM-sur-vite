@@ -120,6 +120,15 @@ function DashboardLayout() {
           icon: LayoutDashboard,
           end: true,
         },
+        ...(role === "administrateur" || role === "agent terrain"
+          ? [
+            {
+              to: "/dashboard/especes",
+              label: "Espèces",
+              icon: TreePine,
+            },
+          ]
+          : []),
       ],
     },
     ...(projectItems.length > 0
@@ -140,19 +149,10 @@ function DashboardLayout() {
               label: "Utilisateurs",
               icon: Users,
             },
-            ...(isProjectRoute && projectBasePath
-              ? [
-                {
-                  to: `${projectBasePath}/especes`,
-                  label: "Especes",
-                  icon: TreePine,
-                },
-              ]
-              : []),
-          ],
-        },
-      ]
-      : []),
+              ],
+            },
+          ]
+          : []),
     {
       title: "Compte",
       items: [
