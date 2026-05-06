@@ -2163,11 +2163,16 @@ body,
   color: #149655;
 }
 
-.form-error,
 .evolution-success {
   background: #e9f8ef;
   color: #000000;
   border-color: #149655;
+}
+
+.form-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #f87171;
 }
 
 .dashboard-sidebar-backdrop {

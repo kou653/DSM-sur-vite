@@ -412,7 +412,7 @@ function UsersPage() {
             </label>
 
             <div className="filter-field">
-              <span>Projets affectés *</span>
+              <span>Projets affectés</span>
               <div className="users-projects-picker">
                 {projectsLoading ? <p className="muted-text">Chargement des projets...</p> : null}
                 {!projectsLoading && projects.length === 0 ? (
