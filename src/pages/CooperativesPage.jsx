@@ -63,8 +63,8 @@ function CooperativesPage() {
     try {
       const { data } = await getProjetCooperatives(selectedProjectId);
       setCooperatives(normalizeCooperatives(data));
-    } catch {
-      setErrorMessage("Impossible de charger les cooperatives.");
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || "Impossible de charger les cooperatives.");
     } finally {
       setLoading(false);
     }
@@ -163,8 +163,8 @@ function CooperativesPage() {
 
       await fetchCooperatives();
       closeForm();
-    } catch {
-      setActionError("Operation impossible pour cette cooperative.");
+    } catch (error) {
+      setActionError(error.response?.data?.message || "Operation impossible pour cette cooperative.");
     } finally {
       setSubmitting(false);
     }
@@ -187,8 +187,8 @@ function CooperativesPage() {
       await deleteCooperative(cooperative.id);
       setSuccessMessage("Cooperative supprimee avec succes.");
       await fetchCooperatives();
-    } catch {
-      setActionError("Suppression impossible pour cette cooperative.");
+    } catch (error) {
+      setActionError(error.response?.data?.message || "Suppression impossible pour cette cooperative.");
     } finally {
       setSubmitting(false);
     }

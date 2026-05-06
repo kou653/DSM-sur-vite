@@ -216,6 +216,12 @@ function UsersPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (formState.projects.length === 0) {
+      setActionError("Veuillez sélectionner au moins un projet affecté.");
+      return;
+    }
+
     setSubmitting(true);
     setActionError("");
     setSuccessMessage("");
@@ -406,7 +412,7 @@ function UsersPage() {
             </label>
 
             <div className="filter-field">
-              <span>Projets affectes</span>
+              <span>Projets affectés *</span>
               <div className="users-projects-picker">
                 {projectsLoading ? <p className="muted-text">Chargement des projets...</p> : null}
                 {!projectsLoading && projects.length === 0 ? (

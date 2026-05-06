@@ -145,8 +145,8 @@ function ParcelleDetailsPage() {
         lng: prev.lng || parcelleData.lng || ""
       }));
 
-    } catch {
-      setErrorMessage("Impossible de charger les sous-données de la parcelle.");
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || "Impossible de charger les sous-données de la parcelle.");
     } finally {
       setLoading(false);
       setLoadingPlants(false);
@@ -185,8 +185,8 @@ function ParcelleDetailsPage() {
         ? plantsRes.data
         : plantsRes.data?.plants || plantsRes.data?.data || [];
       setPlants(rawPlants);
-    } catch {
-      // Handle plant refresh fail
+    } catch (error) {
+      console.error(error.response?.data?.message || "Erreur lors du rafraîchissement des plants.");
     }
   };
 

@@ -148,8 +148,10 @@ function EspecesPage() {
 
       await fetchEspeces();
       closeForm();
-    } catch {
-      setActionError("Operation impossible pour cette espece.");
+    } catch (error) {
+      setActionError(
+        error.response?.data?.message || "Operation impossible pour cette espece."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -172,8 +174,10 @@ function EspecesPage() {
       await deleteEspece(espece.id);
       setSuccessMessage("Espece supprimee avec succes.");
       await fetchEspeces();
-    } catch {
-      setActionError("Suppression impossible pour cette espece.");
+    } catch (error) {
+      setActionError(
+        error.response?.data?.message || "Suppression impossible pour cette espece."
+      );
     } finally {
       setSubmitting(false);
     }
