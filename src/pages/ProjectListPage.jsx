@@ -17,7 +17,6 @@ function normalizeProjects(payload) {
     name: project.nom || `Projet ${project.id}`,
     description: project.description || null,
     objectif: project.objectif ?? null,
-    status: project.status || null,
     region: project.region || null,
     parcellesCount: Number(project.parcelles_count || 0),
     totalPlants: 0,
@@ -34,7 +33,6 @@ function buildInitialFormState() {
     date_fin: "",
     region: "",
     objectif: "",
-    status: "actif",
   };
 }
 
@@ -69,7 +67,14 @@ function ProjectListPage() {
       );
 
       if (monitorableProjects.length === 0) {
-        setProjects(normalizedProjects);
+        const sorted = [...normalizedProjects].sort((a, b) => {
+          const aAccess = role === "administrateur" || accessibleProjectIds.includes(a.id);
+          const bAccess = role === "administrateur" || accessibleProjectIds.includes(b.id);
+          if (aAccess && !bAccess) return -1;
+          if (!aAccess && bAccess) return 1;
+          return 0;
+        });
+        setProjects(sorted);
         setMetrics({
           totalPlants: 0,
           averageSurvivalRate: 0,
@@ -100,13 +105,21 @@ function ProjectListPage() {
         ])
       );
 
-      setProjects(
-        normalizedProjects.map((project) => ({
-          ...project,
-          totalPlants: totalPlantsByProjectId.get(project.id) ?? 0,
-          survivalRate: survivalRateByProjectId.get(project.id) ?? null,
-        }))
-      );
+      const finalProjects = normalizedProjects.map((project) => ({
+        ...project,
+        totalPlants: totalPlantsByProjectId.get(project.id) ?? 0,
+        survivalRate: survivalRateByProjectId.get(project.id) ?? null,
+      }));
+
+      finalProjects.sort((a, b) => {
+        const aAccess = role === "administrateur" || accessibleProjectIds.includes(a.id);
+        const bAccess = role === "administrateur" || accessibleProjectIds.includes(b.id);
+        if (aAccess && !bAccess) return -1;
+        if (!aAccess && bAccess) return 1;
+        return 0;
+      });
+
+      setProjects(finalProjects);
 
       const validStats = monitoringResponses
         .map((response) => response?.data?.stats_globales)
@@ -145,7 +158,7 @@ function ProjectListPage() {
   }, [fetchProjects]);
 
   const projectStats = useMemo(() => {
-    const activeProjects = projects.filter((project) => project.status === "actif").length;
+    const totalProjects = projects.length;
     const totalParcelles = projects.reduce(
       (sum, project) => sum + project.parcellesCount,
       0
@@ -153,8 +166,8 @@ function ProjectListPage() {
 
     return [
       {
-        label: "Projets actifs",
-        value: activeProjects,
+        label: "Projets enregistrés",
+        value: totalProjects,
         icon: Trees,
       },
       {
@@ -208,7 +221,6 @@ function ProjectListPage() {
       date_debut: formState.date_debut,
       date_fin: formState.date_fin,
       region: formState.region.trim(),
-      status: formState.status,
     };
 
     if (formState.objectif !== "") {
@@ -357,7 +369,7 @@ function ProjectListPage() {
               </label>
             </div>
 
-            <div className="project-create-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
+            <div className="project-create-grid" style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1rem" }}>
               <label className="filter-field">
                 <span>Objectif global</span>
                 <input
@@ -368,19 +380,6 @@ function ProjectListPage() {
                   onChange={handleInputChange}
                   placeholder="Optionnel"
                 />
-              </label>
-
-              <label className="filter-field">
-                <span>Statut</span>
-                <select
-                  name="status"
-                  value={formState.status}
-                  onChange={handleInputChange}
-                >
-                  <option value="actif">Actif</option>
-                  <option value="en_pause">En pause</option>
-                  <option value="termine">Termine</option>
-                </select>
               </label>
             </div>
 
@@ -439,7 +438,10 @@ function ProjectListPage() {
             return (
               <article
                 key={project.id}
-                className={canOpen ? "dashboard-project-card hover-card-effect project-card-clickable" : "dashboard-project-card"}
+                className={canOpen 
+                  ? "dashboard-project-card hover-card-effect project-card-clickable" 
+                  : "dashboard-project-card project-card-disabled"
+                }
                 onClick={() => {
                   if (!canOpen) {
                     return;
@@ -492,9 +494,6 @@ function ProjectListPage() {
                     <span>Taux de survie</span>
                   </div>
                 </div>
-                {!canOpen ? (
-                  <span className="project-disabled-link">Acces non autorise</span>
-                ) : null}
               </article>
             );
           })}
