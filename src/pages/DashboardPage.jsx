@@ -205,15 +205,32 @@ function DashboardPage() {
         "#dashboard-chart-section",
         "#dashboard-pie-section",
         "#dashboard-coop-section",
-        "#dashboard-ai-section",
       ];
+
+      const elementsToRender = [];
+      for (const selector of selectors) {
+        const element = document.querySelector(selector);
+        if (element && element.offsetHeight > 0) {
+          elementsToRender.push(element);
+        }
+      }
+
+      const aiSection = document.querySelector("#dashboard-ai-section");
+      if (aiSection && aiSection.offsetHeight > 0) {
+        const aiHeader = aiSection.querySelector("div:first-child");
+        if (aiHeader) elementsToRender.push(aiHeader);
+
+        const markdownBody = aiSection.querySelector(".markdown-body");
+        if (markdownBody) {
+          Array.from(markdownBody.children).forEach(child => {
+            if (child.offsetHeight > 0) elementsToRender.push(child);
+          });
+        }
+      }
 
       let isFirstSection = true;
 
-      for (const selector of selectors) {
-        const element = document.querySelector(selector);
-        if (!element || element.offsetHeight === 0) continue;
-
+      for (const element of elementsToRender) {
         const canvas = await html2canvas(element, {
           scale: 2,
           useCORS: true,
@@ -231,8 +248,25 @@ function DashboardPage() {
           currentY = margin;
         }
 
-        pdf.addImage(imgData, "PNG", margin, currentY, printableWidth, imgHeightMm);
-        currentY += imgHeightMm + 8;
+        if (currentY + imgHeightMm > pdfHeight - margin) {
+          let position = currentY;
+          let heightLeft = imgHeightMm;
+          const pageAvailableHeight = pdfHeight - margin;
+
+          pdf.addImage(imgData, "PNG", margin, position, printableWidth, imgHeightMm);
+          heightLeft -= (pageAvailableHeight - position);
+
+          while (heightLeft > 0) {
+            position = position + margin - pageAvailableHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, "PNG", margin, position, printableWidth, imgHeightMm);
+            heightLeft -= (pageAvailableHeight - margin);
+          }
+          currentY = position + imgHeightMm + 8;
+        } else {
+          pdf.addImage(imgData, "PNG", margin, currentY, printableWidth, imgHeightMm);
+          currentY += imgHeightMm + 8;
+        }
         isFirstSection = false;
       }
 
