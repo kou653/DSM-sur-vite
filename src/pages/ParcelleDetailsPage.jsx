@@ -1,8 +1,4 @@
 import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronDown, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn, Sparkles, TreePine, Filter, Calendar, MapPin, Wand2, Trash2, AlertCircle, Brain, ClipboardList, Sprout } from "lucide-react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import { Document, Packer, Paragraph, ImageRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, WidthType, BorderStyle, TextRun } from "docx";
-import { saveAs } from "file-saver";
 import {
   CartesianGrid,
   Legend,
@@ -23,6 +19,24 @@ import { getEspeces } from "../api/referentiels.js";
 import { useAuth } from "../contexts/auth-context.js";
 
 const MONTH_LABELS = ["Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juil", "Aou", "Sep", "Oct", "Nov", "Dec"];
+
+async function loadPdfTools() {
+  const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+    import("jspdf"),
+    import("html2canvas"),
+  ]);
+
+  return { jsPDF, html2canvas };
+}
+
+async function loadWordTools() {
+  const [docx, { saveAs }] = await Promise.all([
+    import("docx"),
+    import("file-saver"),
+  ]);
+
+  return { ...docx, saveAs };
+}
 
 function buildMonthlyEvolution(plants) {
   const monthlyMap = new Map();
@@ -358,6 +372,7 @@ function ParcelleDetailsPage() {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
+      const { jsPDF, html2canvas } = await loadPdfTools();
 
       const pdf = new jsPDF({
         orientation: "landscape",
@@ -475,6 +490,21 @@ function ParcelleDetailsPage() {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 300));
+      const { html2canvas } = await loadPdfTools();
+      const {
+        AlignmentType,
+        Document,
+        HeadingLevel,
+        ImageRun,
+        Packer,
+        Paragraph,
+        Table,
+        TableCell,
+        TableRow,
+        TextRun,
+        WidthType,
+        saveAs,
+      } = await loadWordTools();
       const docChildren = [];
 
       docChildren.push(new Paragraph({

@@ -1,6 +1,5 @@
 import {
   BriefcaseBusiness,
-  ChevronDown,
   Mail,
   Pencil,
   Plus,
@@ -12,13 +11,10 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import ConfirmDialog from "../components/ConfirmDialog.jsx";
+import TableFilterDropdown from "../components/TableFilterDropdown.jsx";
 import { getProjets } from "../api/projets.js";
-import {
-  createUser,
-  deleteUser,
-  getUsers,
-  updateUser,
-} from "../api/users.js";
+import { createUser, deleteUser, getUsers, updateUser } from "../api/users.js";
 import { useAuth } from "../contexts/auth-context.js";
 
 function normalizeUsers(payload) {
@@ -95,6 +91,8 @@ function UsersPage() {
   const [formState, setFormState] = useState(buildInitialFormState());
   const [columnFilters, setColumnFilters] = useState({ name: "", role: "" });
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
   async function fetchUsers() {
     setLoading(true);
     setErrorMessage("");
@@ -152,8 +150,8 @@ function UsersPage() {
   }, [searchTerm, users, columnFilters]);
 
   const uniqueValues = useMemo(() => ({
-    name: [...new Set(users.map((u) => u.name))].sort(),
-    role: [...new Set(users.map((u) => u.role).filter(Boolean))].sort(),
+    name: [...new Set(users.map((user) => user.name))].sort(),
+    role: [...new Set(users.map((user) => user.role).filter(Boolean))].sort(),
   }), [users]);
 
   const stats = useMemo(() => {
@@ -218,7 +216,7 @@ function UsersPage() {
     event.preventDefault();
 
     if (formState.role !== "administrateur" && formState.projects.length === 0) {
-      setActionError("Veuillez sélectionner au moins un projet affecté.");
+      setActionError("Veuillez selectionner au moins un projet affecte.");
       return;
     }
 
@@ -258,12 +256,8 @@ function UsersPage() {
     }
   }
 
-  async function handleDelete(user) {
-    const confirmed = window.confirm(
-      `Voulez-vous vraiment supprimer l'utilisateur ${user.name} ?`
-    );
-
-    if (!confirmed) {
+  async function handleDelete() {
+    if (!deleteTarget) {
       return;
     }
 
@@ -272,9 +266,10 @@ function UsersPage() {
     setSuccessMessage("");
 
     try {
-      await deleteUser(user.id);
+      await deleteUser(deleteTarget.id);
       setSuccessMessage("Utilisateur supprime avec succes.");
       await fetchUsers();
+      setDeleteTarget(null);
     } catch (error) {
       setActionError(
         error.response?.data?.message || "Suppression impossible pour cet utilisateur."
@@ -286,6 +281,20 @@ function UsersPage() {
 
   return (
     <section className="users-page">
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Supprimer cet utilisateur ?"
+        message={
+          deleteTarget
+            ? `Cette action supprimera definitivement l'utilisateur ${deleteTarget.name}.`
+            : ""
+        }
+        confirmLabel="Supprimer"
+        loading={submitting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+      />
+
       <div className="users-toolbar">
         <div className="users-hero">
           <div className="users-hero-icon" aria-hidden="true">
@@ -317,13 +326,14 @@ function UsersPage() {
         </div>
       </div>
 
-      {/* <div className="users-access-badge">Acces Administrateur uniquement</div> */}
-
       {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
       {actionError ? <p className="form-error">{actionError}</p> : null}
       {successMessage ? <p className="evolution-success">{successMessage}</p> : null}
 
-      <div className="users-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
+      <div
+        className="users-stats-grid"
+        style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}
+      >
         {stats.map((stat) => {
           const Icon = stat.icon;
 
@@ -413,14 +423,14 @@ function UsersPage() {
 
             {formState.role === "administrateur" ? (
               <div className="filter-field">
-                <span>Projets affectés</span>
+                <span>Projets affectes</span>
                 <p className="muted-text" style={{ marginTop: "0.5rem" }}>
-                  L'administrateur a accès à l'ensemble des projets par défaut.
+                  L&apos;administrateur a acces a l&apos;ensemble des projets par defaut.
                 </p>
               </div>
             ) : (
               <div className="filter-field">
-                <span>Projets affectés *</span>
+                <span>Projets affectes *</span>
                 <div className="users-projects-picker">
                   {projectsLoading ? <p className="muted-text">Chargement des projets...</p> : null}
                   {!projectsLoading && projects.length === 0 ? (
@@ -474,79 +484,28 @@ function UsersPage() {
             <table className="users-table">
               <thead>
                 <tr>
-                  {/* Nom */}
-                  <th style={{ position: "relative" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span>Nom</span>
-                      <button
-                        type="button"
-                        style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}
-                        onClick={(e) => { e.stopPropagation(); setOpenDropdown((prev) => (prev === "name" ? null : "name")); }}
-                      >
-                        <ChevronDown size={13} strokeWidth={2} />
-                        {columnFilters.name && (
-                          <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "var(--primary, #16a34a)", marginLeft: 3 }} />
-                        )}
-                      </button>
-                    </div>
-                    {openDropdown === "name" && (
-                      <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "var(--surface, #fff)", border: "1px solid var(--border, #e2e8f0)", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.10)", minWidth: 200, padding: "6px 0" }}>
-                        <button type="button"
-                          onClick={() => { setColumnFilters((f) => ({ ...f, name: "" })); setOpenDropdown(null); }}
-                          style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted-text, #94a3b8)" }}
-                        >
-                          Tous
-                        </button>
-                        {uniqueValues.name.map((val) => (
-                          <button key={val} type="button"
-                            onClick={() => { setColumnFilters((f) => ({ ...f, name: val })); setOpenDropdown(null); }}
-                            style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: columnFilters.name === val ? "var(--surface-hover, #dcfce7)" : "none", border: "none", cursor: "pointer", fontWeight: columnFilters.name === val ? 600 : 400 }}
-                          >
-                            {val}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </th>
-
+                  <TableFilterDropdown
+                    filterKey="name"
+                    label="Nom"
+                    selectedValue={columnFilters.name}
+                    values={uniqueValues.name}
+                    openDropdown={openDropdown}
+                    setOpenDropdown={setOpenDropdown}
+                    onChange={(value) => setColumnFilters((current) => ({ ...current, name: value }))}
+                  />
                   <th>Email</th>
-
-                  {/* Rôle */}
-                  <th style={{ position: "relative" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span>Rôle</span>
-                      <button
-                        type="button"
-                        style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}
-                        onClick={(e) => { e.stopPropagation(); setOpenDropdown((prev) => (prev === "role" ? null : "role")); }}
-                      >
-                        <ChevronDown size={13} strokeWidth={2} />
-                        {columnFilters.role && (
-                          <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", background: "var(--primary, #16a34a)", marginLeft: 3 }} />
-                        )}
-                      </button>
-                    </div>
-                    {openDropdown === "role" && (
-                      <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 50, background: "var(--surface, #fff)", border: "1px solid var(--border, #e2e8f0)", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.10)", minWidth: 180, padding: "6px 0" }}>
-                        <button type="button"
-                          onClick={() => { setColumnFilters((f) => ({ ...f, role: "" })); setOpenDropdown(null); }}
-                          style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted-text, #94a3b8)" }}
-                        >
-                          Tous
-                        </button>
-                        {uniqueValues.role.map((val) => (
-                          <button key={val} type="button"
-                            onClick={() => { setColumnFilters((f) => ({ ...f, role: val })); setOpenDropdown(null); }}
-                            style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: columnFilters.role === val ? "var(--surface-hover, #dcfce7)" : "none", border: "none", cursor: "pointer", fontWeight: columnFilters.role === val ? 600 : 400 }}
-                          >
-                            {getRoleLabel(val)}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </th>
-
-                  <th>Projets affectés</th>
+                  <TableFilterDropdown
+                    filterKey="role"
+                    label="Role"
+                    selectedValue={columnFilters.role}
+                    values={uniqueValues.role}
+                    openDropdown={openDropdown}
+                    setOpenDropdown={setOpenDropdown}
+                    onChange={(value) => setColumnFilters((current) => ({ ...current, role: value }))}
+                    renderValue={getRoleLabel}
+                    minWidth={180}
+                  />
+                  <th>Projets affectes</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -589,7 +548,7 @@ function UsersPage() {
                         <button
                           type="button"
                           className="danger-action users-icon-button"
-                          onClick={() => handleDelete(user)}
+                          onClick={() => setDeleteTarget(user)}
                           disabled={submitting || currentUserRole !== "administrateur"}
                         >
                           <Trash2 size={14} strokeWidth={2} />

@@ -1,6 +1,7 @@
 import { Leaf, MapPinned, Plus, Sprout, Trash2, Trees, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import HeroCard from "../components/HeroCard.jsx";
 import { useAuth } from "../contexts/auth-context.js";
 import { getProjectMonitoring } from "../api/monitoring.js";
@@ -50,6 +51,7 @@ function ProjectListPage() {
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formState, setFormState] = useState(buildInitialFormState());
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const { role, accessibleProjectIds, setSelectedProjectId } =
     useAuth();
 
@@ -241,12 +243,8 @@ function ProjectListPage() {
     }
   }
 
-  async function handleDeleteProject(project) {
-    const confirmed = window.confirm(
-      `Voulez-vous vraiment supprimer le projet ${project.name} ?`
-    );
-
-    if (!confirmed) {
+  async function handleDeleteProject() {
+    if (!deleteTarget) {
       return;
     }
 
@@ -255,9 +253,10 @@ function ProjectListPage() {
     setSuccessMessage("");
 
     try {
-      await deleteProjet(project.id);
+      await deleteProjet(deleteTarget.id);
       await fetchProjects();
       setSuccessMessage("Projet supprime avec succes.");
+      setDeleteTarget(null);
     } catch (error) {
       setActionError(
         error.response?.data?.message || "Impossible de supprimer ce projet."
@@ -269,6 +268,20 @@ function ProjectListPage() {
 
   return (
     <section className="dashboard-overview">
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Supprimer ce projet ?"
+        message={
+          deleteTarget
+            ? `Cette action supprimera definitivement le projet ${deleteTarget.name}.`
+            : ""
+        }
+        confirmLabel="Supprimer"
+        loading={submitting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteProject}
+      />
+
       <div className="dashboard-overview-header">
         <div className="dashboard-overview-title">
           <h1>Vue d'ensemble</h1>
@@ -462,7 +475,7 @@ function ProjectListPage() {
                       className="project-card-delete-button"
                       onClick={(event) => {
                         event.stopPropagation();
-                        handleDeleteProject(project);
+                        setDeleteTarget(project);
                       }}
                       disabled={submitting}
                       title="Supprimer le projet"

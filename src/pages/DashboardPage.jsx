@@ -2,10 +2,6 @@ import { Building2, Activity, MapPinned, Crosshair, Target, Sprout, TrendingUp, 
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import { Document, Packer, Paragraph, ImageRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, WidthType, TextRun } from "docx";
-import { saveAs } from "file-saver";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -36,6 +32,24 @@ ChartJS.register(
   Legend,
   ArcElement
 );
+
+async function loadPdfTools() {
+  const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+    import("jspdf"),
+    import("html2canvas"),
+  ]);
+
+  return { jsPDF, html2canvas };
+}
+
+async function loadWordTools() {
+  const [docx, { saveAs }] = await Promise.all([
+    import("docx"),
+    import("file-saver"),
+  ]);
+
+  return { ...docx, saveAs };
+}
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -185,6 +199,7 @@ function DashboardPage() {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
+      const { jsPDF, html2canvas } = await loadPdfTools();
 
       const pdf = new jsPDF({
         orientation: "landscape",
@@ -280,6 +295,21 @@ function DashboardPage() {
 
   const exportWord = async () => {
     try {
+      const { html2canvas } = await loadPdfTools();
+      const {
+        AlignmentType,
+        Document,
+        HeadingLevel,
+        ImageRun,
+        Packer,
+        Paragraph,
+        Table,
+        TableCell,
+        TableRow,
+        TextRun,
+        WidthType,
+        saveAs,
+      } = await loadWordTools();
       const docChildren = [];
 
       // 1. Header

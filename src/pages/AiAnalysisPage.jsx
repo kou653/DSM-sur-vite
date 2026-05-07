@@ -3,9 +3,20 @@ import { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { analyzePageContext } from "../api/ai.js";
-import jsPDF from "jspdf";
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
-import { saveAs } from "file-saver";
+
+async function loadPdfTools() {
+  const { default: jsPDF } = await import("jspdf");
+  return { jsPDF };
+}
+
+async function loadWordTools() {
+  const [docx, { saveAs }] = await Promise.all([
+    import("docx"),
+    import("file-saver"),
+  ]);
+
+  return { ...docx, saveAs };
+}
 
 function AiAnalysisPage() {
   const location = useLocation();
@@ -47,7 +58,7 @@ function AiAnalysisPage() {
     } finally {
       setLoading(false);
     }
-  }, [context, initialData]);
+  }, [context, initialData, parcelleId, projectId]);
 
   useEffect(() => {
     startAnalysis();
@@ -60,7 +71,8 @@ function AiAnalysisPage() {
     return () => document.removeEventListener("click", close);
   }, [showReportDropdown]);
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
+    const { jsPDF } = await loadPdfTools();
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -158,6 +170,8 @@ function AiAnalysisPage() {
   };
   
   const exportToWord = async () => {
+    const { Document, HeadingLevel, Packer, Paragraph, TextRun, saveAs } =
+      await loadWordTools();
     const doc = new Document({
       sections: [
         {
