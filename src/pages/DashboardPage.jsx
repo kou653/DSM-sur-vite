@@ -141,7 +141,7 @@ function DashboardPage() {
       {
         label: "Cible (Objectif)",
         data: parcelles.map(p => p.objectif || 0),
-        backgroundColor: "rgba(26, 131, 192, 1)",
+        backgroundColor: "rgba(64, 66, 65, 1)",
         borderColor: "rgb(75, 74, 74)",
         borderWidth: 1,
         borderRadius: 4,
@@ -488,7 +488,15 @@ function DashboardPage() {
       </div>
 
       {/* 1. Titre du projet */}
-      <header id="dashboard-header" style={{ marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <header id="dashboard-header" className="glass-panel" style={{
+        marginBottom: "2rem",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        padding: "1.5rem",
+        borderRadius: "20px",
+        marginTop: "1rem"
+      }}>
         <div>
           <h1 style={{ fontSize: "2rem", color: "#149655", margin: "0 0 0.5rem 0", display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <Trees size={28} className="primary-text" />
