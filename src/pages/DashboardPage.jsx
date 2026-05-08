@@ -141,7 +141,7 @@ function DashboardPage() {
       {
         label: "Cible (Objectif)",
         data: parcelles.map(p => p.objectif || 0),
-        backgroundColor: "rgba(0, 0, 0, 1)",
+        backgroundColor: "rgba(26, 131, 192, 1)",
         borderColor: "rgb(75, 74, 74)",
         borderWidth: 1,
         borderRadius: 4,
@@ -506,7 +506,7 @@ function DashboardPage() {
             <Sparkles size={16} />
             Analyser (IA)
           </button>
-          
+
           <div style={{ position: "relative" }}>
             <button
               type="button"
@@ -518,7 +518,7 @@ function DashboardPage() {
               Rapport
               <ChevronDown size={14} style={{ transform: showReportDropdown ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
             </button>
-            
+
             {showReportDropdown && (
               <div style={{
                 position: "absolute",
@@ -532,7 +532,7 @@ function DashboardPage() {
                 minWidth: "160px",
                 overflow: "hidden"
               }}>
-                <button 
+                <button
                   onClick={exportPDF}
                   style={{
                     width: "100%",
@@ -552,7 +552,7 @@ function DashboardPage() {
                 >
                   <FileText size={14} color="#ef4444" /> Format PDF
                 </button>
-                <button 
+                <button
                   onClick={exportWord}
                   style={{
                     width: "100%",
@@ -775,12 +775,12 @@ function DashboardPage() {
 
       {/* 6. Section IA en bas (Cachée sur l'écran, visible dans le PDF) */}
       {lastAiAnalysis && (
-        <section id="dashboard-ai-section" style={{ 
-          marginTop: "3rem", 
-          background: "#ffffff", 
-          borderRadius: "var(--radius-lg)", 
-          padding: "2rem", 
-          border: "1px solid #b9e7cb", 
+        <section id="dashboard-ai-section" style={{
+          marginTop: "3rem",
+          background: "#ffffff",
+          borderRadius: "var(--radius-lg)",
+          padding: "2rem",
+          border: "1px solid #b9e7cb",
           boxShadow: "var(--shadow-sm)",
           // Par défaut caché de l'écran
           position: "absolute",
