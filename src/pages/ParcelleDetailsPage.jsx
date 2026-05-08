@@ -1143,7 +1143,7 @@ function ParcelleDetailsPage() {
                         }}>
                           <button type="button"
                             onClick={() => { setColumnFilters((f) => ({ ...f, [key]: "" })); setOpenDropdown(null); }}
-                            style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted-text, #94a3b8)" }}
+                            style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted)" }}
                           >
                             Tous
                           </button>
@@ -1187,7 +1187,7 @@ function ParcelleDetailsPage() {
                       }}>
                         <button type="button"
                           onClick={() => { setColumnFilters((f) => ({ ...f, status: "" })); setOpenDropdown(null); }}
-                          style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted-text, #94a3b8)" }}
+                          style={{ display: "block", width: "100%", textAlign: "left", padding: "7px 14px", background: "none", border: "none", cursor: "pointer", fontStyle: "italic", color: "var(--muted)" }}
                         >
                           Tous
                         </button>

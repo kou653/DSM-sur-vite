@@ -1550,7 +1550,8 @@ textarea {
   padding: 7px 14px;
   border: 0;
   background: none;
-  color: inherit;
+  color: var(--text);
+  font-weight: 400;
   text-align: left;
   cursor: pointer;
 }
