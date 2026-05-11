@@ -26,6 +26,7 @@ function DashboardLayout() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
   const menuRef = useRef(null);
 
   // Fermer le menu si on clique ailleurs
@@ -37,6 +38,21 @@ function DashboardLayout() {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const checkStandalone = () => {
+      setIsStandalone(
+        window.matchMedia("(display-mode: standalone)").matches ||
+          window.navigator.standalone === true
+      );
+    };
+    checkStandalone();
+
+    const mediaQuery = window.matchMedia("(display-mode: standalone)");
+    const handler = (e) => setIsStandalone(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
   useEffect(() => {
@@ -254,27 +270,22 @@ function DashboardLayout() {
           </button>
 
           <div className="dashboard-topbar-user" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button
-              onClick={() => {
-                if (deferredPrompt) {
-                  handleInstallClick();
-                } else {
-                  alert("L'installation PWA n'est pas encore disponible. Le navigateur n'a pas déclenché l'événement (peut-être l'app est-elle déjà installée, ou le cache doit être vidé).");
-                }
-              }}
-              className="dashboard-add-button"
-              style={{
-                padding: '4px 10px',
-                fontSize: '0.85rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                opacity: deferredPrompt ? 1 : 0.6
-              }}
-              title="Installer l'application sur votre appareil"
-            >
-              <Download size={14} /> Installer
-            </button>
+            {deferredPrompt && !isStandalone && (
+              <button
+                onClick={handleInstallClick}
+                className="dashboard-add-button"
+                style={{
+                  padding: '4px 10px',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+                title="Installer l'application sur votre appareil"
+              >
+                <Download size={14} /> Installer
+              </button>
+            )}
 
             <div style={{ position: "relative" }} ref={menuRef}>
               <div
