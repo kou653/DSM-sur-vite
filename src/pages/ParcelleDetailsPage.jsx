@@ -1,4 +1,4 @@
-import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronDown, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn, Sparkles, TreePine, Filter, Calendar, MapPin, Wand2, Trash2, AlertCircle, Brain, ClipboardList, Sprout } from "lucide-react";
+import { Activity, ArrowLeft, Building2, CheckCircle2, ChevronDown, Crosshair, FileText, MapPinned, Plus, Target, X, ZoomIn, Sparkles, TreePine, Filter, Calendar, MapPin, Wand2, Trash2, AlertCircle, Brain, ClipboardList, Sprout, Pencil } from "lucide-react";
 import {
   CartesianGrid,
   Legend,
@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { getParcelle } from "../api/parcelles.js";
-import { createPlant, getParcellePlants, updatePlantDocumentation } from "../api/plants.js";
+import { createPlant, getParcellePlants, updatePlantDocumentation, deletePlant, updatePlant } from "../api/plants.js";
 import { getEspeces } from "../api/referentiels.js";
 import { useAuth } from "../contexts/auth-context.js";
 
@@ -111,6 +111,7 @@ function ParcelleDetailsPage() {
 
   // Plants Form
   const [isPlantFormOpen, setIsPlantFormOpen] = useState(false);
+  const [editingPlant, setEditingPlant] = useState(null);
   const [plantSubmitting, setPlantSubmitting] = useState(false);
   const [plantFormError, setPlantFormError] = useState("");
   const [lastAiAnalysis, setLastAiAnalysis] = useState("");
@@ -300,17 +301,28 @@ function ParcelleDetailsPage() {
     setPlantFormError("");
 
     try {
-      await createPlant({
-        parcelle_id: parcelleId,
-        espece_id: plantFormState.espece_id,
-        date_plantation: plantFormState.date_plantation,
-        status: plantFormState.status,
-        lat: Number(plantFormState.lat),
-        lng: Number(plantFormState.lng)
-      });
+      if (editingPlant) {
+        await updatePlant(editingPlant.id, {
+          espece_id: plantFormState.espece_id,
+          date_plantation: plantFormState.date_plantation,
+          status: plantFormState.status,
+          lat: Number(plantFormState.lat),
+          lng: Number(plantFormState.lng)
+        });
+      } else {
+        await createPlant({
+          parcelle_id: parcelleId,
+          espece_id: plantFormState.espece_id,
+          date_plantation: plantFormState.date_plantation,
+          status: plantFormState.status,
+          lat: Number(plantFormState.lat),
+          lng: Number(plantFormState.lng)
+        });
+      }
       await fetchData();
       await refreshPlants();
       setIsPlantFormOpen(false);
+      setEditingPlant(null);
       setPlantFormState({
         espece_id: "",
         date_plantation: new Date().toISOString().slice(0, 10),
@@ -325,6 +337,30 @@ function ParcelleDetailsPage() {
       setPlantSubmitting(false);
     }
   }
+
+  const handleEditPlant = (plant) => {
+    setEditingPlant(plant);
+    setPlantFormState({
+      espece_id: plant.espece_id,
+      date_plantation: plant.date_plantation ? plant.date_plantation.slice(0, 10) : "",
+      status: plant.status,
+      lat: String(plant.lat),
+      lng: String(plant.lng)
+    });
+    setEspeceSearch(`${plant.espece?.nom_commun} (${plant.espece?.nom_scientifique})`);
+    setIsPlantFormOpen(true);
+  };
+
+  const handleDeletePlant = async (plant) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer le plant #${plant.id} ?`)) return;
+    try {
+      await deletePlant(plant.id);
+      await refreshPlants();
+      await fetchData();
+    } catch (error) {
+      alert(error.response?.data?.message || "Erreur de suppression du plant.");
+    }
+  };
 
   const monthlyEvolution = useMemo(() => buildMonthlyEvolution(plants), [plants]);
   const speciesSummary = useMemo(() => buildSpeciesSummary(plants), [plants]);
@@ -929,7 +965,20 @@ function ParcelleDetailsPage() {
         <div className="users-table-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h3>Liste des plants de la parcelle</h3>
           {canManage && (
-            <button type="button" className="dashboard-add-button" onClick={() => setIsPlantFormOpen(!isPlantFormOpen)}>
+            <button type="button" className="dashboard-add-button" onClick={() => {
+              if (isPlantFormOpen) {
+                setEditingPlant(null);
+                setPlantFormState({
+                  espece_id: "",
+                  date_plantation: new Date().toISOString().slice(0, 10),
+                  status: "vivant",
+                  lat: parcelle?.lat || "",
+                  lng: parcelle?.lng || ""
+                });
+                setEspeceSearch("");
+              }
+              setIsPlantFormOpen(!isPlantFormOpen);
+            }}>
               {isPlantFormOpen ? <X size={14} strokeWidth={2.4} /> : <Plus size={14} strokeWidth={2.4} />}
               {isPlantFormOpen ? "Fermer" : "Ajouter un plant"}
             </button>
@@ -939,7 +988,9 @@ function ParcelleDetailsPage() {
         {/* Inline Create Form */}
         {isPlantFormOpen && (
           <div style={{ padding: "1.5rem", background: "var(--surface-hover)", borderBottom: "1px solid var(--border)" }}>
-            <h3 style={{ marginTop: 0, marginBottom: "1rem", fontSize: "1.1rem" }}>Enregistrer un nouveau plant</h3>
+            <h3 style={{ marginTop: 0, marginBottom: "1rem", fontSize: "1.1rem" }}>
+              {editingPlant ? `Modifier le plant #${editingPlant.id}` : "Enregistrer un nouveau plant"}
+            </h3>
             {plantFormError && <p className="form-error" style={{ marginBottom: "1rem" }}>{plantFormError}</p>}
             {gpsError ? <p className="form-error" style={{ marginBottom: "1rem" }}>{gpsError}</p> : null}
             {gpsSuccess ? <p className="evolution-success" style={{ marginBottom: "1rem" }}>{gpsSuccess}</p> : null}
@@ -1028,7 +1079,7 @@ function ParcelleDetailsPage() {
 
               <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "flex-end" }}>
                 <button type="submit" className="primary-action" disabled={plantSubmitting}>
-                  {plantSubmitting ? "Enregistrement..." : "Créer le plant"}
+                  {plantSubmitting ? "Enregistrement..." : (editingPlant ? "Mettre à jour" : "Créer le plant")}
                 </button>
               </div>
             </form>
@@ -1203,7 +1254,7 @@ function ParcelleDetailsPage() {
                     )}
                   </th>
 
-                  {role !== "commanditaire" && <th>Documenter</th>}
+                  {role !== "commanditaire" && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -1225,19 +1276,44 @@ function ParcelleDetailsPage() {
                     </td>
                     {role !== "commanditaire" && (
                       <td>
-                        {canManage ? (
-                          <button
-                            type="button"
-                            className="secondary-action"
-                            style={{ padding: "6px 10px", fontSize: "0.85rem", display: "inline-flex", alignItems: "center", gap: "6px" }}
-                            onClick={() => openDocumentationForm(plant)}
-                          >
-                            <FileText size={14} strokeWidth={2} />
-                            Documenter
-                          </button>
-                        ) : (
-                          <span className="muted-text">--</span>
-                        )}
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          {canManage ? (
+                            <>
+                              <button
+                                type="button"
+                                className="secondary-action"
+                                style={{ padding: "6px 10px", fontSize: "0.85rem", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                                onClick={() => openDocumentationForm(plant)}
+                                title="Documenter"
+                              >
+                                <FileText size={14} strokeWidth={2} />
+                                Documenter
+                              </button>
+                              
+                              <button
+                                type="button"
+                                className="secondary-action"
+                                style={{ padding: "6px", color: "var(--primary)" }}
+                                onClick={() => handleEditPlant(plant)}
+                                title="Modifier"
+                              >
+                                <Pencil size={14} />
+                              </button>
+                              
+                              <button
+                                type="button"
+                                className="secondary-action"
+                                style={{ padding: "6px", color: "#ef4444" }}
+                                onClick={() => handleDeletePlant(plant)}
+                                title="Supprimer"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </>
+                          ) : (
+                            <span className="muted-text">--</span>
+                          )}
+                        </div>
                       </td>
                     )}
                   </tr>

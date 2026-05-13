@@ -19,14 +19,26 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
-const createCustomIcon = () =>
+const createCustomIcon = (color = "var(--accent)") =>
   new L.DivIcon({
-    html: `<div class="custom-marker"><div class="marker-pin"></div></div>`,
+    html: `<div class="custom-marker"><div class="marker-pin" style="background: ${color}"></div></div>`,
     className: "custom-div-icon",
     iconSize: [30, 42],
     iconAnchor: [15, 42],
     popupAnchor: [0, -40],
   });
+
+const getMortalityColor = (parcelle) => {
+  const total = parcelle.plants_count || 0;
+  const morts = parcelle.plants_morts_count || 0;
+  
+  if (total === 0) return "hsl(120, 100%, 40%)"; // Default vibrant green if no plants
+
+  const mortalityRate = morts / total;
+  // Hue: 120 (Green) to 0 (Red)
+  const hue = 120 * (1 - mortalityRate);
+  return `hsl(${hue}, 100%, 40%)`;
+};
 
 const createUserIcon = () =>
   new L.DivIcon({
@@ -457,7 +469,7 @@ function MapPage() {
             <Marker
               key={parcelle.id}
               position={[parcelle.displayLat, parcelle.displayLng]}
-              icon={createCustomIcon()}
+              icon={createCustomIcon(getMortalityColor(parcelle))}
             >
               <Popup>
                 <div className="map-popup-header">
@@ -480,10 +492,16 @@ function MapPage() {
                     <span>Objectif</span>
                     <span>{parcelle.objectif || 0} plants</span>
                   </div>
-                  <div className="map-popup-row">
+                   <div className="map-popup-row">
                     <span>Progression</span>
                     <span>
                       {parcelle.plants_count || 0} / {parcelle.objectif || 0}
+                    </span>
+                  </div>
+                  <div className="map-popup-row">
+                    <span>Mortalité</span>
+                    <span style={{ color: (parcelle.plants_morts_count || 0) > 0 ? "#dc2626" : "inherit", fontWeight: (parcelle.plants_morts_count || 0) > 0 ? "700" : "400" }}>
+                      {parcelle.plants_morts_count || 0} / {parcelle.plants_count || 0}
                     </span>
                   </div>
                 </div>
